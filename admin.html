@@ -110,6 +110,20 @@ button{font-family:var(--font)}
 .status-pill{font-size:11.5px;font-weight:700;padding:6px 11px;border-radius:16px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer}
 .status-pill.on{border-color:var(--char);background:var(--char);color:#fff}
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--char);color:#fff;padding:11px 20px;border-radius:24px;font-size:13px;font-weight:600;z-index:200;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+
+.btn-add-event{width:100%;padding:12px;border-radius:12px;border:none;background:var(--flame);color:#fff;font-weight:700;font-size:13.5px;cursor:pointer;margin-bottom:14px;box-shadow:0 8px 18px rgba(216,72,27,.28)}
+
+/* calendar */
+.cal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-title{font-weight:700;font-family:var(--font-head);font-size:15px}
+.cal-nav{background:var(--surface2);border:none;border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;color:var(--text2);cursor:pointer}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-weekdays{margin-bottom:4px;font-size:11px;color:var(--text3);font-weight:700;text-align:center}
+.cal-cell{aspect-ratio:1/1;border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;position:relative;background:var(--surface)}
+.cal-cell.empty{border:none;background:transparent}
+.cal-cell.has-events{cursor:pointer;border-color:var(--flame);background:var(--flame-bg);font-weight:700}
+.cal-cell.today{box-shadow:inset 0 0 0 2px var(--char)}
+.cal-dot{position:absolute;bottom:3px;font-size:9px;background:var(--flame);color:#fff;border-radius:8px;min-width:14px;height:14px;display:flex;align-items:center;justify-content:center;padding:0 3px}
 </style>
 </head>
 <body>
@@ -128,7 +142,8 @@ button{font-family:var(--font)}
   <div class="hdr">
     <div class="hdr-in">
       <div class="hdr-title"><img src="images/logo.png" alt="BBQ" style="height:28px;width:28px;border-radius:50%;object-fit:cover">לוח ניהול</div>
-      <div style="display:flex;gap:8px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+        <button class="hdr-btn" id="bioBtn" onclick="toggleBiometricSetting()">👆 הפעל טביעת אצבע</button>
         <button class="hdr-btn" id="notifBtn" onclick="toggleNotifications()">🔔 התראות</button>
         <button class="hdr-btn" onclick="lockOut()">יציאה</button>
       </div>
@@ -148,11 +163,19 @@ button{font-family:var(--font)}
     </div>
 
     <div class="panel" id="panel-board">
+      <button class="btn-add-event" onclick="openNewEventModal()">+ הוספת אירוע חדש</button>
       <div class="toggle-row">
-        <button class="on" id="btnUpcoming" onclick="setBoardFilter('upcoming')">אירועים קרובים</button>
-        <button id="btnPast" onclick="setBoardFilter('past')">אירועים שעברו</button>
+        <button class="on" id="viewList" onclick="setBoardView('list')">📋 רשימה</button>
+        <button id="viewCalendar" onclick="setBoardView('calendar')">📅 לוח שנה</button>
       </div>
-      <div id="boardList"></div>
+      <div id="boardListWrap">
+        <div class="toggle-row">
+          <button class="on" id="btnUpcoming" onclick="setBoardFilter('upcoming')">אירועים קרובים</button>
+          <button id="btnPast" onclick="setBoardFilter('past')">אירועים שעברו</button>
+        </div>
+        <div id="boardList"></div>
+      </div>
+      <div id="boardCalendarWrap" style="display:none"></div>
     </div>
 
     <div class="panel" id="panel-debts">
@@ -182,7 +205,7 @@ async function fbInit(){
   const fsMod=await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js");
   const app=appMod.initializeApp(firebaseConfig);
   const db=fsMod.getFirestore(app);
-  _fb={db,doc:fsMod.doc,getDoc:fsMod.getDoc,setDoc:fsMod.setDoc,updateDoc:fsMod.updateDoc,deleteDoc:fsMod.deleteDoc,
+  _fb={db,doc:fsMod.doc,getDoc:fsMod.getDoc,setDoc:fsMod.setDoc,updateDoc:fsMod.updateDoc,deleteDoc:fsMod.deleteDoc,addDoc:fsMod.addDoc,
     onSnapshot:fsMod.onSnapshot,collection:fsMod.collection,query:fsMod.query,orderBy:fsMod.orderBy};
   return _fb;
 }
@@ -240,11 +263,70 @@ async function doSetup(){
 }
 function renderUnlockForm(){
   document.getElementById('lockTitle').textContent='ניהול BBQ';
+  const hasBio = !!localStorage.getItem('mangalBiometricCredId') && window.PublicKeyCredential;
   document.getElementById('lockSub').textContent='הזינו סיסמה כדי להיכנס';
   document.getElementById('lockBody').innerHTML=`
+    ${hasBio?`<button id="biometricBtn" class="main" style="background:var(--char);margin-bottom:10px" onclick="doBiometricUnlock()">👆 כניסה עם טביעת אצבע</button><div style="font-size:11px;color:var(--text3);margin-bottom:10px">— או עם סיסמה —</div>`:''}
     <input type="password" id="unlockInp" placeholder="סיסמה" onkeydown="if(event.key==='Enter')doUnlock()">
     <button class="main" onclick="doUnlock()">כניסה</button>`;
-  setTimeout(()=>{const i=document.getElementById('unlockInp');if(i)i.focus();},50);
+  if(hasBio) setTimeout(()=>doBiometricUnlock(),300);
+  else setTimeout(()=>{const i=document.getElementById('unlockInp');if(i)i.focus();},50);
+}
+
+/* ===== biometric (WebAuthn) ===== */
+function _ab2b64(buf){return btoa(String.fromCharCode(...new Uint8Array(buf)));}
+function _b642ab(b64){const bin=atob(b64);const arr=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);return arr.buffer;}
+async function registerBiometric(){
+  try{
+    const cred=await navigator.credentials.create({publicKey:{
+      challenge:crypto.getRandomValues(new Uint8Array(32)),
+      rp:{name:'BBQ',id:location.hostname},
+      user:{id:crypto.getRandomValues(new Uint8Array(16)),name:'admin',displayName:'מנהל'},
+      pubKeyCredParams:[{alg:-7,type:'public-key'},{alg:-257,type:'public-key'}],
+      authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},
+      timeout:60000
+    }});
+    localStorage.setItem('mangalBiometricCredId',_ab2b64(cred.rawId));
+    return true;
+  }catch(e){ console.error(e); return false; }
+}
+async function tryBiometric(){
+  const b64=localStorage.getItem('mangalBiometricCredId');
+  if(!b64||!window.PublicKeyCredential) return false;
+  try{
+    await navigator.credentials.get({publicKey:{
+      challenge:crypto.getRandomValues(new Uint8Array(32)),
+      allowCredentials:[{id:_b642ab(b64),type:'public-key'}],
+      userVerification:'required',
+      timeout:60000
+    }});
+    return true;
+  }catch(e){ return false; }
+}
+async function doBiometricUnlock(){
+  const btn=document.getElementById('biometricBtn');
+  if(btn){btn.disabled=true;btn.textContent='⏳ מאמת...';}
+  const ok=await tryBiometric();
+  if(ok){ localStorage.setItem('mangalAdminUnlocked','1'); unlockApp(); }
+  else if(btn){btn.disabled=false;btn.textContent='👆 כניסה עם טביעת אצבע';}
+}
+async function toggleBiometricSetting(){
+  const has=!!localStorage.getItem('mangalBiometricCredId');
+  if(has){
+    localStorage.removeItem('mangalBiometricCredId');
+    showToast('טביעת אצבע בוטלה');
+  } else {
+    if(!window.PublicKeyCredential){ showToast('הדפדפן לא תומך בטביעת אצבע'); return; }
+    const ok=await registerBiometric();
+    showToast(ok?'טביעת אצבע הופעלה ✓':'ההפעלה נכשלה או בוטלה');
+  }
+  updateBioBtn();
+}
+function updateBioBtn(){
+  const btn=document.getElementById('bioBtn');
+  if(!btn) return;
+  const has=!!localStorage.getItem('mangalBiometricCredId');
+  btn.textContent = has ? '👆 טביעת אצבע פעילה' : '👆 הפעל טביעת אצבע';
 }
 async function doUnlock(){
   const val=document.getElementById('unlockInp').value||'';
@@ -265,6 +347,7 @@ function lockOut(){
 function unlockApp(){
   document.getElementById('lockScreen').style.display='none';
   document.getElementById('app').style.display='block';
+  updateBioBtn();
   startListening();
 }
 
@@ -349,6 +432,68 @@ function setBoardFilter(f){
   document.getElementById('btnPast').classList.toggle('on',f==='past');
   renderBoard();
 }
+let boardView='list';
+function setBoardView(v){
+  boardView=v;
+  document.getElementById('viewList').classList.toggle('on',v==='list');
+  document.getElementById('viewCalendar').classList.toggle('on',v==='calendar');
+  document.getElementById('boardListWrap').style.display = v==='list' ? 'block':'none';
+  document.getElementById('boardCalendarWrap').style.display = v==='calendar' ? 'block':'none';
+  if(v==='calendar') renderCalendar();
+}
+let calMonth=new Date(); calMonth.setDate(1);
+function calShift(dir){
+  calMonth.setMonth(calMonth.getMonth()+dir);
+  renderCalendar();
+}
+function renderCalendar(){
+  const el=document.getElementById('boardCalendarWrap');
+  const y=calMonth.getFullYear(), m=calMonth.getMonth();
+  const startWeekday=new Date(y,m,1).getDay();
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const monthName=calMonth.toLocaleDateString('he-IL',{month:'long',year:'numeric'});
+  const todayStr=new Date().toISOString().slice(0,10);
+
+  const byDay={};
+  bookings.filter(b=>b.status==='approved' && b.date).forEach(b=>{
+    (byDay[b.date]=byDay[b.date]||[]).push(b);
+  });
+
+  let cells='';
+  for(let i=0;i<startWeekday;i++) cells+=`<div class="cal-cell empty"></div>`;
+  for(let day=1;day<=daysInMonth;day++){
+    const dateStr=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const evs=byDay[dateStr]||[];
+    cells+=`<div class="cal-cell ${evs.length?'has-events':''} ${dateStr===todayStr?'today':''}" ${evs.length?`onclick="openDayEvents('${dateStr}')"`:''}>
+      <span>${day}</span>
+      ${evs.length?`<span class="cal-dot">${evs.length}</span>`:''}
+    </div>`;
+  }
+
+  el.innerHTML=`
+    <div class="cal-hdr">
+      <button class="cal-nav" onclick="calShift(-1)">‹ הקודם</button>
+      <div class="cal-title">${monthName}</div>
+      <button class="cal-nav" onclick="calShift(1)">הבא ›</button>
+    </div>
+    <div class="cal-grid cal-weekdays">${['א','ב','ג','ד','ה','ו','ש'].map(d=>`<div>${d}</div>`).join('')}</div>
+    <div class="cal-grid">${cells}</div>`;
+}
+function openDayEvents(dateStr){
+  const evs=bookings.filter(b=>b.status==='approved' && b.date===dateStr);
+  if(evs.length===1){ openModal(evs[0].id); return; }
+  const root=document.getElementById('modalRoot');
+  root.innerHTML=`
+    <div class="modal-bg" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div class="modal-top"><h3>${fmtDate(dateStr)}</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+        ${evs.map(b=>`<div class="card" onclick="openModal('${b.id}')">
+          <div class="card-top"><div class="card-name">${esc(b.name)}</div></div>
+          <div class="card-mid"><span class="chip lvl">${LEVEL_ICON[b.level]||''} ${esc(b.level)}</span><span class="chip">👥 ${b.guests} אנשים</span>${paidChip(b)}</div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+}
 
 function fmtDate(d){
   if(!d)return '';
@@ -366,6 +511,7 @@ function paidChip(b){
 function renderAll(){
   renderPending();
   renderBoard();
+  if(boardView==='calendar') renderCalendar();
   renderDebts();
 }
 
@@ -543,6 +689,67 @@ async function deleteBooking(id){
   await deleteDoc(doc(db,'mangalBookings',id));
   closeModal();
   showToast('נמחק');
+}
+
+/* ===== manual event creation ===== */
+function openNewEventModal(){
+  const today=new Date().toISOString().slice(0,10);
+  const root=document.getElementById('modalRoot');
+  root.innerHTML=`
+    <div class="modal-bg" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div class="modal-top"><h3>הוספת אירוע חדש</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+        <div class="mfld"><label>שם הלקוח / אירוע *</label><input type="text" id="nName" placeholder="שם"></div>
+        <div class="mrow">
+          <div class="mfld"><label>טלפון</label><input type="tel" id="nPhone" placeholder="050-0000000"></div>
+          <div class="mfld"><label>תאריך *</label><input type="date" id="nDate" value="${today}"></div>
+        </div>
+        <div class="mfld"><label>רמת אירוע</label>
+          <div class="status-row" id="nLevelRow">
+            ${LEVELS.map((l,i)=>`<div class="status-pill ${i===0?'on':''}" onclick="setNLevel(this,'${l}')">${LEVEL_ICON[l]} ${l}</div>`).join('')}
+          </div>
+        </div>
+        <div class="mrow">
+          <div class="mfld"><label>מספר משתתפים</label><input type="number" id="nGuests" min="1" value="1"></div>
+          <div class="mfld"><label>מיקום</label><input type="text" id="nLocation" placeholder="כתובת / אולם / חצר"></div>
+        </div>
+        <div class="mfld"><label>הערות</label><textarea id="nNotes"></textarea></div>
+        <div class="mrow">
+          <div class="mfld"><label>מחיר כולל (₪)</label><input type="number" id="nTotal" min="0" value="0"></div>
+          <div class="mfld"><label>שולם עד כה (₪)</label><input type="number" id="nPaid" min="0" value="0"></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-danger" onclick="closeModal()">ביטול</button>
+          <button class="btn-save" onclick="saveNewEvent()">💾 שמירה</button>
+        </div>
+      </div>
+    </div>`;
+  root.dataset.nlevel=LEVELS[0];
+}
+function setNLevel(el,lvl){
+  document.querySelectorAll('#nLevelRow .status-pill').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('modalRoot').dataset.nlevel=lvl;
+}
+async function saveNewEvent(){
+  const name=document.getElementById('nName').value.trim();
+  const date=document.getElementById('nDate').value;
+  if(!name||!date){ showToast('נא למלא שם ותאריך'); return; }
+  const phone=document.getElementById('nPhone').value.trim();
+  const guests=parseInt(document.getElementById('nGuests').value,10)||1;
+  const location=document.getElementById('nLocation').value.trim();
+  const notes=document.getElementById('nNotes').value.trim();
+  const totalPrice=parseFloat(document.getElementById('nTotal').value)||0;
+  const paidAmount=parseFloat(document.getElementById('nPaid').value)||0;
+  const level=document.getElementById('modalRoot').dataset.nlevel||LEVELS[0];
+  const {db,collection,addDoc}=await fbInit();
+  await addDoc(collection(db,'mangalBookings'),{
+    name, phone:phone||null, date, guests, level, location:location||null, notes:notes||null,
+    status:'approved', totalPrice, paidAmount,
+    createdAtMs:Date.now(), source:'admin'
+  });
+  closeModal();
+  showToast('האירוע נוסף ללוח ✓');
 }
 
 function esc(s){

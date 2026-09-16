@@ -18,7 +18,9 @@
 npx serve .
 ```
 
-## הגדרת Firebase (חובה)
+## הגדרת Firebase
+
+הפרויקט משתמש בפרויקט Firebase עצמאי משלו (`mangal-b11fe`), נפרד מכל אפליקציה אחרת. אם רוצים להחליף לפרויקט אחר:
 
 1. גשו ל-[Firebase Console](https://console.firebase.google.com) וצרו פרויקט חדש (חינמי).
 2. **Build → Firestore Database → Create database**.

@@ -1,9 +1,7 @@
 <!--
-  אתר עסק המנגלים - חלק ציבורי.
-  התאמה אישית מהירה:
-   - שם העסק/טלפון/וואטסאפ: חפשו "TODO-EDIT" בקובץ הזה.
-   - תמונות גלריה: הוסיפו קבצים לתיקייה mangal/images/ ועדכנו את מערך GALLERY למטה.
-   - תפריטים: ערכו את שלושת הבלוקים בתוך MENUS למטה.
+  BBQ - אתר עסק המנגלים, חלק ציבורי.
+   - תמונות גלריה: קבצים בתיקייה images/, מערך GALLERY למטה.
+   - תפריטים ומחירים: מערך MENUS למטה (מקור: תפריט הלקוח).
    - סיסמת הניהול נקבעת בפעם הראשונה שנכנסים ל-admin.html.
 -->
 <!DOCTYPE html>
@@ -11,7 +9,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>מנגל בלהבות · אירועי מנגל</title>
+<title>BBQ · חגיגת ברבקיו משחררת</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=Varela+Round&display=swap" rel="stylesheet">
@@ -39,6 +37,7 @@ a{color:inherit}
 .nav{position:sticky;top:0;z-index:40;background:rgba(251,243,236,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
 .nav-in{max-width:920px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .brand{display:flex;align-items:center;gap:8px;font-family:var(--font-head);font-weight:700;font-size:17px}
+.brand img{height:34px;width:34px;border-radius:50%;object-fit:cover}
 .brand-flame{font-size:20px}
 .nav-links{display:flex;gap:6px;flex-wrap:wrap}
 .nav-links a{font-size:13px;font-weight:600;color:var(--text2);text-decoration:none;padding:7px 10px;border-radius:20px;transition:.15s}
@@ -134,7 +133,7 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
 
 <nav class="nav">
   <div class="nav-in">
-    <div class="brand"><span class="brand-flame">🔥</span>מנגל בלהבות</div>
+    <div class="brand"><img src="images/logo.png" alt="BBQ">BBQ</div>
     <div class="nav-links" style="display:none" id="navLinksWide">
       <a href="#gallery">גלריה</a>
       <a href="#menus">תפריטים</a>
@@ -156,7 +155,7 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
     <div class="hero-stats">
       <div class="hstat"><b>3</b><span>רמות אירוע</span></div>
       <div class="hstat"><b>100%</b><span>טרי על האש</span></div>
-      <div class="hstat"><b>24/7</b><span>מענה להזמנות</span></div>
+      <div class="hstat"><b>✓</b><span>כשרות מהודרת</span></div>
     </div>
   </div>
 </div>
@@ -181,6 +180,7 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
     </div>
     <div class="menu-tabs" id="menuTabs"></div>
     <div id="menuCards"></div>
+    <div class="menu-note" style="margin-top:18px;border:none">התמחור לפי ראש · ניתן להוסיף על התפריט בתוספת תשלום · ביטול אירוע עד 3 ימי עבודה מראש</div>
   </div>
 </section>
 
@@ -248,72 +248,73 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
       <h2>יש שאלה לפני שמזמינים?</h2>
     </div>
     <div class="contact-grid">
-      <a class="contact-card" href="tel:0500000000"><div class="ico">📞</div><b>התקשרו אלינו</b><span>050-000-0000</span></a>
-      <a class="contact-card" href="https://wa.me/972500000000" target="_blank"><div class="ico">💬</div><b>וואטסאפ</b><span>מענה מהיר</span></a>
-      <a class="contact-card" href="mailto:info@mangal-belahavot.co.il"><div class="ico">✉️</div><b>מייל</b><span>info@mangal-belahavot.co.il</span></a>
+      <a class="contact-card" href="tel:0527626562"><div class="ico">📞</div><b>התקשרו אלינו</b><span>052-762-6562</span></a>
+      <a class="contact-card" href="https://wa.me/972527626562" target="_blank"><div class="ico">💬</div><b>וואטסאפ</b><span>מענה מהיר</span></a>
     </div>
   </div>
 </section>
 
 <footer>
-  <div>🔥 מנגל בלהבות · אירועי מנגל מקצועיים</div>
+  <div>🔥 BBQ · חגיגת ברבקיו משחררת</div>
   <a class="admin-link" href="admin.html">כניסת מנהל</a>
 </footer>
 
 <div id="lightboxRoot"></div>
 
 <script>
-/* ===== TODO-EDIT: פרטי עסק ===== */
-const BUSINESS = { name:'מנגל בלהבות', phone:'0500000000', whatsapp:'972500000000', email:'info@mangal-belahavot.co.il' };
+const BUSINESS = { name:'BBQ', phone:'0527626562', whatsapp:'972527626562' };
 
-/* גלריה - TODO-EDIT: אפשר להוסיף תמונות אמיתיות: {img:'images/1.jpg', cap:'...'} */
 const GALLERY = [
-  {icon:'🍖',cap:'בשרים על האש'},
-  {icon:'🔥',cap:'גריל פתוח'},
-  {icon:'🥗',cap:'שולחן סלטים'},
-  {icon:'🎉',cap:'אירוע חברה'},
-  {icon:'🍢',cap:'שיפודים טריים'},
-  {icon:'👨‍🍳',cap:'שף על המנגל'},
-  {icon:'🌭',cap:'תחנת נקניקיות'},
-  {icon:'🥂',cap:'חגיגה משפחתית'},
+  {img:'images/gallery-01.jpg',cap:'השף מגיע עם הפתיחה'},
+  {img:'images/gallery-02.jpg',cap:'מגש בשרים גולמי לפני הגריל'},
+  {img:'images/gallery-03.jpg',cap:'אנטריקוט פרוס על קרש עץ'},
+  {img:'images/gallery-04.jpg',cap:'ישר מהאש'},
+  {img:'images/gallery-05.jpg',cap:'סטייק וירקות צרובים'},
+  {img:'images/gallery-06.jpg',cap:'פרגיות בציטרוס ותבלינים'},
+  {img:'images/gallery-07.jpg',cap:'תחנת נקניקיות וקבבונים'},
+  {img:'images/gallery-08.jpg',cap:'עריאס בפיתה עם טחינה וסילאן'},
+  {img:'images/gallery-09.jpg',cap:'פלטת פרגיות מוגשת'},
+  {img:'images/gallery-10.jpg',cap:'לחמים על האש עם טחינה'},
+  {img:'images/gallery-11.jpg',cap:'שולחן קינוחים ופירות'},
+  {img:'images/gallery-12.jpg',cap:'שולחן חגיגי מוכן לאורחים'},
 ];
 
 const LEVELS = [
-  { id:'רגיל', label:'רגיל', sub:'בסיסי ומושלם' },
-  { id:'רגיל+', label:'רגיל+', sub:'עוד קצת מכל טוב' },
-  { id:'פרימיום', label:'פרימיום', sub:'חוויה מלאה' },
+  { id:'CLASIC', label:'CLASIC BBQ', sub:'₪170 למנה' },
+  { id:'SPECIAL', label:'SPECIAL BBQ', sub:'₪220 למנה' },
+  { id:'CRAZY', label:'CRAZY BBQ', sub:'₪270 למנה' },
 ];
 
 const MENUS = {
-  'רגיל': {
-    badge:'רמה 1', premium:false,
+  'CLASIC': {
+    badge:'₪170 למנה · מינימום 20 מנות', premium:false,
     groups:[
-      {t:'סלטים', items:['סלט חסה','סלט כרוב','טחינה גולמית']},
-      {t:'לחמים', items:['פיתות טריות','לחמניות']},
-      {t:'בשרים', items:['קבב','נקניקיות מרגז','פרגית עוף']},
-      {t:'תוספות', items:['אורז לבן','תפוחי אדמה בתנור']},
+      {t:'על השולחן', items:['סלט חסה עשיר','טחינה פיקנטית','חומוס קטפתי לצד חריף','מיקס חמוצים','חציל על גחלים שוחה בטחינה']},
+      {t:'פותחים שולחן', items:['ערייאס בפיתה עם זילוף טחינה וסילאן','קונפי שום ופטריות']},
+      {t:'פלטות בשרים', items:['פרגיות ברוטב צילי חריף/מתוק','חזה עוף ברוטב צילי חריף/מתוק',"נקניקיות מרגז וצ'וריצ'וס",'קבבונים']},
+      {t:'מנה אחרונה', items:['קוביות גלידה מרעננות']},
     ],
-    note:'כולל שתייה קלה ואד לב חופשי 🔥'
+    note:'כולל שתייה מתוקה, מפות וחד פעמי בסטייל 🔥'
   },
-  'רגיל+': {
-    badge:'רמה 2', premium:false,
+  'SPECIAL': {
+    badge:'₪220 למנה · מינימום 15 מנות', premium:false,
     groups:[
-      {t:'סלטים', items:['5 סלטים טריים','חמוצים ומטבלים']},
-      {t:'לחמים', items:['פיתות טריות','לחם שום']},
-      {t:'בשרים', items:['קבב','נקניקיות מרגז','כנפיים','אנטריקוט פרוס']},
-      {t:'תוספות', items:['אורז לבן','בטטה בתנור','פטריות ברוטב']},
+      {t:'על השולחן', items:['לחמים טריים','סלט חסה עשיר','טחינה פיקנטית','חומוס קטפתי לצד חריף','מיקס חמוצים','חציל על גחלים שוחה בטחינה']},
+      {t:'פותחים שולחן', items:['ערייאס בפיתה עם זילוף טחינה וסילאן','קונפי שום ופטריות']},
+      {t:'פלטות בשרים', items:['פרגיות ברוטב צילי חריף/מתוק','חזה עוף ברוטב צילי חריף/מתוק',"נקניקיות מרגז וצ'וריצ'וס",'קבבונים','מגדל אנטריקוט לצד אננס טרופי (תלוי בעונה)']},
+      {t:'מנה אחרונה', items:['שייק פירות מגוון ומרענן']},
     ],
-    note:'כולל שתייה קלה, קינוח קל ואד לב חופשי 🔥'
+    note:'כולל שתייה מתוקה, מפות וחד פעמי בסטייל 🔥'
   },
-  'פרימיום': {
-    badge:'רמה 3 · VIP', premium:true,
+  'CRAZY': {
+    badge:'₪270 למנה · מינימום 15 מנות', premium:true,
     groups:[
-      {t:'סלטים', items:['8 סלטים ומטבלים','בר חמוצים']},
-      {t:'לחמים', items:['פיתות טריות','לחם שום','פוקאצ׳ה']},
-      {t:'בשרים פרימיום', items:['אנטריקוט שלם','סינטה','כבש','סטייק אונקל']},
-      {t:'תוספות גורמה', items:['בטטה בתנור','פטריות ברוטב יין','ירקות גריל']},
+      {t:'על השולחן', items:['לחמים טריים','סלט חסה עשיר','טחינה פיקנטית','חומוס בשר חם ומיוחד','מיקס חמוצים','חציל על גחלים שוחה בטחינה']},
+      {t:'פותחים שולחן', items:['ארייעס בפיתה/רול שיפוד בטחינה וסילאן','קונפי שום ופטריות','מגוון עשיר של ירקות צרובים']},
+      {t:'פלטות בשרים', items:['פרגיות ברוטב צילי חריף/מתוק',"נקניקיות מרגז וצ'וריצ'וס",'קבבונים','כבד על מצע בצל מקורמל','מגדל אנטריקוט לצד אננס טרופי (תלוי בעונה)',"תפו״א ובטטה מדורה בצ'ימיצ'וריו"]},
+      {t:'מנה אחרונה', items:['פירות חתוכים באלגנטיות לצד שייק מרענן']},
     ],
-    note:'כולל שף מנגל צמוד, הגשה וסידור מלא וקינוח מפנק 👑'
+    note:'כולל שתייה מתוקה, מפות וחד פעמי בסטייל · אקסטרה: בירה 👑'
   }
 };
 

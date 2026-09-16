@@ -11,7 +11,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>ניהול · מנגל בלהבות</title>
+<title>ניהול · BBQ</title>
 <meta name="robots" content="noindex,nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -117,7 +117,7 @@ button{font-family:var(--font)}
 <div id="lockScreen" class="lock-screen">
   <div class="lock-card">
     <div class="lock-ico">🔒</div>
-    <h2 id="lockTitle">ניהול מנגל בלהבות</h2>
+    <h2 id="lockTitle">ניהול BBQ</h2>
     <p id="lockSub">טוען...</p>
     <div id="lockBody"></div>
     <div class="lock-err" id="lockErr">סיסמה שגויה</div>
@@ -127,7 +127,7 @@ button{font-family:var(--font)}
 <div id="app" style="display:none">
   <div class="hdr">
     <div class="hdr-in">
-      <div class="hdr-title">🔥 לוח ניהול</div>
+      <div class="hdr-title"><img src="images/logo.png" alt="BBQ" style="height:28px;width:28px;border-radius:50%;object-fit:cover">לוח ניהול</div>
       <div style="display:flex;gap:8px">
         <button class="hdr-btn" id="notifBtn" onclick="toggleNotifications()">🔔 התראות</button>
         <button class="hdr-btn" onclick="lockOut()">יציאה</button>
@@ -186,8 +186,8 @@ async function fbInit(){
     onSnapshot:fsMod.onSnapshot,collection:fsMod.collection,query:fsMod.query,orderBy:fsMod.orderBy};
   return _fb;
 }
-const LEVELS = ['רגיל','רגיל+','פרימיום'];
-const LEVEL_ICON = {'רגיל':'🔥','רגיל+':'🔥🔥','פרימיום':'👑'};
+const LEVELS = ['CLASIC','SPECIAL','CRAZY'];
+const LEVEL_ICON = {'CLASIC':'🔥','SPECIAL':'🔥🔥','CRAZY':'👑'};
 
 /* ===== auth (app-level password, hashed) ===== */
 async function sha256(str){
@@ -227,7 +227,7 @@ async function doSetup(){
   unlockApp();
 }
 function renderUnlockForm(){
-  document.getElementById('lockTitle').textContent='ניהול מנגל בלהבות';
+  document.getElementById('lockTitle').textContent='ניהול BBQ';
   document.getElementById('lockSub').textContent='הזינו סיסמה כדי להיכנס';
   document.getElementById('lockBody').innerHTML=`
     <input type="password" id="unlockInp" placeholder="סיסמה" onkeydown="if(event.key==='Enter')doUnlock()">

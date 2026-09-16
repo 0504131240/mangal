@@ -196,15 +196,27 @@ async function sha256(str){
 }
 let adminPassHash=null;
 async function initLock(){
-  const {db,doc,getDoc}=await fbInit();
-  const snap=await getDoc(doc(db,'mangalSettings','admin'));
-  if(snap.exists() && snap.data().passHash){
-    adminPassHash=snap.data().passHash;
-    if(localStorage.getItem('mangalAdminUnlocked')==='1'){ unlockApp(); return; }
-    renderUnlockForm();
-  } else {
-    renderSetupForm();
+  try{
+    const {db,doc,getDoc}=await fbInit();
+    const snap=await getDoc(doc(db,'mangalSettings','admin'));
+    if(snap.exists() && snap.data().passHash){
+      adminPassHash=snap.data().passHash;
+      if(localStorage.getItem('mangalAdminUnlocked')==='1'){ unlockApp(); return; }
+      renderUnlockForm();
+    } else {
+      renderSetupForm();
+    }
+  }catch(err){
+    console.error(err);
+    renderLoadError(err);
   }
+}
+function renderLoadError(err){
+  document.getElementById('lockTitle').textContent='לא הצליח להתחבר';
+  document.getElementById('lockSub').textContent='נכשל חיבור למסד הנתונים (Firestore). ייתכן שחוקי האבטחה חוסמים את ה-collections mangalSettings/mangalBookings - יש להוסיף אותם בקונסולת Firebase (ראו README).';
+  document.getElementById('lockBody').innerHTML=`
+    <div style="font-size:11px;color:var(--text3);direction:ltr;text-align:left;background:var(--bg);border-radius:8px;padding:8px;margin-bottom:10px;word-break:break-all">${esc(err&&err.message||String(err))}</div>
+    <button class="main" onclick="location.reload()">ניסיון חדש</button>`;
 }
 function renderSetupForm(){
   document.getElementById('lockTitle').textContent='הגדרת סיסמת מנהל';

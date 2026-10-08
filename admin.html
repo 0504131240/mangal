@@ -124,6 +124,11 @@ button{font-family:var(--font)}
 .btn-add-event{width:100%;padding:12px;border-radius:12px;border:none;background:var(--flame);color:#fff;font-weight:700;font-size:13.5px;cursor:pointer;margin-bottom:14px;box-shadow:0 8px 18px rgba(216,72,27,.28)}
 
 /* calendar */
+.cal-mode-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.cal-mode-toggle{display:flex;background:var(--surface2);border-radius:10px;padding:3px;gap:2px}
+.cal-mode-toggle button{border:none;background:transparent;color:var(--text2);font-size:12px;font-weight:700;padding:6px 12px;border-radius:8px;cursor:pointer}
+.cal-mode-toggle button.on{background:var(--char);color:#fff}
+.cal-today-btn{background:var(--surface2);border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;color:var(--text2);cursor:pointer;flex-shrink:0;white-space:nowrap}
 .cal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
 .cal-hdr>div{text-align:center;min-width:0}
 .cal-title{font-weight:700;font-family:var(--font-head);font-size:15px}
@@ -458,11 +463,10 @@ function setBoardView(v){
   document.getElementById('boardCalendarWrap').style.display = v==='calendar' ? 'block':'none';
   if(v==='calendar') renderCalendar();
 }
-let calMonth=new Date(); calMonth.setDate(1);
-function calShift(dir){
-  calMonth.setMonth(calMonth.getMonth()+dir);
-  renderCalendar();
-}
+let calMode=(function(){ try{ return localStorage.getItem('mangalCalMode')||'hebrew'; }catch(e){ return 'hebrew'; } })();
+let calMonth=new Date(); calMonth.setDate(1); // anchor for gregorian mode (first-of-month)
+let calHebrewAnchor=new Date(); // any date inside the currently shown hebrew month
+
 const _heDayFmt=new Intl.DateTimeFormat('he-u-ca-hebrew',{day:'numeric'});
 const _heMonthFmt=new Intl.DateTimeFormat('he-u-ca-hebrew',{month:'long'});
 const _heYearFmt=new Intl.DateTimeFormat('he-u-ca-hebrew',{year:'numeric'});
@@ -484,42 +488,104 @@ function hebrewNumeral(num){
   if(!letters) return String(num);
   return letters.length>1 ? letters.slice(0,-1)+'״'+letters.slice(-1) : letters+'׳';
 }
+function heMonthKey(date){ return _heMonthFmt.format(date)+' '+_heYearFmt.format(date); }
+/* scans day-by-day (a hebrew month is at most 30 days) to find the Gregorian
+   start/end dates of the hebrew month containing `anchor` - Intl only converts
+   gregorian->hebrew, not the other way, so this is the simple robust way to
+   find hebrew month boundaries */
+function hebrewMonthBounds(anchor){
+  const key=heMonthKey(anchor);
+  let start=new Date(anchor);
+  while(true){
+    const prev=new Date(start); prev.setDate(prev.getDate()-1);
+    if(heMonthKey(prev)!==key) break;
+    start=prev;
+  }
+  let end=new Date(anchor);
+  while(true){
+    const next=new Date(end); next.setDate(next.getDate()+1);
+    if(heMonthKey(next)!==key) break;
+    end=next;
+  }
+  return {start,end};
+}
+function setCalMode(mode){
+  calMode=mode;
+  try{ localStorage.setItem('mangalCalMode',mode); }catch(e){}
+  renderCalendar();
+}
+function calToday(){
+  if(calMode==='hebrew') calHebrewAnchor=new Date();
+  else { calMonth=new Date(); calMonth.setDate(1); }
+  renderCalendar();
+}
+function calShift(dir){
+  if(calMode==='hebrew'){
+    const {start,end}=hebrewMonthBounds(calHebrewAnchor);
+    const next=new Date(dir>0?end:start);
+    next.setDate(next.getDate()+dir);
+    calHebrewAnchor=next;
+  } else {
+    calMonth.setMonth(calMonth.getMonth()+dir);
+  }
+  renderCalendar();
+}
 function renderCalendar(){
   const el=document.getElementById('boardCalendarWrap');
-  const y=calMonth.getFullYear(), m=calMonth.getMonth();
-  const startWeekday=new Date(y,m,1).getDay();
-  const daysInMonth=new Date(y,m+1,0).getDate();
-  const firstDate=new Date(y,m,1), lastDate=new Date(y,m,daysInMonth);
-  const heMonthStart=_heMonthFmt.format(firstDate), heMonthEnd=_heMonthFmt.format(lastDate);
-  const heYear=hebrewNumeral(parseInt(_heYearFmt.format(lastDate),10));
-  const heTitle = heMonthStart===heMonthEnd ? `${heMonthStart} ${heYear}` : `${heMonthStart} – ${heMonthEnd} ${heYear}`;
-  const gregSub=calMonth.toLocaleDateString('he-IL',{month:'long',year:'numeric'});
   const todayStr=new Date().toISOString().slice(0,10);
-
   const byDay={};
   bookings.filter(b=>b.status==='approved' && b.date).forEach(b=>{
     (byDay[b.date]=byDay[b.date]||[]).push(b);
   });
 
+  let title, subtitle, startWeekday, daysCount, cellDate;
+  if(calMode==='hebrew'){
+    const {start,end}=hebrewMonthBounds(calHebrewAnchor);
+    daysCount=Math.round((end-start)/86400000)+1;
+    startWeekday=start.getDay();
+    title=`${_heMonthFmt.format(start)} ${hebrewNumeral(parseInt(_heYearFmt.format(start),10))}`;
+    const sameGregMonth = start.getMonth()===end.getMonth() && start.getFullYear()===end.getFullYear();
+    subtitle = sameGregMonth
+      ? start.toLocaleDateString('he-IL',{month:'long',year:'numeric'})
+      : `${start.toLocaleDateString('he-IL',{day:'numeric',month:'short'})} – ${end.toLocaleDateString('he-IL',{day:'numeric',month:'short',year:'numeric'})}`;
+    cellDate=(i)=>{ const d=new Date(start); d.setDate(d.getDate()+i); return d; };
+  } else {
+    const y=calMonth.getFullYear(), m=calMonth.getMonth();
+    daysCount=new Date(y,m+1,0).getDate();
+    startWeekday=new Date(y,m,1).getDay();
+    title=calMonth.toLocaleDateString('he-IL',{month:'long',year:'numeric'});
+    subtitle='';
+    cellDate=(i)=>new Date(y,m,i+1);
+  }
+
   let cells='';
   for(let i=0;i<startWeekday;i++) cells+=`<div class="cal-cell empty"></div>`;
-  for(let day=1;day<=daysInMonth;day++){
-    const dateStr=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+  for(let i=0;i<daysCount;i++){
+    const d=cellDate(i);
+    const dateStr=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     const evs=byDay[dateStr]||[];
-    const heDay=hebrewNumeral(parseInt(_heDayFmt.format(new Date(y,m,day)),10));
+    const mainLabel = calMode==='hebrew' ? hebrewNumeral(i+1) : String(d.getDate());
+    const subLabel = calMode==='hebrew' ? String(d.getDate()) : '';
     cells+=`<div class="cal-cell ${evs.length?'has-events':''} ${dateStr===todayStr?'today':''}" ${evs.length?`onclick="openDayEvents('${dateStr}')"`:''}>
-      <span class="cal-he-day">${heDay}</span>
-      <span class="cal-greg-day">${day}</span>
+      <span class="cal-he-day">${mainLabel}</span>
+      ${subLabel?`<span class="cal-greg-day">${subLabel}</span>`:''}
       ${evs.length?`<span class="cal-dot">${evs.length}</span>`:''}
     </div>`;
   }
 
   el.innerHTML=`
+    <div class="cal-mode-row">
+      <div class="cal-mode-toggle">
+        <button class="${calMode==='hebrew'?'on':''}" onclick="setCalMode('hebrew')">עברי</button>
+        <button class="${calMode==='gregorian'?'on':''}" onclick="setCalMode('gregorian')">לועזי</button>
+      </div>
+      <button class="cal-today-btn" onclick="calToday()">📍 היום</button>
+    </div>
     <div class="cal-hdr">
       <button class="cal-nav" onclick="calShift(-1)">‹ הקודם</button>
       <div>
-        <div class="cal-title">${heTitle}</div>
-        <div class="cal-subtitle">${gregSub}</div>
+        <div class="cal-title">${title}</div>
+        ${subtitle?`<div class="cal-subtitle">${subtitle}</div>`:''}
       </div>
       <button class="cal-nav" onclick="calShift(1)">הבא ›</button>
     </div>

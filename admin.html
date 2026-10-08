@@ -115,12 +115,17 @@ button{font-family:var(--font)}
 .btn-add-event{width:100%;padding:12px;border-radius:12px;border:none;background:var(--flame);color:#fff;font-weight:700;font-size:13.5px;cursor:pointer;margin-bottom:14px;box-shadow:0 8px 18px rgba(216,72,27,.28)}
 
 /* calendar */
-.cal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.cal-hdr>div{text-align:center;min-width:0}
 .cal-title{font-weight:700;font-family:var(--font-head);font-size:15px}
-.cal-nav{background:var(--surface2);border:none;border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;color:var(--text2);cursor:pointer}
+.cal-subtitle{font-size:10.5px;color:var(--text3);margin-top:1px}
+.cal-nav{background:var(--surface2);border:none;border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;color:var(--text2);cursor:pointer;flex-shrink:0}
 .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;width:100%}
 .cal-weekdays{margin-bottom:4px;font-size:11px;color:var(--text3);font-weight:700;text-align:center}
 .cal-cell{aspect-ratio:1/1;min-width:0;border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;position:relative;background:var(--surface);overflow:hidden}
+.cal-he-day{font-size:13px;font-weight:700}
+.cal-greg-day{font-size:8.5px;color:var(--text3);margin-top:1px}
+.cal-cell.has-events .cal-greg-day{color:var(--flame-dark);opacity:.75}
 .cal-cell.empty{border:none;background:transparent}
 .cal-cell.has-events{cursor:pointer;border-color:var(--flame);background:var(--flame-bg);font-weight:700}
 .cal-cell.today{box-shadow:inset 0 0 0 2px var(--char)}
@@ -447,12 +452,19 @@ function calShift(dir){
   calMonth.setMonth(calMonth.getMonth()+dir);
   renderCalendar();
 }
+const _heDayFmt=new Intl.DateTimeFormat('he-u-ca-hebrew',{day:'numeric'});
+const _heMonthFmt=new Intl.DateTimeFormat('he-u-ca-hebrew',{month:'long'});
+const _heYearFmt=new Intl.DateTimeFormat('he-u-ca-hebrew',{year:'numeric'});
 function renderCalendar(){
   const el=document.getElementById('boardCalendarWrap');
   const y=calMonth.getFullYear(), m=calMonth.getMonth();
   const startWeekday=new Date(y,m,1).getDay();
   const daysInMonth=new Date(y,m+1,0).getDate();
-  const monthName=calMonth.toLocaleDateString('he-IL',{month:'long',year:'numeric'});
+  const firstDate=new Date(y,m,1), lastDate=new Date(y,m,daysInMonth);
+  const heMonthStart=_heMonthFmt.format(firstDate), heMonthEnd=_heMonthFmt.format(lastDate);
+  const heYear=_heYearFmt.format(lastDate);
+  const heTitle = heMonthStart===heMonthEnd ? `${heMonthStart} ${heYear}` : `${heMonthStart} – ${heMonthEnd} ${heYear}`;
+  const gregSub=calMonth.toLocaleDateString('he-IL',{month:'long',year:'numeric'});
   const todayStr=new Date().toISOString().slice(0,10);
 
   const byDay={};
@@ -465,8 +477,10 @@ function renderCalendar(){
   for(let day=1;day<=daysInMonth;day++){
     const dateStr=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
     const evs=byDay[dateStr]||[];
+    const heDay=_heDayFmt.format(new Date(y,m,day));
     cells+=`<div class="cal-cell ${evs.length?'has-events':''} ${dateStr===todayStr?'today':''}" ${evs.length?`onclick="openDayEvents('${dateStr}')"`:''}>
-      <span>${day}</span>
+      <span class="cal-he-day">${heDay}</span>
+      <span class="cal-greg-day">${day}</span>
       ${evs.length?`<span class="cal-dot">${evs.length}</span>`:''}
     </div>`;
   }
@@ -474,7 +488,10 @@ function renderCalendar(){
   el.innerHTML=`
     <div class="cal-hdr">
       <button class="cal-nav" onclick="calShift(-1)">‹ הקודם</button>
-      <div class="cal-title">${monthName}</div>
+      <div>
+        <div class="cal-title">${heTitle}</div>
+        <div class="cal-subtitle">${gregSub}</div>
+      </div>
       <button class="cal-nav" onclick="calShift(1)">הבא ›</button>
     </div>
     <div class="cal-grid cal-weekdays">${['א','ב','ג','ד','ה','ו','ש'].map(d=>`<div>${d}</div>`).join('')}</div>

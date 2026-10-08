@@ -670,7 +670,10 @@ function renderPending(){
 }
 async function approveBooking(id){
   const {db,doc,updateDoc}=await fbInit();
-  await updateDoc(doc(db,'mangalBookings',id),{status:'approved'});
+  const b=bookings.find(x=>x.id===id);
+  const patch={status:'approved'};
+  if(b && !b.totalPrice) patch.totalPrice=Number(b.guests||0)*(LEVEL_PRICE[b.level]||0);
+  await updateDoc(doc(db,'mangalBookings',id),patch);
   showToast('האירוע אושר ונכנס ללוח ✓');
 }
 async function declineBooking(id){

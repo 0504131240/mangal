@@ -113,6 +113,12 @@ button{font-family:var(--font)}
 .quickpay{display:flex;gap:8px;margin-top:8px}
 .quickpay button{flex:1;padding:9px;border-radius:9px;border:1.5px solid var(--border);background:var(--surface);font-size:12px;font-weight:700;cursor:pointer;color:var(--text2)}
 .modal-actions{display:flex;gap:8px;margin-top:18px}
+.dlist{margin-top:12px;border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+.drow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 13px;font-size:13px;border-bottom:1px solid var(--border)}
+.drow:last-child{border-bottom:none}
+.drow span{color:var(--text2);flex-shrink:0}
+.drow b{font-weight:700;text-align:left;min-width:0;overflow-wrap:anywhere}
+.drow a{color:var(--flame-dark);text-decoration:none}
 .modal-actions button{flex:1;padding:12px;border-radius:11px;border:none;font-weight:700;font-size:13px;cursor:pointer}
 .btn-save{background:var(--flame);color:#fff}
 .btn-danger{background:var(--bad-bg);color:var(--bad)}
@@ -616,13 +622,13 @@ function renderCalendar(){
 }
 function openDayEvents(dateStr){
   const evs=bookings.filter(b=>b.status==='approved' && b.date===dateStr);
-  if(evs.length===1){ openModal(evs[0].id); return; }
+  if(evs.length===1){ openDetails(evs[0].id); return; }
   const root=document.getElementById('modalRoot');
   root.innerHTML=`
     <div class="modal-bg" onclick="if(event.target===this)closeModal()">
       <div class="modal">
         <div class="modal-top"><h3>${fmtDate(dateStr)}</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
-        ${evs.map(b=>`<div class="card" onclick="openModal('${b.id}')">
+        ${evs.map(b=>`<div class="card" onclick="openDetails('${b.id}')">
           <div class="card-top"><div class="card-name">${esc(b.name)}</div></div>
           <div class="card-mid"><span class="chip lvl">${LEVEL_ICON[b.level]||''} ${esc(b.level)}</span><span class="chip">👥 ${b.guests} אנשים</span>${paidChip(b)}</div>
         </div>`).join('')}
@@ -755,6 +761,43 @@ function renderDebts(){
       </div>
     </div>`;
   }).join('');
+}
+
+/* ===== read-only event details ===== */
+const STATUS_LABEL={pending:'ממתין לאישור',approved:'מאושר',declined:'נדחה/בוטל'};
+function openDetails(id){
+  const b=bookings.find(x=>x.id===id);
+  if(!b)return;
+  const total=Number(b.totalPrice||0), paid=Number(b.paidAmount||0);
+  const row=(label,value)=>`<div class="drow"><span>${label}</span><b>${value}</b></div>`;
+  document.getElementById('modalRoot').innerHTML=`
+    <div class="modal-bg" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div class="modal-top">
+          <h3>${esc(b.name)}</h3>
+          <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="card-mid">
+          <span class="chip lvl">${LEVEL_ICON[b.level]||''} ${esc(b.level)}</span>
+          <span class="chip">📅 ${fmtDate(b.date)}</span>
+          ${paidChip(b)}
+        </div>
+        <div class="dlist">
+          ${row('📞 טלפון', b.phone?`<a href="tel:${esc(b.phone)}">${esc(b.phone)}</a>`:'—')}
+          ${b.email?row('✉️ אימייל', esc(b.email)):''}
+          ${row('📍 מיקום', b.location?esc(b.location):'—')}
+          ${row('👥 משתתפים', esc(b.guests||0))}
+          ${row('💰 מחיר כולל', total>0?`₪${total.toLocaleString()}`:'טרם נקבע')}
+          ${row('✓ שולם', `₪${paid.toLocaleString()}`)}
+          ${total>0?row('⏳ יתרה לתשלום', `₪${Math.max(total-paid,0).toLocaleString()}`):''}
+          ${row('סטטוס', STATUS_LABEL[b.status]||esc(b.status))}
+        </div>
+        ${b.notes?`<div class="minfo">📝 ${esc(b.notes)}</div>`:''}
+        <div class="modal-actions">
+          <button class="btn-save" onclick="openModal('${b.id}')">✏️ עריכה</button>
+        </div>
+      </div>
+    </div>`;
 }
 
 /* ===== modal ===== */

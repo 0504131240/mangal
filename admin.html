@@ -132,7 +132,7 @@ button{font-family:var(--font)}
 .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;width:100%}
 .cal-weekdays{margin-bottom:4px;font-size:11px;color:var(--text3);font-weight:700;text-align:center}
 .cal-cell{aspect-ratio:1/1;min-width:0;border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;position:relative;background:var(--surface);overflow:hidden}
-.cal-he-day{font-size:13px;font-weight:700}
+.cal-he-day{font-size:12px;font-weight:700;white-space:nowrap}
 .cal-greg-day{font-size:8.5px;color:var(--text3);margin-top:1px}
 .cal-cell.has-events .cal-greg-day{color:var(--flame-dark);opacity:.75}
 .cal-cell.empty{border:none;background:transparent}
@@ -466,6 +466,24 @@ function calShift(dir){
 const _heDayFmt=new Intl.DateTimeFormat('he-u-ca-hebrew',{day:'numeric'});
 const _heMonthFmt=new Intl.DateTimeFormat('he-u-ca-hebrew',{month:'long'});
 const _heYearFmt=new Intl.DateTimeFormat('he-u-ca-hebrew',{year:'numeric'});
+/* Hebrew numeral (gematria) letters for a plain number, e.g. 17 -> י״ז, 5787 -> תשפ״ז
+   (thousands dropped per the usual year-writing convention; 15/16 use ט״ו/ט״ז to
+   avoid spelling the letter-combinations that resemble God's name) */
+function hebrewNumeral(num){
+  const map=[[400,'ת'],[300,'ש'],[200,'ר'],[100,'ק'],[90,'צ'],[80,'פ'],[70,'ע'],[60,'ס'],[50,'נ'],[40,'מ'],[30,'ל'],[20,'כ'],[10,'י'],[9,'ט'],[8,'ח'],[7,'ז'],[6,'ו'],[5,'ה'],[4,'ד'],[3,'ג'],[2,'ב'],[1,'א']];
+  let rem=num%1000;
+  if(rem===0) rem=num;
+  let letters='';
+  while(rem>0){
+    if(rem===15){ letters+='טו'; break; }
+    if(rem===16){ letters+='טז'; break; }
+    const hit=map.find(([val])=>rem>=val);
+    if(!hit) break;
+    letters+=hit[1]; rem-=hit[0];
+  }
+  if(!letters) return String(num);
+  return letters.length>1 ? letters.slice(0,-1)+'״'+letters.slice(-1) : letters+'׳';
+}
 function renderCalendar(){
   const el=document.getElementById('boardCalendarWrap');
   const y=calMonth.getFullYear(), m=calMonth.getMonth();
@@ -473,7 +491,7 @@ function renderCalendar(){
   const daysInMonth=new Date(y,m+1,0).getDate();
   const firstDate=new Date(y,m,1), lastDate=new Date(y,m,daysInMonth);
   const heMonthStart=_heMonthFmt.format(firstDate), heMonthEnd=_heMonthFmt.format(lastDate);
-  const heYear=_heYearFmt.format(lastDate);
+  const heYear=hebrewNumeral(parseInt(_heYearFmt.format(lastDate),10));
   const heTitle = heMonthStart===heMonthEnd ? `${heMonthStart} ${heYear}` : `${heMonthStart} – ${heMonthEnd} ${heYear}`;
   const gregSub=calMonth.toLocaleDateString('he-IL',{month:'long',year:'numeric'});
   const todayStr=new Date().toISOString().slice(0,10);
@@ -488,7 +506,7 @@ function renderCalendar(){
   for(let day=1;day<=daysInMonth;day++){
     const dateStr=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
     const evs=byDay[dateStr]||[];
-    const heDay=_heDayFmt.format(new Date(y,m,day));
+    const heDay=hebrewNumeral(parseInt(_heDayFmt.format(new Date(y,m,day)),10));
     cells+=`<div class="cal-cell ${evs.length?'has-events':''} ${dateStr===todayStr?'today':''}" ${evs.length?`onclick="openDayEvents('${dateStr}')"`:''}>
       <span class="cal-he-day">${heDay}</span>
       <span class="cal-greg-day">${day}</span>

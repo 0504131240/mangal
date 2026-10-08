@@ -903,6 +903,7 @@ function esc(s){
 /* ===== settings: login, notifications, site gallery ===== */
 let galleryItems=null;
 let storageReady=false;
+let storageMode=null;
 function openSettings(){
   document.getElementById('modalRoot').innerHTML=`
     <div class="modal-bg" onclick="if(event.target===this)closeModal()">
@@ -938,10 +939,18 @@ function openSettings(){
 }
 async function checkStorage(){
   let reason='';
+  storageMode=null;
   try{
     const r=await fetch('/api/upload',{cache:'no-store'});
     if(!r.ok) reason=`שרת ההעלאה לא זמין (קוד ${r.status}) - כנראה הפריסה האחרונה ב-Vercel לא הצליחה`;
-    else if((await r.json()).configured!==true) reason='האחסון לא מחובר לפרויקט, או שלא נעשה Redeploy אחרי החיבור';
+    else {
+      const j=await r.json();
+      storageMode=j.mode||null;
+      if(j.configured!==true){
+        const names=(j.env&&j.env.names||[]).join(', ')||'אין';
+        reason=`האחסון לא מחובר לפרויקט, או שלא נעשה Redeploy אחרי החיבור (משתני אחסון שהשרת רואה: ${names}; OIDC: ${j.env&&j.env.oidc?'כן':'לא'})`;
+      }
+    }
   }catch(e){ reason='אין חיבור לשרת ההעלאה: '+(e.message||e); }
   storageReady=!reason;
   const note=document.getElementById('storageNote');
@@ -1036,32 +1045,35 @@ async function handleMediaFiles(fileList){
       const type=body.type||fType;
       const ext=MEDIA_EXT[type];
       if(!ext){ errors.push(`${f.name}: סוג קובץ לא נתמך (${type||'לא ידוע'})`); continue; }
-      _blobClient=_blobClient||await import('./vendor/vercel-blob-client-2.8.0.js');
-      const res=await _blobClient.upload(`gallery/${Date.now()}.${ext}`, body, {
+      _blobClient=_blobClient||await import('./vendor/vercel-blob-upload-2.8.0.js');
+      const uploadFn = storageMode==='oidc' ? _blobClient.uploadPresigned : _blobClient.upload;
+      const name=`gallery/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+      let uploading=true; // the progress callback is throttled and can fire after the upload resolves
+      const res=await uploadFn(name, body, {
         access:'public',
         handleUploadUrl:'/api/upload',
         clientPayload:JSON.stringify({passHash:adminPassHash}),
         contentType:type,
         multipart:body.size>20*1024*1024,
-        onUploadProgress:({percentage})=>setUploadStatus(`${prefix}מעלה ${isVideo?'סרטון':'תמונה'}... ${Math.round(percentage)}%`)
-      });
+        onUploadProgress:({percentage})=>{ if(uploading) setUploadStatus(`${prefix}מעלה ${isVideo?'סרטון':'תמונה'}... ${Math.round(percentage)}%`); }
+      }).finally(()=>{ uploading=false; });
       await saveGalleryItems([{kind:isVideo?'video':'image', url:res.url, cap:'', blob:true}, ...galleryItems]);
       added++;
     }catch(e){
       console.error(e);
       let msg=e&&e.message||String(e);
-      if(/client token/i.test(msg)) msg+=' | '+await uploadServerReason();
+      if(/client token|presigned URL/i.test(msg)) msg+=' | '+await uploadServerReason();
       errors.push(`${f.name}: ההעלאה נכשלה - ${msg}`);
     }
   }
   setUploadStatus(errors.length ? '⚠️ '+errors.join('\n⚠️ ') : '');
   if(added) showToast(added===1?'נוסף לאתר ✓':`${added} קבצים נוספו לאתר ✓`);
 }
-// the blob client only says "Failed to retrieve the client token"; ask the server directly for its reason
+// the blob client only says "Failed to retrieve the client token / presigned URL"; ask the server directly for its reason
 async function uploadServerReason(){
   try{
     const r=await fetch('/api/upload',{method:'POST',headers:{'content-type':'application/json'},
-      body:JSON.stringify({type:'blob.generate-client-token',payload:{pathname:'gallery/probe.jpg',multipart:false,clientPayload:JSON.stringify({passHash:adminPassHash})}})});
+      body:JSON.stringify({type:storageMode==='oidc'?'blob.generate-presigned-url':'blob.generate-client-token',payload:{pathname:'gallery/probe.jpg',multipart:false,clientPayload:JSON.stringify({passHash:adminPassHash})}})});
     const j=await r.json().catch(()=>({}));
     return `שרת: ${r.status} ${j.error||''}`.trim();
   }catch(e){ return 'שרת לא זמין'; }

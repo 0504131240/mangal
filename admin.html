@@ -692,7 +692,7 @@ function renderPending(){
   const dWrap=document.getElementById('declinedWrap');
   if(!declined.length){ dWrap.innerHTML=''; return; }
   dWrap.innerHTML=`<div class="section-note">בקשות שנדחו (${declined.length})</div>` +
-    declined.map(b=>`<div class="card" style="opacity:.6" onclick="openModal('${b.id}')">
+    declined.map(b=>`<div class="card" style="opacity:.6" onclick="openDetails('${b.id}')">
       <div class="card-top"><div class="card-name">${esc(b.name)}</div><div class="card-date">📅 ${fmtDate(b.date)}</div></div>
     </div>`).join('');
 }
@@ -720,7 +720,7 @@ function renderBoard(){
   const el=document.getElementById('boardList');
   if(!list.length){ el.innerHTML=`<div class="empty">אין אירועים ${boardFilter==='upcoming'?'קרובים':'מהעבר'} בלוח</div>`; return; }
   el.innerHTML=list.map(b=>`
-    <div class="card" onclick="openModal('${b.id}')">
+    <div class="card" onclick="openDetails('${b.id}')">
       <div class="card-top">
         <div class="card-name">${esc(b.name)}</div>
         <div class="card-date">📅 ${fmtDate(b.date)}</div>
@@ -749,7 +749,7 @@ function renderDebts(){
   if(!debts.length){ el.innerHTML=`<div class="empty">אין חובות פתוחים 🎉</div>`; return; }
   el.innerHTML=debts.map(b=>{
     const owe=Number(b.totalPrice||0)-Number(b.paidAmount||0);
-    return `<div class="card" onclick="openModal('${b.id}')">
+    return `<div class="card" onclick="openDetails('${b.id}')">
       <div class="card-top">
         <div class="card-name">${esc(b.name)}</div>
         <div class="card-date">📅 ${fmtDate(b.date)}</div>

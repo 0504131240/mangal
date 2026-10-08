@@ -45,7 +45,6 @@ a{color:inherit}
 .nav-links a:hover{background:var(--surface2);color:var(--text)}
 
 /* banner (ad creative, replaces the old text hero) */
-.banner{display:block;width:100%;height:auto}
 
 /* sections */
 section{padding:52px 0}
@@ -121,7 +120,7 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
 .admin-link{display:block;margin-top:8px;opacity:.5;font-size:11px}
 @media(max-width:520px){.lvl-grid{grid-template-columns:1fr}.two-col{grid-template-columns:1fr}}
 
-/* short layout (big buttons -> windows) */
+/* home: banner + big buttons that open windows */
 .short-banner img{display:block;width:100%;height:auto}
 .big-cards{display:flex;flex-direction:column;gap:12px;max-width:480px;margin:0 auto;padding:28px 0}
 .big-card{display:flex;align-items:center;gap:14px;background:var(--surface);border:1.5px solid var(--border);border-radius:16px;
@@ -132,8 +131,6 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
 .big-card .txt b{display:block;font-family:var(--font-head);font-size:15.5px;color:var(--text)}
 .big-card .txt span{font-size:12px;color:var(--text2)}
 .big-card .arrow{font-size:18px;color:var(--text3)}
-.book-cta{text-align:center}
-.book-cta-btn{display:inline-flex;align-items:center;gap:8px;padding:14px 26px;border-radius:var(--r2);border:none;background:var(--flame);color:#fff;font-weight:700;font-size:14.5px;cursor:pointer;box-shadow:0 10px 24px rgba(216,72,27,.32)}
 
 /* shared modal shells (gallery/menus/booking) */
 .modal-bg{position:fixed;inset:0;background:rgba(32,20,14,.55);z-index:90;display:flex;align-items:flex-end;justify-content:center}
@@ -145,10 +142,6 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
 .modal-top h3{font-family:var(--font-head);font-size:17px}
 .modal-close{background:var(--surface2);border:none;width:32px;height:32px;border-radius:50%;font-size:15px;cursor:pointer;color:var(--text2)}
 
-/* layout preview toggle */
-.layout-toggle{position:fixed;bottom:14px;right:14px;z-index:60;display:flex;gap:4px;background:var(--char);border-radius:24px;padding:4px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
-.layout-toggle button{border:none;background:transparent;color:rgba(255,255,255,.6);font-size:11px;font-weight:700;padding:8px 12px;border-radius:20px;cursor:pointer;font-family:var(--font)}
-.layout-toggle button.on{background:var(--flame);color:#fff}
 </style>
 </head>
 <body>
@@ -157,72 +150,21 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
   <div class="nav-in">
     <div class="brand"><img src="images/logo-v2.png" alt="BBQ · חגיגת ברבקיו משחררת"></div>
     <div class="nav-links" style="display:none" id="navLinksWide">
-      <a href="#gallery" onclick="return navGoTo(event,'gallery')">גלריה</a>
-      <a href="#menus" onclick="return navGoTo(event,'menus')">תפריטים</a>
+      <a href="#gallery" onclick="openGalleryModal();return false">גלריה</a>
+      <a href="#menus" onclick="openMenusModal();return false">תפריטים</a>
       <a href="#contact">יצירת קשר</a>
     </div>
   </div>
 </nav>
 
-<!-- ===== LAYOUT 1: long scrolling page (default) ===== -->
-<div id="layoutLong">
-  <img class="banner" src="images/poster-hero.jpg" alt="חוויית מנגל עם דודי - מנגל יוקרתי שמגיע אליכם: ציוד מקצועי, בשרים איכותיים, עריכה מוקפדת, שתייה קרה. שירות אישי ברמה גבוהה וחוויה בלתי נשכחת. גיבושים, שמחות ואירועים. כשרות מהודרת.">
-
-  <section id="gallery">
-    <div class="wrap">
-      <div class="sect-head">
-        <div class="eyebrow">קצת ממה שהיה</div>
-        <h2>תמונות מאירועים קודמים</h2>
-        <p>כדי להתרשם מהאווירה, הבשר והעשן — הנה כמה רגעים מאירועים שעשינו.</p>
-      </div>
-      <div class="gallery" id="galleryGrid"></div>
-    </div>
-  </section>
-
-  <section id="menus" style="background:var(--surface2)">
-    <div class="wrap">
-      <div class="sect-head">
-        <div class="eyebrow">מה אוכלים</div>
-        <h2>תפריטי האירועים</h2>
-        <p>שלוש רמות אירוע, כל אחת עם היקף שונה של סלטים, בשרים ותוספות.</p>
-      </div>
-      <div id="menuBlock">
-        <div class="menu-tabs" id="menuTabs"></div>
-        <div id="menuCards"></div>
-      </div>
-    </div>
-  </section>
-
-  <section id="bookCta">
-    <div class="wrap">
-      <div class="sect-head">
-        <div class="eyebrow">שריינו תאריך</div>
-        <h2>מוכנים להזמין אירוע?</h2>
-        <p>ממלאים פרטים בטופס קצר, אנחנו בודקים זמינות וחוזרים אליכם לאישור סופי.</p>
-      </div>
-      <div class="book-cta">
-        <button type="button" class="book-cta-btn" onclick="openBookModal()">📅 פתיחת טופס הזמנה</button>
-      </div>
-    </div>
-  </section>
-</div>
-
-<!-- ===== LAYOUT 2: short page, big buttons open windows ===== -->
-<div id="layoutShort" hidden>
-  <div class="short-banner"><img src="images/poster-hero.jpg" alt="חוויית מנגל עם דודי"></div>
-  <div class="wrap">
-    <div class="big-cards">
-      <button type="button" class="big-card" onclick="openGalleryModal()"><div class="ico">📷</div><div class="txt"><b>תמונות מאירועים</b><span>הצצה לאירועים קודמים</span></div><div class="arrow">‹</div></button>
-      <button type="button" class="big-card" onclick="openMenusModal()"><div class="ico">📋</div><div class="txt"><b>תפריטים</b><span>CLASIC · SPECIAL · CRAZY</span></div><div class="arrow">‹</div></button>
-      <button type="button" class="big-card" onclick="openBookModal()"><div class="ico">📅</div><div class="txt"><b>הזמנת אירוע</b><span>בוחרים תאריך ורמה</span></div><div class="arrow">‹</div></button>
-    </div>
+<!-- banner + three big buttons; gallery, menus and booking each open in a window -->
+<div class="short-banner"><img src="images/poster-hero.jpg" alt="חוויית מנגל עם דודי"></div>
+<div class="wrap">
+  <div class="big-cards">
+    <button type="button" class="big-card" onclick="openGalleryModal()"><div class="ico">📷</div><div class="txt"><b>תמונות מאירועים</b><span>הצצה לאירועים קודמים</span></div><div class="arrow">‹</div></button>
+    <button type="button" class="big-card" onclick="openMenusModal()"><div class="ico">📋</div><div class="txt"><b>תפריטים</b><span>CLASIC · SPECIAL · CRAZY</span></div><div class="arrow">‹</div></button>
+    <button type="button" class="big-card" onclick="openBookModal()"><div class="ico">📅</div><div class="txt"><b>הזמנת אירוע</b><span>בוחרים תאריך ורמה</span></div><div class="arrow">‹</div></button>
   </div>
-</div>
-
-<!-- layout preview toggle - for the business owner to compare, not a customer-facing control -->
-<div class="layout-toggle">
-  <button type="button" id="layoutBtnLong" class="on" onclick="setSiteLayout('long')">דף ארוך</button>
-  <button type="button" id="layoutBtnShort" onclick="setSiteLayout('short')">דף קצר</button>
 </div>
 
 <section id="contact" style="background:var(--surface2)">
@@ -246,18 +188,21 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
 
 <div id="lightboxRoot"></div>
 
-<!-- shared modal shells: gallery / menus / booking (booking is always a modal) -->
+<!-- windows: gallery / menus / booking -->
 <div class="modal-bg" id="galleryModalBg" hidden onclick="if(event.target===this)closeGalleryModal()">
   <div class="modal">
     <div class="modal-top"><h3>תמונות מאירועים</h3><button class="modal-close" onclick="closeGalleryModal()">✕</button></div>
-    <div id="galleryModalSlot"></div>
+    <div class="gallery" id="galleryGrid"></div>
   </div>
 </div>
 
 <div class="modal-bg" id="menusModalBg" hidden onclick="if(event.target===this)closeMenusModal()">
   <div class="modal">
     <div class="modal-top"><h3>תפריטי האירועים</h3><button class="modal-close" onclick="closeMenusModal()">✕</button></div>
-    <div id="menusModalSlot"></div>
+    <div id="menuBlock">
+      <div class="menu-tabs" id="menuTabs"></div>
+      <div id="menuCards"></div>
+    </div>
     <div class="menu-note" style="margin-top:18px;border:none">התמחור לפי ראש · ניתן להוסיף על התפריט בתוספת תשלום · ביטול אירוע עד 3 ימי עבודה מראש</div>
   </div>
 </div>
@@ -466,52 +411,19 @@ function renderMenus(){
 }
 function setMenuTab(id){activeMenuTab=id;renderMenus();}
 
-/* ===== shared modals: gallery / menus move between home sections and their
-   modal when layout 2 opens them; booking modal is always separate ===== */
-let galleryHomeParent=null, menuHomeParent=null;
+/* ===== windows: gallery / menus / booking ===== */
 function isOverlayOpen(){
   return lightboxIndex>=0
     || !document.getElementById('galleryModalBg').hidden
     || !document.getElementById('menusModalBg').hidden
     || !document.getElementById('bookModalBg').hidden;
 }
-function openGalleryModal(){
-  document.getElementById('galleryModalSlot').appendChild(document.getElementById('galleryGrid'));
-  document.getElementById('galleryModalBg').hidden=false;
-}
-function closeGalleryModal(){
-  galleryHomeParent.appendChild(document.getElementById('galleryGrid'));
-  document.getElementById('galleryModalBg').hidden=true;
-}
-function openMenusModal(){
-  document.getElementById('menusModalSlot').appendChild(document.getElementById('menuBlock'));
-  document.getElementById('menusModalBg').hidden=false;
-}
-function closeMenusModal(){
-  menuHomeParent.appendChild(document.getElementById('menuBlock'));
-  document.getElementById('menusModalBg').hidden=true;
-}
+function openGalleryModal(){ document.getElementById('galleryModalBg').hidden=false; }
+function closeGalleryModal(){ document.getElementById('galleryModalBg').hidden=true; }
+function openMenusModal(){ document.getElementById('menusModalBg').hidden=false; }
+function closeMenusModal(){ document.getElementById('menusModalBg').hidden=true; }
 function openBookModal(){ document.getElementById('bookModalBg').hidden=false; }
 function closeBookModal(){ document.getElementById('bookModalBg').hidden=true; }
-function navGoTo(e, which){
-  if(document.getElementById('layoutShort').hidden) return true; // long layout: let the anchor scroll normally
-  e.preventDefault();
-  if(which==='gallery') openGalleryModal(); else openMenusModal();
-  return false;
-}
-
-function setSiteLayout(mode){
-  const isLong = mode==='long';
-  document.getElementById('layoutLong').hidden = !isLong;
-  document.getElementById('layoutShort').hidden = isLong;
-  document.getElementById('layoutBtnLong').classList.toggle('on', isLong);
-  document.getElementById('layoutBtnShort').classList.toggle('on', !isLong);
-  // closing any open gallery/menu modal when switching layout keeps their
-  // content's "home" parent (inside layoutLong) accurate
-  if(!document.getElementById('galleryModalBg').hidden) closeGalleryModal();
-  if(!document.getElementById('menusModalBg').hidden) closeMenusModal();
-  try{ localStorage.setItem('mangalSiteLayout', mode); }catch(e){}
-}
 
 /* ===== Firebase ===== */
 const firebaseConfig = {
@@ -578,12 +490,6 @@ window.addEventListener('resize',applyMediaNav);
 applyMediaNav();
 
 renderGallery();renderLevels();renderMenus();loadGallery();
-galleryHomeParent=document.getElementById('galleryGrid').parentNode;
-menuHomeParent=document.getElementById('menuBlock').parentNode;
-try{
-  const savedLayout=localStorage.getItem('mangalSiteLayout');
-  if(savedLayout==='short') setSiteLayout('short');
-}catch(e){}
 
 /* החלקה ימינה בכל מקום באתר -> כניסה ללוח הניהול (מושבת כשחלון/לייטבוקס פתוח) */
 (function(){

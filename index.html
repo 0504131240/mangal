@@ -45,21 +45,8 @@ a{color:inherit}
 .nav-links a:hover{background:var(--surface2);color:var(--text)}
 .nav-cta{background:var(--flame);color:#fff;padding:9px 16px;border-radius:20px;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;box-shadow:0 6px 16px rgba(216,72,27,.3)}
 
-/* hero */
-.hero{background:radial-gradient(120% 140% at 50% -10%,#40261A 0%,var(--char) 55%,#150C08 100%);color:#fff;padding:56px 16px 70px;text-align:center;position:relative;overflow:hidden}
-.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 20% 100%,rgba(216,72,27,.35),transparent 55%),radial-gradient(circle at 85% 90%,rgba(185,131,42,.25),transparent 50%);pointer-events:none}
-.hero-in{position:relative;max-width:680px;margin:0 auto}
-.hero-eyebrow{font-size:13px;font-weight:700;color:#F3C08A;letter-spacing:.5px;margin-bottom:10px}
-.hero h1{font-family:var(--font-head);font-size:clamp(28px,6vw,44px);line-height:1.2;font-weight:700}
-.hero p{margin-top:14px;font-size:16px;color:rgba(255,255,255,.8);line-height:1.7;max-width:520px;margin-left:auto;margin-right:auto}
-.hero-actions{margin-top:26px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.btn{border:none;border-radius:14px;font-family:var(--font);font-weight:700;font-size:14.5px;cursor:pointer;padding:13px 22px;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
-.btn-flame{background:var(--flame);color:#fff;box-shadow:0 10px 26px rgba(216,72,27,.4)}
-.btn-ghost{background:rgba(255,255,255,.1);color:#fff;border:1.5px solid rgba(255,255,255,.35)}
-.hero-stats{margin-top:38px;display:flex;gap:22px;justify-content:center;flex-wrap:wrap}
-.hstat{text-align:center}
-.hstat b{display:block;font-family:var(--font-head);font-size:22px;color:#F3C08A}
-.hstat span{font-size:11.5px;color:rgba(255,255,255,.65)}
+/* banner (ad creative, replaces the old text hero) */
+.banner{display:block;width:100%;height:auto}
 
 /* sections */
 section{padding:52px 0}
@@ -67,13 +54,6 @@ section{padding:52px 0}
 .eyebrow{font-size:12.5px;font-weight:700;color:var(--flame);letter-spacing:.4px;margin-bottom:8px}
 .sect-head h2{font-family:var(--font-head);font-size:clamp(22px,4vw,30px)}
 .sect-head p{margin-top:10px;color:var(--text2);font-size:14.5px;line-height:1.7}
-
-/* about */
-.about-features{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;max-width:640px;margin:0 auto}
-.about-f{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 8px;text-align:center;font-size:26px}
-.about-f span{display:block;margin-top:8px;font-size:11.5px;font-weight:700;color:var(--text2)}
-.about-quote{text-align:center;margin-top:22px;font-family:var(--font-head);font-size:16px;color:var(--flame-dark);font-weight:700}
-@media(max-width:480px){.about-features{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 /* gallery */
 .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
@@ -143,7 +123,6 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
   <div class="nav-in">
     <div class="brand"><img src="images/logo.png" alt="BBQ">BBQ</div>
     <div class="nav-links" style="display:none" id="navLinksWide">
-      <a href="#about">אודות</a>
       <a href="#gallery">גלריה</a>
       <a href="#menus">תפריטים</a>
       <a href="#contact">יצירת קשר</a>
@@ -152,39 +131,7 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
   </div>
 </nav>
 
-<div class="hero">
-  <div class="hero-in">
-    <div class="hero-eyebrow">גיבושים · שמחות · אירועים</div>
-    <h1>האש שלכם, האוכל שלנו</h1>
-    <p>מגישים חוויית מנגל מלאה לאירועים פרטיים, ימי הולדת, אירועי חברה וכל הזדמנות שמצדיקה קצת עשן וריח טוב באוויר.</p>
-    <div class="hero-actions">
-      <a href="#book" class="btn btn-flame">📅 הזמינו תאריך</a>
-      <a href="#menus" class="btn btn-ghost">🍖 לתפריטים</a>
-    </div>
-    <div class="hero-stats">
-      <div class="hstat"><b>3</b><span>רמות אירוע</span></div>
-      <div class="hstat"><b>100%</b><span>טרי על האש</span></div>
-      <div class="hstat"><b>✓</b><span>כשרות מהודרת</span></div>
-    </div>
-  </div>
-</div>
-
-<section id="about" style="background:var(--surface2)">
-  <div class="wrap">
-    <div class="sect-head">
-      <div class="eyebrow">מי זה דודי</div>
-      <h2>חוויית מנגל יוקרתית שמגיעה עד אליכם</h2>
-      <p>ציוד מקצועי, בשרים איכותיים, עריכה מוקפדת עם כלים יפים, שתייה קרה ושפע טעמים משובחים — אתם רק מביאים שולחנות וכיסאות, ודודי דואג לכל השאר.</p>
-    </div>
-    <div class="about-features">
-      <div class="about-f">🎪<span>ציוד מקצועי</span></div>
-      <div class="about-f">🥩<span>בשרים איכותיים</span></div>
-      <div class="about-f">🍽️<span>עריכה מוקפדת</span></div>
-      <div class="about-f">🥤<span>שתייה קרה</span></div>
-    </div>
-    <div class="about-quote">שירות אישי, הזמנה בסטנדרט גבוה וחוויה בלתי נשכחת! 🔥</div>
-  </div>
-</section>
+<img class="banner" src="images/poster-hero.jpg" alt="חוויית מנגל עם דודי - מנגל יוקרתי שמגיע אליכם: ציוד מקצועי, בשרים איכותיים, עריכה מוקפדת, שתייה קרה. שירות אישי ברמה גבוהה וחוויה בלתי נשכחת. גיבושים, שמחות ואירועים. כשרות מהודרת.">
 
 <section id="gallery">
   <div class="wrap">

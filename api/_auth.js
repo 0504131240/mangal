@@ -7,7 +7,7 @@ const ADMIN_DOC_URL =
 export async function isAdmin(passHash) {
   if (typeof passHash !== 'string' || !/^[0-9a-f]{64}$/.test(passHash)) return false;
   const res = await fetch(ADMIN_DOC_URL);
-  if (!res.ok) return false;
+  if (!res.ok) throw new Error(`admin lookup failed: firestore ${res.status}`);
   const stored = (await res.json())?.fields?.passHash?.stringValue;
   if (typeof stored !== 'string' || stored.length !== passHash.length) return false;
   return timingSafeEqual(Buffer.from(stored), Buffer.from(passHash));

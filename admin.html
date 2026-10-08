@@ -154,7 +154,7 @@ button{font-family:var(--font)}
 .set-btn.on{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
 .set-upload{display:block;text-align:center;padding:13px;border-radius:var(--r2);border:1.5px dashed var(--flame);background:var(--flame-bg);color:var(--flame-dark);font-weight:700;font-size:13.5px;cursor:pointer;margin-top:8px}
 .set-upload.disabled{opacity:.45;pointer-events:none}
-.upload-status{font-size:12px;color:var(--text2);text-align:center;margin-top:8px;font-weight:600}
+.upload-status{font-size:12px;color:var(--text2);text-align:center;margin-top:8px;font-weight:600;white-space:pre-line;overflow-wrap:anywhere}
 .media-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:12px}
 .media-grid .empty{grid-column:1/-1;padding:24px 10px}
 .media-tile{position:relative;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:var(--surface2)}
@@ -937,15 +937,18 @@ function openSettings(){
   checkStorage();
 }
 async function checkStorage(){
+  let reason='';
   try{
-    const r=await fetch('/api/upload');
-    storageReady = r.ok && (await r.json()).configured===true;
-  }catch(e){ storageReady=false; }
+    const r=await fetch('/api/upload',{cache:'no-store'});
+    if(!r.ok) reason=`שרת ההעלאה לא זמין (קוד ${r.status}) - כנראה הפריסה האחרונה ב-Vercel לא הצליחה`;
+    else if((await r.json()).configured!==true) reason='האחסון לא מחובר לפרויקט, או שלא נעשה Redeploy אחרי החיבור';
+  }catch(e){ reason='אין חיבור לשרת ההעלאה: '+(e.message||e); }
+  storageReady=!reason;
   const note=document.getElementById('storageNote');
   if(!note) return;
   document.getElementById('uploadLabel').classList.toggle('disabled', !storageReady);
   note.innerHTML = storageReady ? '' :
-    `<div class="minfo" style="margin:0 0 4px">כדי להעלות תמונות וסרטונים חדשים צריך לחבר אחסון קבצים לאתר (פעם אחת, ב-Vercel). הסרת תמונות עובדת כבר עכשיו.</div>`;
+    `<div class="minfo" style="margin:0 0 4px">אי אפשר להעלות כרגע: ${esc(reason)}. הסרת תמונות עובדת גם בלי זה.</div>`;
 }
 async function loadGalleryItems(){
   try{
@@ -1019,17 +1022,20 @@ async function handleMediaFiles(fileList){
   if(!storageReady){ showToast('האחסון עוד לא מחובר'); return; }
   if(galleryItems===null){ showToast('הגלריה לא נטענה, נסו לפתוח שוב'); return; }
   let added=0;
+  const errors=[];
   for(let i=0;i<files.length;i++){
     const f=files[i];
     const prefix=files.length>1?`(${i+1}/${files.length}) `:'';
-    const isVideo=f.type.startsWith('video/');
-    if(isVideo && f.size>MAX_VIDEO_BYTES){ showToast(`${f.name}: הסרטון גדול מדי (עד 300MB)`); continue; }
+    // some phones hand over files with an empty type, so fall back to the extension
+    const fType=f.type||guessMediaType(f.name);
+    const isVideo=fType.startsWith('video/');
+    if(isVideo && f.size>MAX_VIDEO_BYTES){ errors.push(`${f.name}: הסרטון גדול מדי (עד 300MB)`); continue; }
     try{
       setUploadStatus(prefix+'מכין קובץ...');
-      const body=f.type.startsWith('image/') ? await shrinkImage(f) : f;
-      const type=body.type||f.type;
+      const body=fType.startsWith('image/') ? await shrinkImage(f) : f;
+      const type=body.type||fType;
       const ext=MEDIA_EXT[type];
-      if(!ext){ showToast(`${f.name}: סוג קובץ לא נתמך`); continue; }
+      if(!ext){ errors.push(`${f.name}: סוג קובץ לא נתמך (${type||'לא ידוע'})`); continue; }
       _blobClient=_blobClient||await import('./vendor/vercel-blob-client-2.8.0.js');
       const res=await _blobClient.upload(`gallery/${Date.now()}.${ext}`, body, {
         access:'public',
@@ -1043,11 +1049,27 @@ async function handleMediaFiles(fileList){
       added++;
     }catch(e){
       console.error(e);
-      showToast(`${f.name}: ההעלאה נכשלה`);
+      let msg=e&&e.message||String(e);
+      if(/client token/i.test(msg)) msg+=' | '+await uploadServerReason();
+      errors.push(`${f.name}: ההעלאה נכשלה - ${msg}`);
     }
   }
-  setUploadStatus('');
+  setUploadStatus(errors.length ? '⚠️ '+errors.join('\n⚠️ ') : '');
   if(added) showToast(added===1?'נוסף לאתר ✓':`${added} קבצים נוספו לאתר ✓`);
+}
+// the blob client only says "Failed to retrieve the client token"; ask the server directly for its reason
+async function uploadServerReason(){
+  try{
+    const r=await fetch('/api/upload',{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({type:'blob.generate-client-token',payload:{pathname:'gallery/probe.jpg',multipart:false,clientPayload:JSON.stringify({passHash:adminPassHash})}})});
+    const j=await r.json().catch(()=>({}));
+    return `שרת: ${r.status} ${j.error||''}`.trim();
+  }catch(e){ return 'שרת לא זמין'; }
+}
+function guessMediaType(name){
+  const ext=(String(name).split('.').pop()||'').toLowerCase();
+  return {jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',webp:'image/webp',heic:'image/heic',heif:'image/heif',
+    mp4:'video/mp4',m4v:'video/mp4',mov:'video/quicktime',webm:'video/webm'}[ext]||'';
 }
 
 /* ===== install as app (PWA) ===== */

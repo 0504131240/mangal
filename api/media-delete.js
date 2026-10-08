@@ -6,7 +6,11 @@ export default async function handler(req, res) {
   if (!process.env.BLOB_READ_WRITE_TOKEN) return res.status(503).json({ error: 'storage-not-connected' });
 
   const { url, passHash } = req.body || {};
-  if (!(await isAdmin(passHash))) return res.status(401).json({ error: 'unauthorized' });
+  try {
+    if (!(await isAdmin(passHash))) return res.status(401).json({ error: 'unauthorized' });
+  } catch (err) {
+    return res.status(502).json({ error: err.message });
+  }
 
   let host = '';
   try { host = new URL(url).hostname; } catch {}

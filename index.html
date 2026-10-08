@@ -68,6 +68,13 @@ section{padding:52px 0}
 .sect-head h2{font-family:var(--font-head);font-size:clamp(22px,4vw,30px)}
 .sect-head p{margin-top:10px;color:var(--text2);font-size:14.5px;line-height:1.7}
 
+/* about */
+.about-features{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;max-width:640px;margin:0 auto}
+.about-f{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 8px;text-align:center;font-size:26px}
+.about-f span{display:block;margin-top:8px;font-size:11.5px;font-weight:700;color:var(--text2)}
+.about-quote{text-align:center;margin-top:22px;font-family:var(--font-head);font-size:16px;color:var(--flame-dark);font-weight:700}
+@media(max-width:480px){.about-features{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
 /* gallery */
 .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
 .gtile{aspect-ratio:1/1;border-radius:16px;overflow:hidden;position:relative;cursor:pointer;border:1px solid var(--border)}
@@ -136,6 +143,7 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
   <div class="nav-in">
     <div class="brand"><img src="images/logo.png" alt="BBQ">BBQ</div>
     <div class="nav-links" style="display:none" id="navLinksWide">
+      <a href="#about">אודות</a>
       <a href="#gallery">גלריה</a>
       <a href="#menus">תפריטים</a>
       <a href="#contact">יצירת קשר</a>
@@ -146,7 +154,7 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
 
 <div class="hero">
   <div class="hero-in">
-    <div class="hero-eyebrow">מנגלים מקצועיים לכל אירוע</div>
+    <div class="hero-eyebrow">גיבושים · שמחות · אירועים</div>
     <h1>האש שלכם, האוכל שלנו</h1>
     <p>מגישים חוויית מנגל מלאה לאירועים פרטיים, ימי הולדת, אירועי חברה וכל הזדמנות שמצדיקה קצת עשן וריח טוב באוויר.</p>
     <div class="hero-actions">
@@ -160,6 +168,23 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
     </div>
   </div>
 </div>
+
+<section id="about" style="background:var(--surface2)">
+  <div class="wrap">
+    <div class="sect-head">
+      <div class="eyebrow">מי זה דודי</div>
+      <h2>חוויית מנגל יוקרתית שמגיעה עד אליכם</h2>
+      <p>ציוד מקצועי, בשרים איכותיים, עריכה מוקפדת עם כלים יפים, שתייה קרה ושפע טעמים משובחים — אתם רק מביאים שולחנות וכיסאות, ודודי דואג לכל השאר.</p>
+    </div>
+    <div class="about-features">
+      <div class="about-f">🎪<span>ציוד מקצועי</span></div>
+      <div class="about-f">🥩<span>בשרים איכותיים</span></div>
+      <div class="about-f">🍽️<span>עריכה מוקפדת</span></div>
+      <div class="about-f">🥤<span>שתייה קרה</span></div>
+    </div>
+    <div class="about-quote">שירות אישי, הזמנה בסטנדרט גבוה וחוויה בלתי נשכחת! 🔥</div>
+  </div>
+</section>
 
 <section id="gallery">
   <div class="wrap">
@@ -245,18 +270,19 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
 <section id="contact" style="background:var(--surface2)">
   <div class="wrap">
     <div class="sect-head">
-      <div class="eyebrow">יצירת קשר</div>
+      <div class="eyebrow">לשירותכם דודי</div>
       <h2>יש שאלה לפני שמזמינים?</h2>
     </div>
     <div class="contact-grid">
       <a class="contact-card" href="tel:0527626562"><div class="ico">📞</div><b>התקשרו אלינו</b><span>052-762-6562</span></a>
-      <a class="contact-card" href="https://wa.me/972527626562" target="_blank"><div class="ico">💬</div><b>וואטסאפ</b><span>מענה מהיר</span></a>
+      <a class="contact-card" href="https://wa.me/972527626562?text=%D7%94%D7%99%D7%99%20%D7%93%D7%95%D7%93%D7%99!%20%D7%A8%D7%A6%D7%99%D7%AA%D7%99%20%D7%9C%D7%A9%D7%90%D7%95%D7%9C%20%D7%A2%D7%9C%20%D7%94%D7%96%D7%9E%D7%A0%D7%AA%20%D7%9E%D7%A0%D7%92%D7%9C%20%F0%9F%94%A5" target="_blank"><div class="ico">💬</div><b>וואטסאפ</b><span>דודי ישמח לעזור</span></a>
     </div>
   </div>
 </section>
 
 <footer>
   <div>🔥 BBQ · חגיגת ברבקיו משחררת</div>
+  <div style="margin-top:4px;opacity:.75">לשירותכם דודי · 052-762-6562</div>
   <a class="admin-link" href="admin.html">כניסת מנהל</a>
 </footer>
 

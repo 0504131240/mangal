@@ -201,17 +201,17 @@ button{font-family:var(--font)}
 
   <div class="wrap">
     <div class="tabs">
-      <div class="tab on" data-tab="pending" onclick="setTab('pending')">בקשות חדשות<span class="badge" id="badgePending" style="display:none">0</span></div>
-      <div class="tab" data-tab="board" onclick="setTab('board')">לוח אירועים</div>
+      <div class="tab on" data-tab="board" onclick="setTab('board')">לוח אירועים</div>
+      <div class="tab" data-tab="pending" onclick="setTab('pending')">בקשות חדשות<span class="badge" id="badgePending" style="display:none">0</span></div>
       <div class="tab" data-tab="debts" onclick="setTab('debts')">חובות<span class="badge" id="badgeDebts" style="display:none">0</span></div>
     </div>
 
-    <div class="panel on" id="panel-pending">
+    <div class="panel" id="panel-pending">
       <div id="pendingList"></div>
       <div id="declinedWrap" style="margin-top:22px"></div>
     </div>
 
-    <div class="panel" id="panel-board">
+    <div class="panel on" id="panel-board">
       <button class="btn-add-event" onclick="openNewEventModal()">+ הוספת אירוע חדש</button>
       <div class="toggle-row">
         <button class="on" id="viewList" onclick="setBoardView('list')">📋 רשימה</button>
@@ -469,7 +469,7 @@ function updateNotifBtn(){
 }
 
 /* ===== tabs ===== */
-let currentTab='pending';
+let currentTab='board';
 function setTab(t){
   currentTab=t;
   document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('on',el.dataset.tab===t));

@@ -159,7 +159,14 @@ button{font-family:var(--font)}
 .media-grid .empty{grid-column:1/-1;padding:24px 10px}
 .media-tile{position:relative;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:var(--surface2)}
 .media-tile img,.media-tile video{width:100%;height:100%;object-fit:cover;display:block}
-.media-badge{position:absolute;bottom:5px;right:5px;font-size:13px;background:rgba(0,0,0,.5);border-radius:6px;padding:1px 5px}
+.media-tile{cursor:pointer}
+.media-badge{position:absolute;top:5px;right:5px;font-size:13px;background:rgba(0,0,0,.5);border-radius:6px;padding:1px 5px}
+.media-cap{position:absolute;inset-inline:0;bottom:0;padding:14px 6px 5px;background:linear-gradient(0deg,rgba(0,0,0,.7),transparent);color:#fff;font-size:10.5px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.media-cap.none{color:rgba(255,255,255,.75);font-weight:500}
+.media-hint{font-size:11.5px;color:var(--text3);text-align:center;margin-top:10px}
+.cap-edit-bg{z-index:110}
+.cap-edit-preview{width:100%;max-height:42vh;object-fit:contain;border-radius:12px;background:var(--surface2);display:block}
+.cap-count{font-size:11px;color:var(--text3);text-align:left;margin-top:4px;direction:ltr}
 .media-del{position:absolute;top:5px;left:5px;width:26px;height:26px;border-radius:50%;border:none;background:rgba(32,20,14,.75);color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 
 .cal-dot{position:absolute;bottom:3px;font-size:9px;background:var(--flame);color:#fff;border-radius:8px;min-width:14px;height:14px;display:flex;align-items:center;justify-content:center;padding:0 3px}
@@ -928,6 +935,7 @@ function openSettings(){
             <input type="file" accept="image/*,video/*" multiple hidden onchange="handleMediaFiles(this.files);this.value=''">
           </label>
           <div class="upload-status" id="uploadStatus" hidden></div>
+          <div class="media-hint">לחיצה על תמונה לעריכת הכיתוב שלה</div>
           <div class="media-grid" id="mediaGrid"><div class="empty">טוען...</div></div>
         </div>
       </div>
@@ -982,12 +990,63 @@ function renderMediaGrid(){
   if(galleryItems===null){ el.innerHTML=`<div class="empty">לא הצליח לטעון את הגלריה</div>`; return; }
   if(!galleryItems.length){ el.innerHTML=`<div class="empty">אין כרגע תמונות באתר</div>`; return; }
   el.innerHTML=galleryItems.map((g,i)=>`
-    <div class="media-tile">
+    <div class="media-tile" onclick="openCaptionEditor(${i})">
       ${g.kind==='video'
         ? `<video src="${esc(g.url)}#t=0.1" muted playsinline preload="metadata"></video><span class="media-badge">🎬</span>`
         : `<img src="${esc(g.url)}" alt="" loading="lazy">`}
-      <button class="media-del" onclick="removeMediaItem(${i})" aria-label="הסרה">✕</button>
+      <div class="media-cap ${g.cap?'':'none'}">${g.cap?esc(g.cap):'✏️ הוספת כיתוב'}</div>
+      <button class="media-del" onclick="event.stopPropagation();removeMediaItem(${i})" aria-label="הסרה">✕</button>
     </div>`).join('');
+}
+const CAPTION_MAX=80;
+function openCaptionEditor(i){
+  const item=galleryItems && galleryItems[i];
+  if(!item) return;
+  let root=document.getElementById('capEditRoot');
+  if(!root){ root=document.createElement('div'); root.id='capEditRoot'; document.body.appendChild(root); }
+  root.innerHTML=`
+    <div class="modal-bg cap-edit-bg" onclick="if(event.target===this)closeCaptionEditor()">
+      <div class="modal">
+        <div class="modal-top"><h3>✏️ כיתוב</h3><button class="modal-close" onclick="closeCaptionEditor()">✕</button></div>
+        ${item.kind==='video'
+          ? `<video class="cap-edit-preview" src="${esc(item.url)}#t=0.1" muted playsinline preload="metadata"></video>`
+          : `<img class="cap-edit-preview" src="${esc(item.url)}" alt="">`}
+        <div class="mfld">
+          <label for="capInput">הכיתוב שיופיע על ${item.kind==='video'?'הסרטון':'התמונה'} באתר</label>
+          <input id="capInput" type="text" maxlength="${CAPTION_MAX}" value="${esc(item.cap||'')}" placeholder="למשל: אנטריקוט על האש באירוע בר מצווה"
+            oninput="document.getElementById('capCount').textContent=this.value.length+'/${CAPTION_MAX}'"
+            onkeydown="if(event.key==='Enter')saveCaption()">
+          <div class="cap-count" id="capCount">${(item.cap||'').length}/${CAPTION_MAX}</div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-save" onclick="saveCaption()">שמירה</button>
+          ${item.cap?`<button class="btn-danger" onclick="document.getElementById('capInput').value='';saveCaption()">מחיקת הכיתוב</button>`:''}
+        </div>
+      </div>
+    </div>`;
+  root.dataset.url=item.url;
+  const inp=document.getElementById('capInput');
+  inp.focus();
+  inp.setSelectionRange(inp.value.length,inp.value.length);
+}
+function closeCaptionEditor(){
+  const root=document.getElementById('capEditRoot');
+  if(root) root.innerHTML='';
+}
+async function saveCaption(){
+  const root=document.getElementById('capEditRoot');
+  const url=root && root.dataset.url;
+  const inp=document.getElementById('capInput');
+  if(!url || !inp || !galleryItems) return;
+  const cap=inp.value.trim().slice(0,CAPTION_MAX);
+  if(!galleryItems.some(g=>g.url===url)){ closeCaptionEditor(); return; }
+  closeCaptionEditor();
+  try{
+    await saveGalleryItems(galleryItems.map(g=>g.url===url?{...g,cap}:g));
+    showToast(cap?'הכיתוב נשמר ✓':'הכיתוב נמחק ✓');
+  }catch(e){
+    console.error(e); showToast('השמירה נכשלה'); loadGalleryItems();
+  }
 }
 async function removeMediaItem(i){
   const item=galleryItems && galleryItems[i];

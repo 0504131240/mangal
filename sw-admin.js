@@ -1,5 +1,5 @@
-const CACHE='bbq-admin-v1';
-const SHELL=['admin.html','images/logo.png','images/icon-192.png','images/icon-512.png','manifest-admin.json'];
+const CACHE='bbq-admin-v2';
+const SHELL=['admin.html','gallery-default.js','images/logo-v2.png','images/icon-192.png','images/icon-512.png','manifest-admin.json'];
 
 self.addEventListener('install',(e)=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)));
@@ -16,6 +16,7 @@ self.addEventListener('activate',(e)=>{
 self.addEventListener('fetch',(e)=>{
   const url=new URL(e.request.url);
   if(url.origin!==location.origin || e.request.method!=='GET') return; // let Firebase/CDN requests pass through untouched
+  if(url.pathname.startsWith('/api/')) return;
 
   if(e.request.mode==='navigate'){
     e.respondWith(

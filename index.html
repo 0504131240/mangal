@@ -1,6 +1,7 @@
 <!--
   BBQ - אתר עסק המנגלים, חלק ציבורי.
-   - תמונות גלריה: קבצים בתיקייה images/, מערך GALLERY למטה.
+   - תמונות וסרטונים בגלריה: מנוהלים מ"הגדרות" בניהול (נשמר ב-mangalSettings/gallery);
+     עד השינוי הראשון מוצגת רשימת ברירת המחדל שב-gallery-default.js.
    - תפריטים ומחירים: מערך MENUS למטה (מקור: תפריט הלקוח).
    - סיסמת הניהול נקבעת בפעם הראשונה שנכנסים ל-admin.html.
 -->
@@ -56,12 +57,13 @@ section{padding:52px 0}
 /* gallery */
 .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
 .gtile{aspect-ratio:1/1;border-radius:16px;overflow:hidden;position:relative;cursor:pointer;border:1px solid var(--border)}
-.gtile img{width:100%;height:100%;object-fit:cover}
-.gtile-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:34px}
+.gtile img,.gtile video{width:100%;height:100%;object-fit:cover;display:block}
+.gtile video{pointer-events:none;background:#000}
+.gtile-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;padding-left:3px;pointer-events:none}
 .gtile-cap{position:absolute;inset-inline:0;bottom:0;padding:8px 10px 7px;background:linear-gradient(0deg,rgba(0,0,0,.55),transparent);color:#fff;font-size:11.5px;font-weight:600}
 .lightbox{position:fixed;inset:0;background:rgba(15,9,6,.92);z-index:100;display:flex;align-items:center;justify-content:center;padding:24px}
-.lightbox img,.lightbox .lb-ph{max-width:min(92vw,560px);max-height:80vh;border-radius:14px}
-.lb-ph{width:min(92vw,420px);height:60vh;display:flex;align-items:center;justify-content:center;font-size:70px;background:var(--surface2);color:var(--text3)}
+.lightbox img,.lightbox video{max-width:min(92vw,560px);max-height:80vh;border-radius:14px}
+.lightbox video{background:#000}
 .lb-close{position:absolute;top:18px;left:18px;background:rgba(255,255,255,.15);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:18px;cursor:pointer;z-index:2}
 .lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:22px;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center}
 .lb-prev{right:14px}
@@ -313,25 +315,39 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
   </div>
 </div>
 
+<script src="gallery-default.js"></script>
 <script>
 const BUSINESS = { name:'BBQ', phone:'0523359599', whatsapp:'972527626562' };
 
-const GALLERY = [
-  {img:'images/gallery-01.jpg',cap:'שולחן אירוע מלא מהמנגל שלנו'},
-  {img:'images/gallery-02.jpg',cap:'מגשי עריאס בפיתה טריים'},
-  {img:'images/gallery-03.jpg',cap:'שולחן פתיחה: חומוס, חציל וסלטים'},
-  {img:'images/gallery-04.jpg',cap:'אנטריקוט פרוס וצלעות על קרש'},
-  {img:'images/gallery-05.jpg',cap:'צלעות טלה ישר מהגריל'},
-  {img:'images/gallery-06.jpg',cap:'פרגיות על האש'},
-  {img:'images/gallery-07.jpg',cap:'פלטת עוף על האש'},
-  {img:'images/gallery-08.jpg',cap:'בשרים פרוסים טריים'},
-  {img:'images/gallery-09.jpg',cap:'גחלים לוהטות, מוכנים לצלייה'},
-  {img:'images/gallery-10.jpg',cap:'שולחן ערוך באווירה חגיגית'},
-  {img:'images/gallery-11.jpg',cap:'שולחן מעוצב עם פרחים'},
-  {img:'images/gallery-12.jpg',cap:'סידור שולחן לאירוע גג'},
-  {img:'images/gallery-13.jpg',cap:'אולם אירועים גדול, שולחנות ערוכים'},
-  {img:'images/gallery-14.jpg',cap:'סידור אלגנטי לאירוע'},
-];
+const GALLERY_DOC_URL='https://firestore.googleapis.com/v1/projects/mangal-b11fe/databases/(default)/documents/mangalSettings/gallery?key=AIzaSyA5Qp3W1dcpd4ncnTyB68nMueXtHbAoLAk';
+let GALLERY = (function(){
+  try{
+    const cached=JSON.parse(localStorage.getItem('mangalGalleryCache')||'null');
+    if(Array.isArray(cached)) return cached.filter(g=>isSafeMediaUrl(g.url));
+  }catch(e){}
+  return DEFAULT_GALLERY;
+})();
+async function loadGallery(){
+  try{
+    const res=await fetch(GALLERY_DOC_URL);
+    let list;
+    if(res.status===404) list=DEFAULT_GALLERY;
+    else if(res.ok){
+      const data=await res.json();
+      const values=data?.fields?.items?.arrayValue?.values||[];
+      list=values.map(v=>{
+        const f=v.mapValue?.fields||{};
+        return {kind:f.kind?.stringValue==='video'?'video':'image', url:f.url?.stringValue, cap:f.cap?.stringValue||''};
+      }).filter(g=>isSafeMediaUrl(g.url));
+    } else return;
+    try{ localStorage.setItem('mangalGalleryCache', JSON.stringify(list)); }catch(e){}
+    if(JSON.stringify(list)===JSON.stringify(GALLERY)) return;
+    GALLERY=list;
+    renderGallery();
+    if(lightboxIndex>=GALLERY.length) closeLightbox();
+  }catch(e){}
+}
+function escHtml(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 const LEVELS = [
   { id:'CLASIC', label:'CLASIC BBQ', sub:'₪170 למנה' },
@@ -376,8 +392,10 @@ function renderGallery(){
   const grid=document.getElementById('galleryGrid');
   grid.innerHTML=GALLERY.map((g,i)=>`
     <div class="gtile" onclick="openLightbox(${i})">
-      ${g.img?`<img src="${g.img}" alt="${g.cap||''}">`:`<div class="gtile-ph" style="background:linear-gradient(135deg,#FCE9DF,#F3C08A33)">${g.icon||'📷'}</div>`}
-      ${g.cap?`<div class="gtile-cap">${g.cap}</div>`:''}
+      ${g.kind==='video'
+        ? `<video src="${escHtml(g.url)}#t=0.1" muted playsinline preload="metadata"></video><div class="gtile-play">▶</div>`
+        : `<img src="${escHtml(g.url)}" alt="${escHtml(g.cap)}" loading="lazy">`}
+      ${g.cap?`<div class="gtile-cap">${escHtml(g.cap)}</div>`:''}
     </div>`).join('');
 }
 let lightboxIndex=-1;
@@ -391,7 +409,9 @@ function renderLightbox(){
   root.innerHTML=`<div class="lightbox" id="lightboxEl" onclick="if(event.target===this)closeLightbox()">
     <button class="lb-close" onclick="closeLightbox()">✕</button>
     <button class="lb-nav lb-prev" onclick="event.stopPropagation();lightboxShift(1)">›</button>
-    ${g.img?`<img src="${g.img}" alt="${g.cap||''}">`:`<div class="lb-ph">${g.icon||'📷'}</div>`}
+    ${g.kind==='video'
+      ? `<video src="${escHtml(g.url)}" controls autoplay playsinline></video>`
+      : `<img src="${escHtml(g.url)}" alt="${escHtml(g.cap)}">`}
     <button class="lb-nav lb-next" onclick="event.stopPropagation();lightboxShift(-1)">‹</button>
     <div class="lb-counter">${lightboxIndex+1} / ${GALLERY.length}</div>
   </div>`;
@@ -557,7 +577,7 @@ function applyMediaNav(){
 window.addEventListener('resize',applyMediaNav);
 applyMediaNav();
 
-renderGallery();renderLevels();renderMenus();
+renderGallery();renderLevels();renderMenus();loadGallery();
 galleryHomeParent=document.getElementById('galleryGrid').parentNode;
 menuHomeParent=document.getElementById('menuBlock').parentNode;
 try{

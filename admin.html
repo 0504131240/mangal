@@ -143,6 +143,25 @@ button{font-family:var(--font)}
 .cal-cell.cal-blank{border:none;background:transparent}
 .cal-cell.has-events{cursor:pointer;border-color:var(--flame);background:var(--flame-bg);font-weight:700}
 .cal-cell.today{box-shadow:inset 0 0 0 2px var(--char)}
+/* settings */
+.set-sec{margin-top:16px}
+.set-title{font-size:11.5px;font-weight:800;color:var(--text3);letter-spacing:.3px;margin-bottom:8px}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r2);margin-bottom:8px}
+.set-txt{min-width:0}
+.set-txt b{display:block;font-size:13.5px}
+.set-txt small{display:block;font-size:11.5px;color:var(--text3);margin-top:2px}
+.set-btn{flex-shrink:0;border:1.5px solid var(--flame);background:var(--surface);color:var(--flame-dark);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer}
+.set-btn.on{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.set-upload{display:block;text-align:center;padding:13px;border-radius:var(--r2);border:1.5px dashed var(--flame);background:var(--flame-bg);color:var(--flame-dark);font-weight:700;font-size:13.5px;cursor:pointer;margin-top:8px}
+.set-upload.disabled{opacity:.45;pointer-events:none}
+.upload-status{font-size:12px;color:var(--text2);text-align:center;margin-top:8px;font-weight:600}
+.media-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:12px}
+.media-grid .empty{grid-column:1/-1;padding:24px 10px}
+.media-tile{position:relative;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:var(--surface2)}
+.media-tile img,.media-tile video{width:100%;height:100%;object-fit:cover;display:block}
+.media-badge{position:absolute;bottom:5px;right:5px;font-size:13px;background:rgba(0,0,0,.5);border-radius:6px;padding:1px 5px}
+.media-del{position:absolute;top:5px;left:5px;width:26px;height:26px;border-radius:50%;border:none;background:rgba(32,20,14,.75);color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
 .cal-dot{position:absolute;bottom:3px;font-size:9px;background:var(--flame);color:#fff;border-radius:8px;min-width:14px;height:14px;display:flex;align-items:center;justify-content:center;padding:0 3px}
 </style>
 </head>
@@ -163,11 +182,7 @@ button{font-family:var(--font)}
   <div class="hdr">
     <div class="hdr-in">
       <div class="hdr-title"><img src="images/logo-v2.png" alt="BBQ" style="height:28px;width:28px;border-radius:50%;object-fit:cover">לוח ניהול</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-        <button class="hdr-btn" id="bioBtn" onclick="toggleBiometricSetting()">👆 הפעל טביעת אצבע</button>
-        <button class="hdr-btn" id="notifBtn" onclick="toggleNotifications()">🔔 התראות</button>
-        <button class="hdr-btn" onclick="lockOut()">יציאה</button>
-      </div>
+      <button class="hdr-btn" onclick="openSettings()">⚙️ הגדרות</button>
     </div>
   </div>
 
@@ -209,6 +224,7 @@ button{font-family:var(--font)}
 <div id="modalRoot"></div>
 <div id="toastRoot"></div>
 
+<script src="gallery-default.js"></script>
 <script>
 /* ===== Firebase ===== */
 const firebaseConfig = {
@@ -335,6 +351,7 @@ async function doBiometricUnlock(){
 async function toggleBiometricSetting(){
   const has=!!localStorage.getItem('mangalBiometricCredId');
   if(has){
+    if(!confirm('לבטל כניסה עם טביעת אצבע?')) return;
     localStorage.removeItem('mangalBiometricCredId');
     showToast('טביעת אצבע בוטלה');
   } else {
@@ -348,7 +365,8 @@ function updateBioBtn(){
   const btn=document.getElementById('bioBtn');
   if(!btn) return;
   const has=!!localStorage.getItem('mangalBiometricCredId');
-  btn.textContent = has ? '👆 טביעת אצבע פעילה' : '👆 הפעל טביעת אצבע';
+  btn.textContent = has ? 'פעיל ✓' : 'הפעלה';
+  btn.classList.toggle('on', has);
 }
 async function doUnlock(){
   const val=document.getElementById('unlockInp').value||'';
@@ -362,14 +380,9 @@ async function doUnlock(){
     document.getElementById('unlockInp').value='';
   }
 }
-function lockOut(){
-  localStorage.removeItem('mangalAdminUnlocked');
-  location.reload();
-}
 function unlockApp(){
   document.getElementById('lockScreen').style.display='none';
   document.getElementById('app').style.display='block';
-  updateBioBtn();
   startListening();
 }
 
@@ -437,7 +450,9 @@ async function toggleNotifications(){
 }
 function updateNotifBtn(){
   const btn=document.getElementById('notifBtn');
-  if(btn) btn.textContent = notifPermission ? '🔔 התראות פעילות' : '🔕 הפעל התראות';
+  if(!btn) return;
+  btn.textContent = notifPermission ? 'פעיל ✓' : 'הפעלה';
+  btn.classList.toggle('on', notifPermission);
 }
 
 /* ===== tabs ===== */
@@ -883,6 +898,156 @@ async function saveNewEvent(){
 
 function esc(s){
   return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ===== settings: login, notifications, site gallery ===== */
+let galleryItems=null;
+let storageReady=false;
+function openSettings(){
+  document.getElementById('modalRoot').innerHTML=`
+    <div class="modal-bg" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div class="modal-top"><h3>⚙️ הגדרות</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+        <div class="set-sec">
+          <div class="set-title">כניסה והתראות</div>
+          <div class="set-row">
+            <div class="set-txt"><b>👆 טביעת אצבע</b><small>כניסה לניהול בלי להקליד סיסמה</small></div>
+            <button class="set-btn" id="bioBtn" onclick="toggleBiometricSetting()"></button>
+          </div>
+          <div class="set-row">
+            <div class="set-txt"><b>🔔 התראות</b><small>התראה כשמגיעה בקשה חדשה, כשהניהול פתוח</small></div>
+            <button class="set-btn" id="notifBtn" onclick="toggleNotifications()"></button>
+          </div>
+        </div>
+        <div class="set-sec">
+          <div class="set-title">תמונות וסרטונים באתר</div>
+          <div id="storageNote"></div>
+          <label class="set-upload disabled" id="uploadLabel">
+            ＋ הוספת תמונות / סרטונים
+            <input type="file" accept="image/*,video/*" multiple hidden onchange="handleMediaFiles(this.files);this.value=''">
+          </label>
+          <div class="upload-status" id="uploadStatus" hidden></div>
+          <div class="media-grid" id="mediaGrid"><div class="empty">טוען...</div></div>
+        </div>
+      </div>
+    </div>`;
+  updateBioBtn();
+  updateNotifBtn();
+  loadGalleryItems();
+  checkStorage();
+}
+async function checkStorage(){
+  try{
+    const r=await fetch('/api/upload');
+    storageReady = r.ok && (await r.json()).configured===true;
+  }catch(e){ storageReady=false; }
+  const note=document.getElementById('storageNote');
+  if(!note) return;
+  document.getElementById('uploadLabel').classList.toggle('disabled', !storageReady);
+  note.innerHTML = storageReady ? '' :
+    `<div class="minfo" style="margin:0 0 4px">כדי להעלות תמונות וסרטונים חדשים צריך לחבר אחסון קבצים לאתר (פעם אחת, ב-Vercel). הסרת תמונות עובדת כבר עכשיו.</div>`;
+}
+async function loadGalleryItems(){
+  try{
+    const {db,doc,getDoc}=await fbInit();
+    const snap=await getDoc(doc(db,'mangalSettings','gallery'));
+    galleryItems = snap.exists() && Array.isArray(snap.data().items)
+      ? snap.data().items.filter(g=>isSafeMediaUrl(g.url))
+      : DEFAULT_GALLERY.map(g=>({...g}));
+  }catch(e){ console.error(e); galleryItems=null; }
+  renderMediaGrid();
+}
+async function saveGalleryItems(items){
+  // update memory first so an upload finishing mid-save builds on the latest list
+  galleryItems=items;
+  renderMediaGrid();
+  const {db,doc,setDoc}=await fbInit();
+  await setDoc(doc(db,'mangalSettings','gallery'),{items, updatedAtMs:Date.now()});
+}
+function renderMediaGrid(){
+  const el=document.getElementById('mediaGrid');
+  if(!el) return;
+  if(galleryItems===null){ el.innerHTML=`<div class="empty">לא הצליח לטעון את הגלריה</div>`; return; }
+  if(!galleryItems.length){ el.innerHTML=`<div class="empty">אין כרגע תמונות באתר</div>`; return; }
+  el.innerHTML=galleryItems.map((g,i)=>`
+    <div class="media-tile">
+      ${g.kind==='video'
+        ? `<video src="${esc(g.url)}#t=0.1" muted playsinline preload="metadata"></video><span class="media-badge">🎬</span>`
+        : `<img src="${esc(g.url)}" alt="" loading="lazy">`}
+      <button class="media-del" onclick="removeMediaItem(${i})" aria-label="הסרה">✕</button>
+    </div>`).join('');
+}
+async function removeMediaItem(i){
+  const item=galleryItems && galleryItems[i];
+  if(!item) return;
+  if(!confirm(item.kind==='video'?'להסיר את הסרטון מהאתר?':'להסיר את התמונה מהאתר?')) return;
+  try{
+    await saveGalleryItems(galleryItems.filter(g=>g.url!==item.url));
+    showToast('הוסר מהאתר ✓');
+  }catch(e){
+    console.error(e); showToast('ההסרה נכשלה'); loadGalleryItems(); return;
+  }
+  if(item.blob){
+    fetch('/api/media-delete',{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({url:item.url,passHash:adminPassHash})}).catch(()=>{});
+  }
+}
+function setUploadStatus(text){
+  const el=document.getElementById('uploadStatus');
+  if(!el) return;
+  el.hidden=!text;
+  el.textContent=text;
+}
+async function shrinkImage(file){
+  let bmp;
+  try{ bmp=await createImageBitmap(file,{imageOrientation:'from-image'}); }catch(e){ return file; }
+  const scale=Math.min(1, 1800/Math.max(bmp.width,bmp.height));
+  const c=document.createElement('canvas');
+  c.width=Math.round(bmp.width*scale);
+  c.height=Math.round(bmp.height*scale);
+  c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+  if(bmp.close) bmp.close();
+  const out=await new Promise(r=>c.toBlob(r,'image/jpeg',0.85));
+  return out||file;
+}
+const MEDIA_EXT={'image/jpeg':'jpg','image/png':'png','image/webp':'webp','video/mp4':'mp4','video/quicktime':'mov','video/webm':'webm'};
+const MAX_VIDEO_BYTES=300*1024*1024;
+let _blobClient=null;
+async function handleMediaFiles(fileList){
+  const files=[...fileList];
+  if(!files.length) return;
+  if(!storageReady){ showToast('האחסון עוד לא מחובר'); return; }
+  if(galleryItems===null){ showToast('הגלריה לא נטענה, נסו לפתוח שוב'); return; }
+  let added=0;
+  for(let i=0;i<files.length;i++){
+    const f=files[i];
+    const prefix=files.length>1?`(${i+1}/${files.length}) `:'';
+    const isVideo=f.type.startsWith('video/');
+    if(isVideo && f.size>MAX_VIDEO_BYTES){ showToast(`${f.name}: הסרטון גדול מדי (עד 300MB)`); continue; }
+    try{
+      setUploadStatus(prefix+'מכין קובץ...');
+      const body=f.type.startsWith('image/') ? await shrinkImage(f) : f;
+      const type=body.type||f.type;
+      const ext=MEDIA_EXT[type];
+      if(!ext){ showToast(`${f.name}: סוג קובץ לא נתמך`); continue; }
+      _blobClient=_blobClient||await import('./vendor/vercel-blob-client-2.8.0.js');
+      const res=await _blobClient.upload(`gallery/${Date.now()}.${ext}`, body, {
+        access:'public',
+        handleUploadUrl:'/api/upload',
+        clientPayload:JSON.stringify({passHash:adminPassHash}),
+        contentType:type,
+        multipart:body.size>20*1024*1024,
+        onUploadProgress:({percentage})=>setUploadStatus(`${prefix}מעלה ${isVideo?'סרטון':'תמונה'}... ${Math.round(percentage)}%`)
+      });
+      await saveGalleryItems([{kind:isVideo?'video':'image', url:res.url, cap:'', blob:true}, ...galleryItems]);
+      added++;
+    }catch(e){
+      console.error(e);
+      showToast(`${f.name}: ההעלאה נכשלה`);
+    }
+  }
+  setUploadStatus('');
+  if(added) showToast(added===1?'נוסף לאתר ✓':`${added} קבצים נוספו לאתר ✓`);
 }
 
 /* ===== install as app (PWA) ===== */

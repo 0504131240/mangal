@@ -13,6 +13,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>ניהול · BBQ</title>
 <meta name="robots" content="noindex,nofollow">
+<link rel="manifest" href="manifest-admin.json">
+<meta name="theme-color" content="#20140E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ניהול BBQ">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="images/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=Varela+Round&display=swap" rel="stylesheet">
@@ -42,6 +49,8 @@ button{font-family:var(--font)}
 .lock-card p{color:var(--text2);font-size:12.5px;margin-top:6px;margin-bottom:16px}
 .lock-card input{width:100%;border:1.5px solid var(--border);border-radius:var(--r2);padding:12px;font-size:15px;font-family:var(--font);background:var(--bg);color:var(--text);text-align:center;direction:ltr;margin-bottom:8px}
 .lock-card button.main{width:100%;padding:13px;border-radius:var(--r2);border:none;background:var(--flame);color:#fff;font-weight:700;font-size:14.5px;cursor:pointer;margin-top:4px}
+.install-btn{width:100%;padding:11px;border-radius:var(--r2);border:1.5px dashed var(--border);background:transparent;color:var(--text2);font-weight:700;font-size:12.5px;cursor:pointer;margin-top:14px;font-family:var(--font)}
+.install-btn:hover{border-color:var(--flame);color:var(--flame-dark)}
 .lock-err{color:var(--bad);font-size:12.5px;margin-top:8px;display:none}
 
 /* header */
@@ -141,6 +150,7 @@ button{font-family:var(--font)}
     <p id="lockSub">טוען...</p>
     <div id="lockBody"></div>
     <div class="lock-err" id="lockErr">סיסמה שגויה</div>
+    <button id="installBtn" class="install-btn" hidden onclick="handleInstallClick()">📲 התקן כאפליקציה</button>
   </div>
 </div>
 
@@ -787,6 +797,44 @@ async function saveNewEvent(){
 function esc(s){
   return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+
+/* ===== install as app (PWA) ===== */
+let _deferredInstallPrompt=null;
+const _isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const _isStandalone=window.matchMedia('(display-mode: standalone)').matches || navigator.standalone===true;
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw-admin.js').catch(()=>{}); });
+}
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  _deferredInstallPrompt=e;
+  showInstallBtn();
+});
+window.addEventListener('appinstalled', ()=>{
+  _deferredInstallPrompt=null;
+  const btn=document.getElementById('installBtn');
+  if(btn)btn.hidden=true;
+});
+function showInstallBtn(){
+  if(_isStandalone)return;
+  const btn=document.getElementById('installBtn');
+  if(btn)btn.hidden=false;
+}
+async function handleInstallClick(){
+  if(_deferredInstallPrompt){
+    _deferredInstallPrompt.prompt();
+    await _deferredInstallPrompt.userChoice;
+    _deferredInstallPrompt=null;
+    document.getElementById('installBtn').hidden=true;
+    return;
+  }
+  if(_isIOS){
+    alert('להתקנה ב-iPhone/iPad:\n1. לחצו על כפתור השיתוף ⬆️ בתחתית הדפדפן\n2. גללו ובחרו "הוסף למסך הבית" (Add to Home Screen)');
+    return;
+  }
+  alert('בדפדפן הזה ההתקנה מופיעה בתפריט הדפדפן (⋮) תחת "התקן אפליקציה" או "הוסף למסך הבית".');
+}
+if(_isIOS && !_isStandalone) showInstallBtn();
 
 initLock();
 </script>

@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=Varela+Round&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%A5%3C/text%3E%3C/svg%3E">
+<script>if(/[?&]theme=fire(&|$)/.test(location.search))document.documentElement.classList.add('theme-fire');</script>
 <style>
 :root{
   --bg:#FBF3EC;--surface:#fff;--surface2:#F3E7DA;--border:#EDE0D4;
@@ -142,6 +143,41 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
 .modal-top h3{font-family:var(--font-head);font-size:17px}
 .modal-close{background:var(--surface2);border:none;width:32px;height:32px;border-radius:50%;font-size:15px;cursor:pointer;color:var(--text2)}
 
+
+/* ===== preview: the whole site on the poster's dark fire background (open with ?theme=fire) ===== */
+html.theme-fire{
+  --bg:#0E0907;--surface:#1A120E;--surface2:#261A14;--border:rgba(255,170,110,.16);
+  --text:#F7EDE4;--text2:#CDB8A8;--text3:#8F7B6D;
+  --flame:#F2662B;--flame-dark:#FFA26E;--flame-bg:rgba(242,102,43,.16);
+  --gold:#E8B252;--char:#050302;
+  color-scheme:dark;
+}
+html.theme-fire body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    url(images/embers.png) 0 0/400px auto repeat,
+    radial-gradient(130% 55% at 50% 118%,rgba(255,96,24,.42),rgba(255,96,24,0) 64%),
+    radial-gradient(90% 45% at 50% -12%,rgba(130,62,28,.28),rgba(130,62,28,0) 70%),
+    var(--bg)}
+html.theme-fire .nav{background:rgba(14,9,7,.82);border-bottom-color:rgba(255,170,110,.12)}
+html.theme-fire .short-banner{overflow:hidden}
+/* trims the poster's white bottom-left corner and lets the sparks show through its lower edge */
+html.theme-fire .short-banner img{margin-bottom:-2.6%;-webkit-mask-image:linear-gradient(to bottom,#000 82%,transparent);mask-image:linear-gradient(to bottom,#000 82%,transparent)}
+html.theme-fire .big-card,
+html.theme-fire .contact-card{background:rgba(26,18,14,.72);border-color:var(--border);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 12px 30px rgba(0,0,0,.35)}
+html.theme-fire .big-card:hover,
+html.theme-fire .contact-card:hover{border-color:rgba(242,102,43,.6)}
+html.theme-fire .big-card .ico{background:linear-gradient(135deg,rgba(242,102,43,.3),rgba(242,102,43,.08))}
+html.theme-fire #contact{background:transparent!important}
+html.theme-fire footer{padding:54px 16px 40px;color:rgba(255,236,220,.78);
+  background:linear-gradient(to bottom,var(--bg) 0%,rgba(14,9,7,.6) 55%,rgba(14,9,7,.15)),url(images/flames-strip.jpg) center bottom/cover no-repeat}
+html.theme-fire .menu-tab.on{background:var(--flame);border-color:var(--flame);color:#fff}
+html.theme-fire .menu-card.premium{border-color:rgba(242,102,43,.5)}
+html.theme-fire .modal-bg{background:rgba(0,0,0,.62)}
+html.theme-fire .modal{border-top:1px solid rgba(255,170,110,.14)}
+html.theme-fire .book-wrap{background:transparent}
+html.theme-fire .fld input,
+html.theme-fire .fld textarea,
+html.theme-fire .fld select{background:var(--surface)}
 </style>
 </head>
 <body>

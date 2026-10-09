@@ -348,12 +348,12 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
         </div>
         <div class="two-col">
           <div class="fld">
-            <label for="fMen">כמה גברים *</label>
-            <input type="number" id="fMen" required min="0" inputmode="numeric" placeholder="0" oninput="updateGuestTotal()">
+            <label for="fMen">כמה גברים</label>
+            <input type="number" id="fMen" min="0" inputmode="numeric" placeholder="0" oninput="updateGuestTotal()">
           </div>
           <div class="fld">
-            <label for="fWomen">כמה נשים *</label>
-            <input type="number" id="fWomen" required min="0" inputmode="numeric" placeholder="0" oninput="updateGuestTotal()">
+            <label for="fWomen">כמה נשים</label>
+            <input type="number" id="fWomen" min="0" inputmode="numeric" placeholder="0" oninput="updateGuestTotal()">
           </div>
         </div>
         <div class="guest-total" id="guestTotal" aria-live="polite"></div>
@@ -724,10 +724,10 @@ async function fbInit(){
 }
 
 document.getElementById('fDate').min=new Date().toISOString().slice(0,10);
-function intOrNaN(id){ const v=document.getElementById(id).value; return v==='' ? NaN : parseInt(v,10); }
+// an empty men / women field counts as 0 (e.g. a men-only event), as long as the total is at least 1
+function countOf(id){ const v=parseInt(document.getElementById(id).value,10); return isNaN(v) ? 0 : v; }
 function updateGuestTotal(){
-  const men=intOrNaN('fMen'), women=intOrNaN('fWomen');
-  const total=(men||0)+(women||0);
+  const total=countOf('fMen')+countOf('fWomen');
   document.getElementById('guestTotal').textContent = total>0 ? `סה"כ ${total} משתתפים` : '';
 }
 function updatePrepNote(){
@@ -749,13 +749,13 @@ document.getElementById('bookForm').addEventListener('submit', async (e)=>{
   const phone=document.getElementById('fPhone').value.trim();
   const email=document.getElementById('fEmail').value.trim();
   const date=document.getElementById('fDate').value;
-  const men=intOrNaN('fMen'), women=intOrNaN('fWomen');
-  const guests=(men||0)+(women||0);
+  const men=countOf('fMen'), women=countOf('fWomen');
+  const guests=men+women;
   const washTime=document.getElementById('fWash').value;
   const location=document.getElementById('fLocation').value.trim();
   const notes=document.getElementById('fNotes').value.trim();
 
-  if(!name||!phone||!date||!washTime||isNaN(men)||isNaN(women)){errEl.textContent='נא למלא את כל השדות המסומנים בכוכבית';errEl.style.display='block';return;}
+  if(!name||!phone||!date||!washTime){errEl.textContent='נא למלא את כל השדות המסומנים בכוכבית';errEl.style.display='block';return;}
   if(men<0||women<0||guests<1){errEl.textContent='נא למלא כמה גברים וכמה נשים (לפחות משתתף אחד)';errEl.style.display='block';return;}
   if(!selectedLevel){errEl.textContent='נא לבחור רמת אירוע';errEl.style.display='block';return;}
 

@@ -1,6 +1,6 @@
 <!--
   לוח ניהול פרטי לעסק המנגלים - לא מקושר מהאתר הציבורי חוץ מקישור קטן בפוטר.
-  הכניסה היא עם חשבון Firebase (מייל וסיסמה). בכניסה הראשונה נוצר החשבון,
+  הכניסה היא עם חשבון Google (Firebase Auth). בכניסה הראשונה מחברים את החשבון,
   ואחריה מוצגים חוקי האבטחה (firestore.rules) עם מזהה החשבון, להדבקה ב-Firebase.
   החוקים מאפשרים גישה לפרטי הלקוחות רק לחשבון הזה (ראו README.md).
 -->
@@ -50,6 +50,8 @@ button{font-family:var(--font)}
 .install-btn{width:100%;padding:11px;border-radius:var(--r2);border:1.5px dashed var(--border);background:transparent;color:var(--text2);font-weight:700;font-size:12.5px;cursor:pointer;margin-top:14px;font-family:var(--font)}
 .install-btn:hover{border-color:var(--flame);color:var(--flame-dark)}
 .lock-err{color:var(--bad);font-size:12.5px;margin-top:8px;display:none}
+.google-btn{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff!important;color:#1f1f1f!important;border:1.5px solid #dadce0!important;margin-top:6px}
+.google-btn:disabled{opacity:.6}
 .link-btn{display:block;margin:10px auto 0;background:none;border:none;color:var(--text2);font-size:12.5px;font-weight:600;text-decoration:underline;cursor:pointer;font-family:var(--font)}
 .rules-box{width:100%;height:170px;border:1.5px solid var(--border);border-radius:10px;padding:8px;font:11px/1.45 ui-monospace,Menlo,Consolas,monospace;background:var(--bg);color:var(--text);resize:vertical;margin-bottom:8px;text-align:left}
 .rules-steps{text-align:right;font-size:12.5px;color:var(--text2);line-height:1.7;margin:12px 18px 6px 0}
@@ -274,15 +276,15 @@ async function fbInit(){
   const auth=authMod.getAuth(app);
   _fb={db,doc:fsMod.doc,getDoc:fsMod.getDoc,setDoc:fsMod.setDoc,updateDoc:fsMod.updateDoc,deleteDoc:fsMod.deleteDoc,addDoc:fsMod.addDoc,
     onSnapshot:fsMod.onSnapshot,collection:fsMod.collection,query:fsMod.query,orderBy:fsMod.orderBy,deleteField:fsMod.deleteField,
-    auth,onAuthStateChanged:authMod.onAuthStateChanged,signIn:authMod.signInWithEmailAndPassword,
-    createUser:authMod.createUserWithEmailAndPassword,resetPassword:authMod.sendPasswordResetEmail,signOut:authMod.signOut};
+    auth,onAuthStateChanged:authMod.onAuthStateChanged,signOut:authMod.signOut,
+    googleSignIn:()=>authMod.signInWithPopup(auth,new authMod.GoogleAuthProvider())};
   return _fb;
 }
 const LEVELS = ['CLASIC','SPECIAL','CRAZY'];
 const LEVEL_ICON = {'CLASIC':'🔥','SPECIAL':'🔥🔥','CRAZY':'👑'};
 const LEVEL_PRICE = {'CLASIC':170,'SPECIAL':220,'CRAZY':300};
 
-/* ===== auth: Firebase Authentication (email + password); Firestore rules allow only this account ===== */
+/* ===== auth: Firebase Authentication with Google; Firestore rules allow only this account ===== */
 async function sha256(str){
   const buf=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
@@ -318,54 +320,42 @@ function renderLoadError(err){
     <div style="font-size:11px;color:var(--text3);direction:ltr;text-align:left;background:var(--bg);border-radius:8px;padding:8px;margin-bottom:10px;word-break:break-all">${esc(err&&err.message||String(err))}</div>
     <button class="main" onclick="location.reload()">ניסיון חדש</button>`;
 }
+const SITE_DOMAIN=location.hostname;
 function authErrorText(err){
   const code=err&&err.code||'';
-  if(code==='auth/operation-not-allowed') return 'צריך להפעיל ב-Firebase כניסה עם מייל וסיסמה: Authentication ← Sign-in method ← Email/Password ← Enable, ואז לנסות שוב.';
-  if(code==='auth/invalid-email') return 'כתובת המייל לא תקינה';
-  if(code==='auth/weak-password') return 'הסיסמה חלשה מדי, צריך לפחות 6 תווים';
-  if(code==='auth/invalid-credential'||code==='auth/wrong-password'||code==='auth/user-not-found') return 'מייל או סיסמה שגויים';
-  if(code==='auth/too-many-requests') return 'יותר מדי ניסיונות. נסו שוב בעוד כמה דקות';
+  if(code==='auth/operation-not-allowed') return 'צריך להפעיל ב-Firebase כניסה עם Google: Authentication ← Sign-in method ← Google ← Enable, ואז לנסות שוב.';
+  if(code==='auth/unauthorized-domain') return `צריך לאשר את כתובת האתר ב-Firebase: Authentication ← Settings ← Authorized domains ← Add domain ← ${SITE_DOMAIN}`;
+  if(code==='auth/popup-blocked') return 'הדפדפן חסם את חלון הכניסה. אפשרו חלונות קופצים לאתר ונסו שוב';
+  if(code==='auth/popup-closed-by-user'||code==='auth/cancelled-popup-request') return 'חלון הכניסה נסגר לפני שהכניסה הסתיימה';
   if(code==='auth/network-request-failed') return 'אין חיבור לאינטרנט';
-  return 'הפעולה נכשלה: '+(err&&err.message||err);
+  return 'הכניסה נכשלה: '+(err&&err.message||err);
 }
+const GOOGLE_ICON='<svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>';
+const googleBtn=(id,label,onclick)=>`<button class="main google-btn" id="${id}" onclick="${onclick}">${GOOGLE_ICON}<span>${label}</span></button>`;
 function renderSetupForm(){
-  document.getElementById('lockTitle').textContent='יצירת חשבון ניהול';
-  document.getElementById('lockSub').textContent='כדי לנעול את פרטי הלקוחות, הכניסה לניהול עוברת למייל וסיסמה. עושים את זה פעם אחת.';
+  document.getElementById('lockTitle').textContent='חיבור חשבון Google לניהול';
+  document.getElementById('lockSub').textContent='כדי לנעול את פרטי הלקוחות, הכניסה לניהול עוברת לחשבון Google שלך. עושים את זה פעם אחת.';
   document.getElementById('lockBody').innerHTML=`
-    <input type="email" id="suEmail" placeholder="המייל שלך" autocomplete="username" dir="ltr">
-    ${legacyPassHash?`<input type="password" id="suOld" placeholder="הסיסמה הנוכחית של הניהול" autocomplete="current-password">`:''}
-    <input type="password" id="suNew" placeholder="סיסמה לחשבון (לפחות 6 תווים)" autocomplete="new-password">
-    <input type="password" id="suNew2" placeholder="אימות הסיסמה" autocomplete="new-password" onkeydown="if(event.key==='Enter')doSetup()">
-    <button class="main" id="suBtn" onclick="doSetup()">יצירת חשבון</button>`;
+    ${legacyPassHash?`<input type="password" id="suOld" placeholder="הסיסמה הנוכחית של הניהול" autocomplete="current-password" onkeydown="if(event.key==='Enter')doSetup()">`:''}
+    ${googleBtn('suBtn','המשך עם Google','doSetup()')}`;
 }
 async function doSetup(){
-  const email=document.getElementById('suEmail').value.trim();
   const oldEl=document.getElementById('suOld');
-  const pw=document.getElementById('suNew').value, pw2=document.getElementById('suNew2').value;
-  if(!email){ lockErr('נא להזין מייל'); return; }
+  // the old password proves it's the owner (and not a visitor) who claims the admin account
   if(oldEl && await sha256(oldEl.value||'')!==legacyPassHash){ lockErr('הסיסמה הנוכחית שגויה'); return; }
-  if(pw.length<6){ lockErr('הסיסמה צריכה להכיל לפחות 6 תווים'); return; }
-  if(pw!==pw2){ lockErr('הסיסמאות אינן תואמות'); return; }
   lockErr('');
-  const btn=document.getElementById('suBtn'); btn.disabled=true; btn.textContent='⏳ יוצר חשבון...';
+  const btn=document.getElementById('suBtn'); btn.disabled=true;
   try{
-    const {db,doc,setDoc,auth,createUser,signIn}=await fbInit();
-    let cred;
-    try{ cred=await createUser(auth,email,pw); }
-    catch(e){
-      // a previous attempt may have created the account without finishing; sign in to it instead
-      if(e.code==='auth/email-already-in-use') cred=await signIn(auth,email,pw);
-      else throw e;
-    }
+    const {db,doc,setDoc,googleSignIn}=await fbInit();
+    const cred=await googleSignIn();
     adminUid=cred.user.uid;
     // replaces the doc, so the old public password hash is removed too
     await setDoc(doc(db,'mangalSettings','admin'),{authUid:adminUid});
     legacyPassHash=null;
-    localStorage.setItem('mangalAdminEmail',email);
     renderRulesStep();
   }catch(e){
     console.error(e); lockErr(authErrorText(e));
-    btn.disabled=false; btn.textContent='יצירת חשבון';
+    btn.disabled=false;
   }
 }
 async function rulesText(){
@@ -385,7 +375,7 @@ async function copyRules(btn){
   btn.textContent='✓ הועתק'; setTimeout(()=>{ btn.textContent='📋 העתקת החוקים'; },2000);
 }
 async function renderRulesStep(){
-  document.getElementById('lockTitle').textContent='✓ החשבון נוצר';
+  document.getElementById('lockTitle').textContent='✓ החשבון מחובר';
   document.getElementById('lockSub').textContent='שלב אחרון: להדביק את חוקי האבטחה ב-Firebase. עד שזה נעשה, הנתונים עדיין פתוחים.';
   let text='';
   try{ text=await rulesText(); }catch(e){ text='שגיאה בטעינת החוקים: '+e.message; }
@@ -397,47 +387,28 @@ async function renderRulesStep(){
 }
 function renderLoginForm(){
   document.getElementById('lockTitle').textContent='ניהול BBQ';
-  document.getElementById('lockSub').textContent='כניסה עם המייל והסיסמה של חשבון הניהול';
-  document.getElementById('lockBody').innerHTML=`
-    <input type="email" id="liEmail" placeholder="מייל" autocomplete="username" dir="ltr" value="${esc(localStorage.getItem('mangalAdminEmail')||'')}">
-    <input type="password" id="liPass" placeholder="סיסמה" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
-    <button class="main" id="liBtn" onclick="doLogin()">כניסה</button>
-    <button class="link-btn" onclick="doResetPassword()">שכחתי סיסמה</button>`;
-  setTimeout(()=>{ const el=document.getElementById(document.getElementById('liEmail').value?'liPass':'liEmail'); if(el) el.focus(); },50);
+  document.getElementById('lockSub').textContent='כניסה עם חשבון ה-Google של הניהול';
+  document.getElementById('lockBody').innerHTML=googleBtn('liBtn','כניסה עם Google','doLogin()');
 }
 async function doLogin(){
-  const email=document.getElementById('liEmail').value.trim(), pw=document.getElementById('liPass').value;
-  if(!email||!pw){ lockErr('נא להזין מייל וסיסמה'); return; }
   lockErr('');
-  const btn=document.getElementById('liBtn'); btn.disabled=true; btn.textContent='⏳ נכנס...';
+  const btn=document.getElementById('liBtn'); btn.disabled=true;
   try{
-    const {auth,signIn,signOut}=await fbInit();
-    const cred=await signIn(auth,email,pw);
+    const {auth,googleSignIn,signOut}=await fbInit();
+    const cred=await googleSignIn();
     if(cred.user.uid!==adminUid){ await signOut(auth); throw {code:'not-admin'}; }
-    localStorage.setItem('mangalAdminEmail',email);
     unlockApp();
   }catch(e){
-    lockErr(e.code==='not-admin'?'זה לא חשבון הניהול':authErrorText(e));
-    btn.disabled=false; btn.textContent='כניסה';
-    document.getElementById('liPass').value='';
+    lockErr(e.code==='not-admin'?'החשבון הזה לא מחובר לניהול. היכנסו עם חשבון ה-Google שחיברתם':authErrorText(e));
+    btn.disabled=false;
   }
-}
-async function doResetPassword(){
-  const email=(document.getElementById('liEmail')||{}).value||'';
-  if(!email.trim()){ lockErr('נא להזין את המייל ואז ללחוץ שוב על "שכחתי סיסמה"'); return; }
-  try{
-    const {auth,resetPassword}=await fbInit();
-    await resetPassword(auth,email.trim());
-    lockErr('');
-    document.getElementById('lockSub').textContent='נשלח מייל לאיפוס הסיסמה. בדקו גם בספאם.';
-  }catch(e){ lockErr(authErrorText(e)); }
 }
 function renderBiometricLock(){
   document.getElementById('lockTitle').textContent='ניהול BBQ';
   document.getElementById('lockSub').textContent='הניהול נעול';
   document.getElementById('lockBody').innerHTML=`
     <button id="biometricBtn" class="main" style="background:var(--char);margin-bottom:10px" onclick="doBiometricUnlock()">👆 פתיחה עם טביעת אצבע</button>
-    <button class="link-btn" onclick="renderLoginForm()">כניסה עם סיסמה</button>`;
+    <button class="link-btn" onclick="renderLoginForm()">כניסה עם Google</button>`;
   setTimeout(()=>doBiometricUnlock(),300);
 }
 async function idToken(){

@@ -456,9 +456,25 @@ async function startListening(){
     bookings=snap.docs.map(d=>({id:d.id,...d.data()}));
     checkNewPending();
     renderAll();
+    syncReminders();
   }, (err)=>{
     console.error(err);
   });
+}
+// The day-before reminder push (api/reminders.js) reads mangalSettings/reminders, which is readable
+// without signing in, so it holds only the approved upcoming events' date, time, size and level.
+let lastReminders=null;
+async function syncReminders(){
+  const d=new Date(), today=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const events=bookings.filter(b=>b.status==='approved' && b.date>=today)
+    .map(b=>({date:b.date, washTime:b.washTime||null, guests:Number(b.guests||0), level:b.level||null}));
+  const json=JSON.stringify(events);
+  if(json===lastReminders) return;
+  lastReminders=json;
+  try{
+    const {db,doc,setDoc}=await fbInit();
+    await setDoc(doc(db,'mangalSettings','reminders'),{events});
+  }catch(e){ lastReminders=null; console.error('reminders sync',e); }
 }
 function checkNewPending(){
   const currentPending=bookings.filter(b=>b.status==='pending').map(b=>b.id);

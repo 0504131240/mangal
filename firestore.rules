@@ -55,10 +55,11 @@ service cloud.firestore {
       );
     }
 
-    // public: the gallery shown on the site, and push subscriptions
-    // (a subscription can only receive pushes signed with the server's private VAPID key)
+    // public: the gallery shown on the site, push subscriptions (a subscription can only receive pushes
+    // signed with the server's private VAPID key), and the upcoming events' dates for the day-before
+    // reminder (date, time, size and level only, no names or phones)
     match /mangalSettings/{doc} {
-      allow read: if doc in ['gallery', 'push'] || isAdmin();
+      allow read: if doc in ['gallery', 'push', 'reminders'] || isAdmin();
       allow write: if isAdmin() && doc != 'admins';
     }
     match /mangalSettings/admins {

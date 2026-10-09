@@ -125,6 +125,8 @@ button{font-family:var(--font)}
 .mfld label{display:block;font-size:11.5px;font-weight:700;color:var(--text2);margin-bottom:5px}
 .mfld input,.mfld textarea{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:10px 11px;font-size:14px;font-family:var(--font);background:var(--bg);color:var(--text);direction:rtl}
 .mrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mrow3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.drow-sub{font-weight:500;color:var(--text2);font-size:12px}
 .minfo{font-size:13px;color:var(--text2);background:var(--surface2);border-radius:10px;padding:10px 12px;margin-top:10px}
 .minfo a{color:var(--flame-dark);font-weight:700;text-decoration:none}
 .quickpay{display:flex;gap:8px;margin-top:8px}
@@ -759,12 +761,24 @@ function openDayEvents(dateStr){
         <div class="modal-top"><h3>${fmtDate(dateStr)}</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
         ${evs.map(b=>`<div class="card" onclick="openDetails('${b.id}')">
           <div class="card-top"><div class="card-name">${esc(b.name)}</div></div>
-          <div class="card-mid"><span class="chip lvl">${LEVEL_ICON[b.level]||''} ${esc(b.level)}</span><span class="chip">👥 ${b.guests} אנשים</span>${paidChip(b)}</div>
+          <div class="card-mid"><span class="chip lvl">${LEVEL_ICON[b.level]||''} ${esc(b.level)}</span><span class="chip">👥 ${guestsText(b)}</span>${washChip(b)}${paidChip(b)}</div>
         </div>`).join('')}
       </div>
     </div>`;
 }
 
+// "30 · 18 גברים · 12 נשים"; older bookings only have the total
+function guestsText(b){
+  const g=Number(b.guests||0);
+  return (b.men!=null && b.women!=null) ? `${g} · ${esc(b.men)} גברים · ${esc(b.women)} נשים` : `${g} אנשים`;
+}
+// the venue has to be ready an hour before handwashing
+function prepTime(t){
+  if(!/^\d{2}:\d{2}$/.test(t||'')) return '';
+  const [h,m]=t.split(':').map(Number), mins=(h*60+m-60+1440)%1440;
+  return `${String(Math.floor(mins/60)).padStart(2,'0')}:${String(mins%60).padStart(2,'0')}`;
+}
+const washChip=(b)=>b.washTime?`<span class="chip">🕖 נט"י ${esc(b.washTime)}</span>`:'';
 function fmtDate(d){
   if(!d)return '';
   try{ return new Date(d+'T00:00:00').toLocaleDateString('he-IL',{day:'numeric',month:'short',year:'numeric',weekday:'short'}); }
@@ -805,7 +819,8 @@ function renderPending(){
         </div>
         <div class="card-mid">
           <span class="chip lvl">${LEVEL_ICON[b.level]||''} ${esc(b.level)}</span>
-          <span class="chip">👥 ${b.guests} אנשים</span>
+          <span class="chip">👥 ${guestsText(b)}</span>
+          ${washChip(b)}
           ${b.location?`<span class="chip">📍 ${esc(b.location)}</span>`:''}
         </div>
         ${b.notes?`<div class="card-notes">"${esc(b.notes)}"</div>`:''}
@@ -856,7 +871,8 @@ function renderBoard(){
       </div>
       <div class="card-mid">
         <span class="chip lvl">${LEVEL_ICON[b.level]||''} ${esc(b.level)}</span>
-        <span class="chip">👥 ${b.guests} אנשים</span>
+        <span class="chip">👥 ${guestsText(b)}</span>
+        ${washChip(b)}
         ${b.location?`<span class="chip">📍 ${esc(b.location)}</span>`:''}
         ${paidChip(b)}
       </div>
@@ -915,7 +931,8 @@ function openDetails(id){
           ${row('📞 טלפון', b.phone?`<a href="tel:${esc(b.phone)}">${esc(b.phone)}</a>`:'—')}
           ${b.email?row('✉️ אימייל', esc(b.email)):''}
           ${row('📍 מיקום', b.location?esc(b.location):'—')}
-          ${row('👥 משתתפים', esc(b.guests||0))}
+          ${row('🕖 נטילת ידיים', b.washTime?`${esc(b.washTime)} <span class="drow-sub">(המקום פנוי מ-${prepTime(b.washTime)})</span>`:'—')}
+          ${row('👥 משתתפים', guestsText(b))}
           ${row('💰 מחיר כולל', total>0?`₪${total.toLocaleString()}`:'טרם נקבע')}
           ${row('✓ שולם', `₪${paid.toLocaleString()}`)}
           ${total>0?row('⏳ יתרה לתשלום', `₪${Math.max(total-paid,0).toLocaleString()}`):''}
@@ -948,7 +965,12 @@ function openModal(id){
         <div class="minfo">📞 <a href="tel:${esc(b.phone)}">${esc(b.phone)}</a>${b.email?` · ✉️ ${esc(b.email)}`:''}</div>
         ${b.notes?`<div class="minfo">📝 ${esc(b.notes)}</div>`:''}
 
-        <div class="mfld"><label>מספר משתתפים</label><input type="number" id="mGuests" value="${b.guests||0}" min="1"></div>
+        <div class="mfld"><label>שעת נטילת ידיים</label><input type="time" id="mWash" step="300" value="${esc(b.washTime||'')}"></div>
+        <div class="mrow3">
+          <div class="mfld"><label>גברים</label><input type="number" id="mMen" min="0" value="${b.men!=null?esc(b.men):''}" oninput="syncGuestTotal('m')"></div>
+          <div class="mfld"><label>נשים</label><input type="number" id="mWomen" min="0" value="${b.women!=null?esc(b.women):''}" oninput="syncGuestTotal('m')"></div>
+          <div class="mfld"><label>סה"כ</label><input type="number" id="mGuests" value="${b.guests||0}" min="1"></div>
+        </div>
         <div class="mfld"><label>מיקום האירוע</label><input type="text" id="mLocation" value="${b.location?esc(b.location):''}" placeholder="כתובת / אולם / חצר"></div>
 
         <div class="mrow">
@@ -1023,14 +1045,27 @@ async function nativeShare(){
   try{ await navigator.share({title:'BBQ · חגיגת ברבקיו משחררת', text:SHARE_TEXT, url:publicSiteUrl()}); closeModal(); }
   catch(e){ /* the person closed the share sheet */ }
 }
+// men + women fill in the total; the total stays editable for bookings that only have a total
+function syncGuestTotal(prefix){
+  const men=parseInt(document.getElementById(prefix+'Men').value,10), women=parseInt(document.getElementById(prefix+'Women').value,10);
+  if(isNaN(men) && isNaN(women)) return;
+  document.getElementById(prefix+'Guests').value=(men||0)+(women||0);
+  if(prefix==='n') recalcNewEventPrice();
+}
+function readMenWomen(prefix){
+  const men=parseInt(document.getElementById(prefix+'Men').value,10), women=parseInt(document.getElementById(prefix+'Women').value,10);
+  return (isNaN(men) && isNaN(women)) ? {men:null,women:null} : {men:men||0,women:women||0};
+}
 async function saveModal(id){
-  const guests=parseInt(document.getElementById('mGuests').value,10)||0;
+  const {men,women}=readMenWomen('m');
+  const guests=men!=null ? men+women : (parseInt(document.getElementById('mGuests').value,10)||0);
+  const washTime=document.getElementById('mWash').value||null;
   const location=document.getElementById('mLocation').value.trim();
   const totalPrice=parseFloat(document.getElementById('mTotal').value)||0;
   const paidAmount=parseFloat(document.getElementById('mPaid').value)||0;
   const status=document.getElementById('modalRoot').dataset.status||'approved';
   const {db,doc,updateDoc}=await fbInit();
-  await updateDoc(doc(db,'mangalBookings',id),{guests,location:location||null,totalPrice,paidAmount,status});
+  await updateDoc(doc(db,'mangalBookings',id),{guests,men,women,washTime,location:location||null,totalPrice,paidAmount,status});
   closeModal();
   showToast('נשמר ✓');
 }
@@ -1061,8 +1096,13 @@ function openNewEventModal(){
           </div>
         </div>
         <div class="mrow">
-          <div class="mfld"><label>מספר משתתפים</label><input type="number" id="nGuests" min="1" value="1" oninput="recalcNewEventPrice()"></div>
+          <div class="mfld"><label>שעת נטילת ידיים</label><input type="time" id="nWash" step="300"></div>
           <div class="mfld"><label>מיקום</label><input type="text" id="nLocation" placeholder="כתובת / אולם / חצר"></div>
+        </div>
+        <div class="mrow3">
+          <div class="mfld"><label>גברים</label><input type="number" id="nMen" min="0" oninput="syncGuestTotal('n')"></div>
+          <div class="mfld"><label>נשים</label><input type="number" id="nWomen" min="0" oninput="syncGuestTotal('n')"></div>
+          <div class="mfld"><label>סה"כ</label><input type="number" id="nGuests" min="1" value="1" oninput="recalcNewEventPrice()"></div>
         </div>
         <div class="mfld"><label>הערות</label><textarea id="nNotes"></textarea></div>
         <div class="mrow">
@@ -1093,7 +1133,9 @@ async function saveNewEvent(){
   const date=document.getElementById('nDate').value;
   if(!name||!date){ showToast('נא למלא שם ותאריך'); return; }
   const phone=document.getElementById('nPhone').value.trim();
-  const guests=parseInt(document.getElementById('nGuests').value,10)||1;
+  const {men,women}=readMenWomen('n');
+  const guests=men!=null ? Math.max(men+women,1) : (parseInt(document.getElementById('nGuests').value,10)||1);
+  const washTime=document.getElementById('nWash').value||null;
   const location=document.getElementById('nLocation').value.trim();
   const notes=document.getElementById('nNotes').value.trim();
   const totalPrice=parseFloat(document.getElementById('nTotal').value)||0;
@@ -1101,7 +1143,7 @@ async function saveNewEvent(){
   const level=document.getElementById('modalRoot').dataset.nlevel||LEVELS[0];
   const {db,collection,addDoc}=await fbInit();
   await addDoc(collection(db,'mangalBookings'),{
-    name, phone:phone||null, date, guests, level, location:location||null, notes:notes||null,
+    name, phone:phone||null, date, washTime, guests, men, women, level, location:location||null, notes:notes||null,
     status:'approved', totalPrice, paidAmount,
     createdAtMs:Date.now(), source:'admin'
   });

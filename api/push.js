@@ -37,6 +37,7 @@ function bookingText(f) {
   const [y, m, d] = (f.date?.stringValue || '').split('-');
   const parts = [name, `${num(f.guests)} אנשים`];
   if (d) parts.push(`${d}/${m}/${y}`);
+  if (f.washTime?.stringValue) parts.push(`נט"י ${f.washTime.stringValue}`);
   if (f.level?.stringValue) parts.push(f.level.stringValue);
   return parts.join(' · ');
 }

@@ -21,13 +21,16 @@ service cloud.firestore {
       return v == null || (v is string && v.size() <= max);
     }
     function validRequest(d) {
-      return d.keys().hasOnly(['name', 'phone', 'email', 'date', 'guests', 'level', 'location', 'notes',
-                               'status', 'totalPrice', 'paidAmount', 'createdAt', 'createdAtMs'])
+      return d.keys().hasOnly(['name', 'phone', 'email', 'date', 'washTime', 'guests', 'men', 'women', 'level',
+                               'location', 'notes', 'status', 'totalPrice', 'paidAmount', 'createdAt', 'createdAtMs'])
         && d.name is string && d.name.size() > 0 && d.name.size() <= 100
         && d.phone is string && d.phone.size() > 0 && d.phone.size() <= 30
         && optionalText(d.email, 200)
         && d.date is string && d.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
         && d.guests is int && d.guests > 0 && d.guests <= 5000
+        && (!('washTime' in d) || (d.washTime is string && d.washTime.matches('^[0-9]{2}:[0-9]{2}$')))
+        && ((!('men' in d) && !('women' in d))
+            || (d.men is int && d.women is int && d.men >= 0 && d.women >= 0 && d.men + d.women == d.guests))
         && d.level in ['CLASIC', 'SPECIAL', 'CRAZY']
         && optionalText(d.location, 300)
         && optionalText(d.notes, 2000)

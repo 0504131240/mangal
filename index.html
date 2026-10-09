@@ -107,6 +107,11 @@ section{padding:52px 0}
 .fld input,.fld textarea,.fld select{width:100%;border:1.5px solid var(--border);border-radius:var(--r2);padding:12px 13px;font-size:15px;font-family:var(--font);background:var(--surface);color:var(--text);direction:rtl}
 .fld textarea{resize:vertical;min-height:70px}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.prep-note{display:flex;gap:10px;align-items:flex-start;margin:14px 0 4px;padding:12px 14px;border-radius:var(--r2);
+  border:2px solid var(--flame);background:var(--flame-bg);color:var(--text);font-size:14px;line-height:1.6}
+.prep-note b{color:var(--flame-dark)}
+.prep-ico{font-size:20px;line-height:1.3}
+.guest-total{font-size:13px;color:var(--text2);margin-top:6px;min-height:1em}
 .btn-send{width:100%;padding:14px;border-radius:var(--r2);background:var(--flame-btn);color:#fff;margin-top:20px;box-shadow:0 10px 24px rgba(216,72,27,.32)}
 .btn-send:disabled{opacity:.5;cursor:default;box-shadow:none}
 .form-err{color:var(--bad);font-size:13px;font-weight:600;text-align:center;margin-top:10px;display:none}
@@ -333,10 +338,25 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
             <input type="date" id="fDate" required>
           </div>
           <div class="fld">
-            <label for="fGuests">כמות משתתפים *</label>
-            <input type="number" id="fGuests" required min="1" placeholder="לדוגמה: 30">
+            <label for="fWash">שעת נטילת ידיים *</label>
+            <input type="time" id="fWash" required step="300" oninput="updatePrepNote()">
           </div>
         </div>
+        <div class="prep-note" id="prepNote" role="note">
+          <span class="prep-ico" aria-hidden="true">⏰</span>
+          <span><b>חשוב:</b> המקום צריך להיות פנוי עבורנו <b>שעה לפני נטילת הידיים</b><span id="prepTime"></span>, כדי שנוכל להיערך.</span>
+        </div>
+        <div class="two-col">
+          <div class="fld">
+            <label for="fMen">כמה גברים *</label>
+            <input type="number" id="fMen" required min="0" inputmode="numeric" placeholder="0" oninput="updateGuestTotal()">
+          </div>
+          <div class="fld">
+            <label for="fWomen">כמה נשים *</label>
+            <input type="number" id="fWomen" required min="0" inputmode="numeric" placeholder="0" oninput="updateGuestTotal()">
+          </div>
+        </div>
+        <div class="guest-total" id="guestTotal" aria-live="polite"></div>
         <div class="fld">
           <span class="fld-label" id="lvlLabel">רמת אירוע *</span>
           <div class="lvl-grid" id="lvlGrid" role="group" aria-labelledby="lvlLabel"></div>
@@ -347,7 +367,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
         </div>
         <div class="fld">
           <label for="fNotes">הערות נוספות</label>
-          <textarea id="fNotes" placeholder="אלרגיות, בקשות מיוחדות, שעה משוערת..."></textarea>
+          <textarea id="fNotes" placeholder="אלרגיות, בקשות מיוחדות..."></textarea>
         </div>
         <p class="privacy-note" id="privacyNote">הפרטים משמשים רק כדי לטפל בבקשה ולחזור אליכם. השדות עם * נחוצים לטיפול בהזמנה, ואין חובה חוקית למסור אותם. פרטים נוספים ב<button type="button" class="inline-link" onclick="openPrivacy()">מדיניות הפרטיות</button>.</p>
         <button type="submit" class="btn btn-send" id="sendBtn" aria-describedby="privacyNote">שליחת בקשת הזמנה 🔥</button>
@@ -417,7 +437,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
       <p>BBQ · חגיגת ברבקיו משחררת (דודי) מכבדים את הפרטיות שלכם. כאן מוסבר איזה מידע נאסף באתר, למה, ומה הזכויות שלכם.</p>
       <h4>איזה מידע נאסף</h4>
       <ul>
-        <li>רק מה שממלאים בטופס הזמנת האירוע: שם, טלפון, מייל (לא חובה), תאריך האירוע, מספר משתתפים, רמת התפריט, מיקום (לא חובה) והערות (לא חובה).</li>
+        <li>רק מה שממלאים בטופס הזמנת האירוע: שם, טלפון, מייל (לא חובה), תאריך ושעת נטילת ידיים, מספר הגברים והנשים, רמת התפריט, מיקום (לא חובה) והערות (לא חובה).</li>
         <li>האתר לא משתמש בעוגיות מעקב, בפרסום או בכלי ניתוח תנועה.</li>
         <li>הגדרות הנגישות שבחרתם ועותק של רשימת התמונות נשמרים רק בדפדפן שלכם, ולא נשלחים אלינו.</li>
         <li>ספקי האחסון של האתר עשויים לשמור רישומים טכניים (כמו כתובת IP) לצורכי אבטחה ותפעול.</li>
@@ -704,6 +724,22 @@ async function fbInit(){
 }
 
 document.getElementById('fDate').min=new Date().toISOString().slice(0,10);
+function intOrNaN(id){ const v=document.getElementById(id).value; return v==='' ? NaN : parseInt(v,10); }
+function updateGuestTotal(){
+  const men=intOrNaN('fMen'), women=intOrNaN('fWomen');
+  const total=(men||0)+(women||0);
+  document.getElementById('guestTotal').textContent = total>0 ? `סה"כ ${total} משתתפים` : '';
+}
+function updatePrepNote(){
+  const t=document.getElementById('fWash').value;
+  let txt='';
+  if(/^\d{2}:\d{2}$/.test(t)){
+    const [h,m]=t.split(':').map(Number);
+    const mins=(h*60+m-60+1440)%1440;
+    txt=` (כלומר מ-${String(Math.floor(mins/60)).padStart(2,'0')}:${String(mins%60).padStart(2,'0')})`;
+  }
+  document.getElementById('prepTime').textContent=txt;
+}
 
 document.getElementById('bookForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
@@ -713,22 +749,31 @@ document.getElementById('bookForm').addEventListener('submit', async (e)=>{
   const phone=document.getElementById('fPhone').value.trim();
   const email=document.getElementById('fEmail').value.trim();
   const date=document.getElementById('fDate').value;
-  const guests=parseInt(document.getElementById('fGuests').value,10);
+  const men=intOrNaN('fMen'), women=intOrNaN('fWomen');
+  const guests=(men||0)+(women||0);
+  const washTime=document.getElementById('fWash').value;
   const location=document.getElementById('fLocation').value.trim();
   const notes=document.getElementById('fNotes').value.trim();
 
-  if(!name||!phone||!date||!guests||guests<1){errEl.textContent='נא למלא את כל השדות המסומנים בכוכבית';errEl.style.display='block';return;}
+  if(!name||!phone||!date||!washTime||isNaN(men)||isNaN(women)){errEl.textContent='נא למלא את כל השדות המסומנים בכוכבית';errEl.style.display='block';return;}
+  if(men<0||women<0||guests<1){errEl.textContent='נא למלא כמה גברים וכמה נשים (לפחות משתתף אחד)';errEl.style.display='block';return;}
   if(!selectedLevel){errEl.textContent='נא לבחור רמת אירוע';errEl.style.display='block';return;}
 
   const btn=document.getElementById('sendBtn');
   btn.disabled=true;btn.textContent='שולח...';
   try{
     const {db,collection,addDoc,serverTimestamp}=await fbInit();
-    const ref=await addDoc(collection(db,'mangalBookings'),{
-      name,phone,email:email||null,date,guests,level:selectedLevel,location:location||null,notes:notes||null,
-      status:'pending', totalPrice:0, paidAmount:0,
-      createdAt:serverTimestamp(), createdAtMs:Date.now()
-    });
+    const base={name,phone,email:email||null,date,guests,level:selectedLevel,location:location||null,
+      status:'pending', totalPrice:0, paidAmount:0, createdAt:serverTimestamp(), createdAtMs:Date.now()};
+    let ref;
+    try{
+      ref=await addDoc(collection(db,'mangalBookings'),{...base,men,women,washTime,notes:notes||null});
+    }catch(e){
+      // security rules from before these fields existed reject them; keep the request by moving them into the notes
+      if(e.code!=='permission-denied') throw e;
+      const extra=`גברים: ${men} · נשים: ${women} · נטילת ידיים: ${washTime}`;
+      ref=await addDoc(collection(db,'mangalBookings'),{...base,notes:notes?`${extra}\n${notes}`:extra});
+    }
     // push notification to the owner's phone; the request is already saved, so a failure here is ignored
     fetch('/api/push',{method:'POST',headers:{'content-type':'application/json'},keepalive:true,
       body:JSON.stringify({action:'booking',id:ref.id})}).catch(()=>{});

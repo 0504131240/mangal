@@ -58,6 +58,11 @@ button{font-family:var(--font)}
 .hdr-in{max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .hdr-title{font-family:var(--font-head);font-size:18px;display:flex;align-items:center;gap:8px}
 .hdr-btn{background:rgba(255,255,255,.12);border:none;color:#fff;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer}
+.hdr-actions{display:flex;gap:8px;flex-shrink:0}
+.share-opts{display:flex;flex-direction:column;gap:8px}
+.share-opt{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;border-radius:var(--r2);border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;font-weight:700;text-decoration:none;cursor:pointer;font-family:var(--font);text-align:right}
+.share-opt .ico{font-size:20px;width:26px;text-align:center}
+.share-url{width:100%;margin-top:12px;border:1.5px solid var(--border);border-radius:10px;padding:10px 11px;font-size:13px;font-family:var(--font);background:var(--bg);color:var(--text2);direction:ltr;text-align:left}
 
 /* tabs */
 .tabs{display:flex;gap:8px;margin:16px 0;overflow-x:auto;padding-bottom:2px}
@@ -196,7 +201,10 @@ button{font-family:var(--font)}
   <div class="hdr">
     <div class="hdr-in">
       <div class="hdr-title"><img src="images/logo-v2.png" alt="BBQ" style="height:28px;width:28px;border-radius:50%;object-fit:cover">לוח ניהול</div>
-      <button class="hdr-btn" onclick="openSettings()">⚙️ הגדרות</button>
+      <div class="hdr-actions">
+        <button class="hdr-btn" onclick="openShare()">📤 שיתוף</button>
+        <button class="hdr-btn" onclick="openSettings()">⚙️ הגדרות</button>
+      </div>
     </div>
   </div>
 
@@ -949,6 +957,40 @@ function setModalStatus(el,status){
   document.getElementById('modalRoot').dataset.status=status;
 }
 function closeModal(){document.getElementById('modalRoot').innerHTML='';}
+
+/* ===== share the public site (not the admin) ===== */
+const SHARE_TEXT='BBQ · חגיגת ברבקיו משחררת 🔥 מנגל לאירועים עם דודי: תמונות, תפריטים והזמנת אירוע';
+const publicSiteUrl=()=>location.origin+'/';
+function openShare(){
+  const url=publicSiteUrl();
+  const msg=`${SHARE_TEXT}\n${url}`;
+  document.getElementById('modalRoot').innerHTML=`
+    <div class="modal-bg" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div class="modal-top"><h3>📤 שיתוף האתר</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+        <div class="share-opts">
+          <a class="share-opt" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener" onclick="setTimeout(closeModal,300)"><span class="ico">💬</span>וואטסאפ</a>
+          <a class="share-opt" href="mailto:?subject=${encodeURIComponent('BBQ · מנגל לאירועים')}&body=${encodeURIComponent(msg)}" onclick="setTimeout(closeModal,300)"><span class="ico">✉️</span>מייל</a>
+          <button class="share-opt" onclick="copySiteLink()"><span class="ico">🔗</span>העתקת קישור</button>
+          ${navigator.share?`<button class="share-opt" onclick="nativeShare()"><span class="ico">⋯</span>אפליקציה אחרת</button>`:''}
+        </div>
+        <input class="share-url" id="shareUrl" readonly value="${esc(url)}" onclick="this.select()">
+      </div>
+    </div>`;
+}
+async function copySiteLink(){
+  const url=publicSiteUrl();
+  try{ await navigator.clipboard.writeText(url); }
+  catch(e){
+    const inp=document.getElementById('shareUrl');
+    if(inp){ inp.select(); try{ document.execCommand('copy'); }catch(err){} }
+  }
+  showToast('הקישור הועתק ✓');
+}
+async function nativeShare(){
+  try{ await navigator.share({title:'BBQ · חגיגת ברבקיו משחררת', text:SHARE_TEXT, url:publicSiteUrl()}); closeModal(); }
+  catch(e){ /* the person closed the share sheet */ }
+}
 async function saveModal(id){
   const guests=parseInt(document.getElementById('mGuests').value,10)||0;
   const location=document.getElementById('mLocation').value.trim();

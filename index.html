@@ -9,9 +9,11 @@
 <html dir="rtl" lang="he">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0E0907">
 <title>BBQ · חגיגת ברבקיו משחררת</title>
+<script>try{const a=JSON.parse(localStorage.getItem('mangalA11y')||'{}');const c=document.documentElement.classList;
+if(a.zoom)c.add('a11y-z'+a.zoom);['contrast','still','links','font','gray'].forEach(k=>a[k]&&c.add('a11y-'+k));}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=Varela+Round&display=swap" rel="stylesheet">
@@ -24,6 +26,7 @@
   --gold:#E8B252;--gold-bg:rgba(232,178,82,.14);
   --char:#050302;
   --glass:rgba(26,18,14,.72);
+  --flame-btn:#C8461A; /* deep enough for white text (4.8:1) */
   color-scheme:dark;
   --ok:#1D9E75;--bad:#A32D2D;
   --r:18px;--r2:12px;
@@ -76,7 +79,7 @@ section{padding:52px 0}
 /* menus */
 .menu-tabs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:22px}
 .menu-tab{border:1.5px solid var(--border);background:var(--surface);color:var(--text2);padding:10px 18px;border-radius:24px;font-weight:700;font-size:13.5px;cursor:pointer;font-family:var(--font)}
-.menu-tab.on{background:var(--flame);color:#fff;border-color:var(--flame)}
+.menu-tab.on{background:var(--flame-btn);color:#fff;border-color:var(--flame-btn)}
 .menu-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:26px 22px;display:none}
 .menu-card.on{display:block}
 .menu-card.premium{background:linear-gradient(160deg,#231409,#3A2113);color:#fff;border-color:rgba(242,102,43,.5)}
@@ -100,11 +103,11 @@ section{padding:52px 0}
 .lvl-opt.sel{border-color:var(--flame);background:var(--flame-bg);color:var(--flame-dark)}
 .fld{margin-top:14px}
 .fld:first-of-type{margin-top:0}
-.fld label{display:block;font-size:12.5px;font-weight:700;color:var(--text2);margin-bottom:6px}
+.fld label,.fld .fld-label{display:block;font-size:12.5px;font-weight:700;color:var(--text2);margin-bottom:6px}
 .fld input,.fld textarea,.fld select{width:100%;border:1.5px solid var(--border);border-radius:var(--r2);padding:12px 13px;font-size:15px;font-family:var(--font);background:var(--surface);color:var(--text);direction:rtl}
 .fld textarea{resize:vertical;min-height:70px}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.btn-send{width:100%;padding:14px;border-radius:var(--r2);background:var(--flame);color:#fff;margin-top:20px;box-shadow:0 10px 24px rgba(216,72,27,.32)}
+.btn-send{width:100%;padding:14px;border-radius:var(--r2);background:var(--flame-btn);color:#fff;margin-top:20px;box-shadow:0 10px 24px rgba(216,72,27,.32)}
 .btn-send:disabled{opacity:.5;cursor:default;box-shadow:none}
 .form-err{color:var(--bad);font-size:13px;font-weight:600;text-align:center;margin-top:10px;display:none}
 .form-done{text-align:center;padding:30px 10px}
@@ -170,12 +173,72 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
 @media (prefers-reduced-motion:reduce){
   .fx-glow,.fx-embers,.short-banner::after,footer::before{animation:none}
 }
+
+/* ===== accessibility ===== */
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.skip-link{position:absolute;top:-60px;right:12px;z-index:200;background:var(--flame-btn);color:#fff;padding:10px 16px;border-radius:10px;font-weight:700;text-decoration:none}
+.skip-link:focus{top:12px}
+main:focus{outline:none}
+:focus-visible{outline:3px solid #FFC069;outline-offset:2px}
+.gtile{padding:0;background:none;font:inherit;color:inherit;width:100%;display:block}
+.gtile-cap{display:block}
+.lvl-opt{background:none;color:var(--text);font-family:var(--font);width:100%}
+.footer-link{display:block;margin:10px auto 0;background:none;border:none;color:#F3C08A;font:inherit;font-weight:600;text-decoration:underline;cursor:pointer}
+
+.a11y-btn{position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:95;width:50px;height:50px;border-radius:50%;
+  border:2px solid #fff;background:#1F5FD1;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 22px rgba(0,0,0,.45)}
+.a11y-btn svg{width:30px;height:30px}
+.a11y-panel{position:fixed;left:14px;bottom:calc(74px + env(safe-area-inset-bottom,0px));z-index:96;width:min(320px,calc(100vw - 28px));max-height:calc(100vh - 100px);overflow-y:auto;
+  background:#fff;color:#111;border-radius:16px;padding:16px;box-shadow:0 16px 40px rgba(0,0,0,.5);font-family:Arial,'Rubik',sans-serif}
+.a11y-panel[hidden]{display:none}
+.a11y-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.a11y-head h2{font-size:17px;color:#111}
+.a11y-close{background:#eee;border:none;width:32px;height:32px;border-radius:50%;font-size:15px;cursor:pointer;color:#111}
+.a11y-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.a11y-opt{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 6px;border-radius:12px;border:2px solid #d0d5dd;background:#f6f7f9;color:#111;
+  font:700 13px Arial,'Rubik',sans-serif;cursor:pointer;text-align:center}
+.a11y-opt .i{font-size:20px;line-height:1}
+.a11y-opt[aria-pressed="true"]{border-color:#1F5FD1;background:#E6EEFC;color:#0B3B91}
+.a11y-zoom{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:12px;border:2px solid #d0d5dd;background:#f6f7f9;font:700 13px Arial,sans-serif}
+.a11y-zoom button{width:40px;height:40px;border-radius:10px;border:2px solid #1F5FD1;background:#fff;color:#1F5FD1;font:800 18px Arial,sans-serif;cursor:pointer}
+.a11y-zoom button:disabled{opacity:.35;cursor:default}
+.a11y-foot{display:flex;gap:8px;margin-top:10px}
+.a11y-foot button{flex:1;padding:10px;border-radius:10px;border:2px solid #d0d5dd;background:#fff;color:#111;font:700 13px Arial,sans-serif;cursor:pointer}
+.statement{font-size:14px;line-height:1.8;color:var(--text2)}
+.statement h4{color:var(--text);font-size:15px;margin:14px 0 4px}
+.statement ul{padding-inline-start:20px}
+.statement a{color:var(--flame-dark)}
+
+/* text size */
+html.a11y-z1 body{zoom:1.15}
+html.a11y-z2 body{zoom:1.3}
+html.a11y-z3 body{zoom:1.5}
+/* high contrast */
+html.a11y-contrast{--bg:#000;--surface:#000;--surface2:#111;--border:#fff;--text:#fff;--text2:#fff;--text3:#e6e6e6;--flame:#FFD23F;--flame-dark:#FFD23F;--flame-bg:#000;--glass:#000;--gold:#FFD23F}
+html.a11y-contrast .fire-fx,html.a11y-contrast footer::before,html.a11y-contrast .short-banner::after{display:none}
+html.a11y-contrast .short-banner img{-webkit-mask-image:none;mask-image:none}
+html.a11y-contrast .big-card,html.a11y-contrast .contact-card,html.a11y-contrast .menu-card,html.a11y-contrast .lvl-opt,html.a11y-contrast .menu-tab{border:2px solid #fff;background:#000;box-shadow:none}
+html.a11y-contrast .menu-tab.on,html.a11y-contrast .btn-send{background:#FFD23F;color:#000;border-color:#FFD23F}
+html.a11y-contrast .lvl-opt.sel{border:3px solid #FFD23F;color:#FFD23F}
+html.a11y-contrast footer{background:#000}
+/* stop motion */
+html.a11y-still .fx-glow,html.a11y-still .fx-embers,html.a11y-still .short-banner::after,html.a11y-still footer::before{animation:none}
+html.a11y-still *{transition:none!important;scroll-behavior:auto!important}
+/* highlight links and buttons */
+html.a11y-links a,html.a11y-links .footer-link{text-decoration:underline!important;text-underline-offset:3px}
+html.a11y-links main a,html.a11y-links main button,html.a11y-links .modal a,html.a11y-links .modal button,html.a11y-links nav a{outline:2px dashed #FFD23F;outline-offset:2px}
+/* readable font */
+html.a11y-font body,html.a11y-font body *:not(.a11y-panel *){font-family:Arial,Helvetica,sans-serif!important;letter-spacing:.02em;word-spacing:.08em}
+html.a11y-font .sect-head p,html.a11y-font .menu-grp ul,html.a11y-font .statement{line-height:1.9}
+/* grayscale */
+html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">דילוג לתוכן הראשי</a>
 <div class="fire-fx" aria-hidden="true"><div class="fx-glow"></div><div class="fx-embers fx-far"></div><div class="fx-embers fx-near"></div></div>
 
-<nav class="nav">
+<nav class="nav" aria-label="ניווט ראשי">
   <div class="nav-in">
     <div class="brand"><img src="images/logo-v2.png" alt="BBQ · חגיגת ברבקיו משחררת"></div>
     <div class="nav-links" style="display:none" id="navLinksWide">
@@ -187,12 +250,13 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
 </nav>
 
 <!-- banner + three big buttons; gallery, menus and booking each open in a window -->
-<div class="short-banner"><img src="images/poster-hero.jpg" alt="חוויית מנגל עם דודי"></div>
+<main id="main" tabindex="-1">
+<div class="short-banner"><img src="images/poster-hero.jpg" alt="חגיגת מנגל עם דודי. חוויית מנגל יוקרתית שמגיעה עד אליכם: ציוד מקצועי, בשרים איכותיים, עריכה מוקפדת עם כלים יפים, שתייה קרה ושפע טעמים משובחים. אתם רק מביאים שולחנות וכיסאות, ודודי דואג לכל השאר. שירות אישי, הפקה בסטנדרט גבוה ואווירה בלתי נשכחת!"></div>
 <div class="wrap">
   <div class="big-cards">
-    <button type="button" class="big-card" onclick="openGalleryModal()"><div class="ico">📷</div><div class="txt"><b>תמונות מאירועים</b><span>הצצה לאירועים קודמים</span></div><div class="arrow">‹</div></button>
-    <button type="button" class="big-card" onclick="openMenusModal()"><div class="ico">📋</div><div class="txt"><b>תפריטים</b><span>CLASIC · SPECIAL · CRAZY</span></div><div class="arrow">‹</div></button>
-    <button type="button" class="big-card" onclick="openBookModal()"><div class="ico">📅</div><div class="txt"><b>הזמנת אירוע</b><span>בוחרים תאריך ורמה</span></div><div class="arrow">‹</div></button>
+    <button type="button" class="big-card" onclick="openGalleryModal()"><div class="ico" aria-hidden="true">📷</div><div class="txt"><b>תמונות מאירועים</b><span>הצצה לאירועים קודמים</span></div><div class="arrow" aria-hidden="true">‹</div></button>
+    <button type="button" class="big-card" onclick="openMenusModal()"><div class="ico" aria-hidden="true">📋</div><div class="txt"><b>תפריטים</b><span>CLASIC · SPECIAL · CRAZY</span></div><div class="arrow" aria-hidden="true">‹</div></button>
+    <button type="button" class="big-card" onclick="openBookModal()"><div class="ico" aria-hidden="true">📅</div><div class="txt"><b>הזמנת אירוע</b><span>בוחרים תאריך ורמה</span></div><div class="arrow" aria-hidden="true">‹</div></button>
   </div>
 </div>
 
@@ -203,15 +267,17 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
       <h2>יש שאלה לפני שמזמינים?</h2>
     </div>
     <div class="contact-grid">
-      <a class="contact-card" href="tel:0523359599"><div class="ico">📞</div><b>התקשרו אלינו</b><span>052-335-9599</span></a>
-      <a class="contact-card" href="https://wa.me/972527626562?text=%D7%94%D7%99%D7%99%20%D7%93%D7%95%D7%93%D7%99!%20%D7%A8%D7%A6%D7%99%D7%AA%D7%99%20%D7%9C%D7%A9%D7%90%D7%95%D7%9C%20%D7%A2%D7%9C%20%D7%94%D7%96%D7%9E%D7%A0%D7%AA%20%D7%9E%D7%A0%D7%92%D7%9C%20%F0%9F%94%A5" target="_blank"><div class="ico">💬</div><b>וואטסאפ</b><span>דודי ישמח לעזור</span></a>
+      <a class="contact-card" href="tel:0523359599"><div class="ico" aria-hidden="true">📞</div><b>התקשרו אלינו</b><span>052-335-9599</span></a>
+      <a class="contact-card" rel="noopener" href="https://wa.me/972527626562?text=%D7%94%D7%99%D7%99%20%D7%93%D7%95%D7%93%D7%99!%20%D7%A8%D7%A6%D7%99%D7%AA%D7%99%20%D7%9C%D7%A9%D7%90%D7%95%D7%9C%20%D7%A2%D7%9C%20%D7%94%D7%96%D7%9E%D7%A0%D7%AA%20%D7%9E%D7%A0%D7%92%D7%9C%20%F0%9F%94%A5" target="_blank"><div class="ico" aria-hidden="true">💬</div><b>וואטסאפ</b><span>דודי ישמח לעזור</span><span class="sr-only"> (נפתח בחלון חדש)</span></a>
     </div>
   </div>
 </section>
+</main>
 
 <footer>
   <div>🔥 BBQ · חגיגת ברבקיו משחררת</div>
   <div style="margin-top:4px;opacity:.75">לשירותכם דודי · 052-335-9599</div>
+  <button type="button" class="footer-link" onclick="openStatement()">הצהרת נגישות</button>
   <a class="admin-link" href="admin.html">כניסת מנהל</a>
 </footer>
 
@@ -219,15 +285,15 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
 
 <!-- windows: gallery / menus / booking -->
 <div class="modal-bg" id="galleryModalBg" hidden onclick="if(event.target===this)closeGalleryModal()">
-  <div class="modal">
-    <div class="modal-top"><h3>תמונות מאירועים</h3><button class="modal-close" onclick="closeGalleryModal()">✕</button></div>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="galleryTitle">
+    <div class="modal-top"><h3 id="galleryTitle">תמונות מאירועים</h3><button type="button" class="modal-close" aria-label="סגירה" onclick="closeGalleryModal()">✕</button></div>
     <div class="gallery" id="galleryGrid"></div>
   </div>
 </div>
 
 <div class="modal-bg" id="menusModalBg" hidden onclick="if(event.target===this)closeMenusModal()">
-  <div class="modal">
-    <div class="modal-top"><h3>תפריטי האירועים</h3><button class="modal-close" onclick="closeMenusModal()">✕</button></div>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="menusTitle">
+    <div class="modal-top"><h3 id="menusTitle">תפריטי האירועים</h3><button type="button" class="modal-close" aria-label="סגירה" onclick="closeMenusModal()">✕</button></div>
     <div id="menuBlock">
       <div class="menu-tabs" id="menuTabs"></div>
       <div id="menuCards"></div>
@@ -237,54 +303,102 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
 </div>
 
 <div class="modal-bg" id="bookModalBg" hidden onclick="if(event.target===this)closeBookModal()">
-  <div class="modal">
-    <div class="modal-top"><h3>טופס הזמנת אירוע</h3><button class="modal-close" onclick="closeBookModal()">✕</button></div>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="bookTitle">
+    <div class="modal-top"><h3 id="bookTitle">טופס הזמנת אירוע</h3><button type="button" class="modal-close" aria-label="סגירה" onclick="closeBookModal()">✕</button></div>
     <div class="book-wrap" id="bookWrap" style="padding:0;border:none">
       <form id="bookForm">
         <div class="fld">
-          <label>שם מלא *</label>
+          <label for="fName">שם מלא *</label>
           <input type="text" id="fName" required autocomplete="name">
         </div>
         <div class="two-col">
           <div class="fld">
-            <label>טלפון *</label>
+            <label for="fPhone">טלפון *</label>
             <input type="tel" id="fPhone" required autocomplete="tel" placeholder="050-1234567">
           </div>
           <div class="fld">
-            <label>אימייל</label>
+            <label for="fEmail">אימייל</label>
             <input type="email" id="fEmail" autocomplete="email">
           </div>
         </div>
         <div class="two-col">
           <div class="fld">
-            <label>תאריך האירוע *</label>
+            <label for="fDate">תאריך האירוע *</label>
             <input type="date" id="fDate" required>
           </div>
           <div class="fld">
-            <label>כמות משתתפים *</label>
+            <label for="fGuests">כמות משתתפים *</label>
             <input type="number" id="fGuests" required min="1" placeholder="לדוגמה: 30">
           </div>
         </div>
         <div class="fld">
-          <label>רמת אירוע *</label>
-          <div class="lvl-grid" id="lvlGrid"></div>
+          <span class="fld-label" id="lvlLabel">רמת אירוע *</span>
+          <div class="lvl-grid" id="lvlGrid" role="group" aria-labelledby="lvlLabel"></div>
         </div>
         <div class="fld">
-          <label>מיקום / אזור משוער</label>
+          <label for="fLocation">מיקום / אזור משוער</label>
           <input type="text" id="fLocation" placeholder="עיר / אזור / כתובת">
         </div>
         <div class="fld">
-          <label>הערות נוספות</label>
+          <label for="fNotes">הערות נוספות</label>
           <textarea id="fNotes" placeholder="אלרגיות, בקשות מיוחדות, שעה משוערת..."></textarea>
         </div>
         <button type="submit" class="btn btn-send" id="sendBtn">שליחת בקשת הזמנה 🔥</button>
-        <div class="form-err" id="formErr"></div>
+        <div class="form-err" id="formErr" role="alert"></div>
       </form>
-      <div class="form-done" id="formDone" style="display:none">
-        <div class="form-done-ico">✅</div>
-        <h3>הבקשה התקבלה!</h3>
+      <div class="form-done" id="formDone" style="display:none" role="status">
+        <div class="form-done-ico" aria-hidden="true">✅</div>
+        <h3 id="doneTitle" tabindex="-1">הבקשה התקבלה!</h3>
         <p>תודה <span id="doneName"></span>, קיבלנו את הבקשה שלכם לתאריך <span id="doneDate"></span>.<br>ניצור קשר בהקדם לאישור סופי ותיאום פרטים.</p>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- accessibility menu -->
+<button type="button" class="a11y-btn" id="a11yBtn" aria-label="תפריט נגישות" aria-expanded="false" aria-controls="a11yPanel" onclick="toggleA11y()">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="4" r="2"/><path d="M21 9h-6v13h-2v-6h-2v6H9V9H3V7h18z"/></svg>
+</button>
+<div class="a11y-panel" id="a11yPanel" role="dialog" aria-modal="false" aria-labelledby="a11yTitle" hidden>
+  <div class="a11y-head"><h2 id="a11yTitle">נגישות</h2><button type="button" class="a11y-close" aria-label="סגירת תפריט הנגישות" onclick="closeA11y()">✕</button></div>
+  <div class="a11y-grid">
+    <div class="a11y-zoom" role="group" aria-label="גודל טקסט">
+      <button type="button" id="a11yZoomOut" aria-label="הקטנת טקסט" onclick="a11yZoom(-1)">א-</button>
+      <span>גודל טקסט <span id="a11yZoomVal">100%</span></span>
+      <button type="button" id="a11yZoomIn" aria-label="הגדלת טקסט" onclick="a11yZoom(1)">א+</button>
+    </div>
+    <button type="button" class="a11y-opt" data-k="contrast" aria-pressed="false" onclick="a11yToggle('contrast')"><span class="i" aria-hidden="true">◐</span>ניגודיות גבוהה</button>
+    <button type="button" class="a11y-opt" data-k="still" aria-pressed="false" onclick="a11yToggle('still')"><span class="i" aria-hidden="true">⏸</span>עצירת אנימציות</button>
+    <button type="button" class="a11y-opt" data-k="links" aria-pressed="false" onclick="a11yToggle('links')"><span class="i" aria-hidden="true">🔗</span>הדגשת קישורים</button>
+    <button type="button" class="a11y-opt" data-k="font" aria-pressed="false" onclick="a11yToggle('font')"><span class="i" aria-hidden="true">Aa</span>גופן קריא</button>
+    <button type="button" class="a11y-opt" data-k="gray" aria-pressed="false" onclick="a11yToggle('gray')"><span class="i" aria-hidden="true">▒</span>גווני אפור</button>
+    <button type="button" class="a11y-opt" onclick="closeA11y();openStatement()"><span class="i" aria-hidden="true">📄</span>הצהרת נגישות</button>
+  </div>
+  <div class="a11y-foot"><button type="button" onclick="a11yReset()">איפוס הגדרות</button></div>
+</div>
+
+<div class="modal-bg" id="statementBg" hidden onclick="if(event.target===this)closeDialog('statementBg')">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="statementTitle">
+    <div class="modal-top"><h3 id="statementTitle">הצהרת נגישות</h3><button type="button" class="modal-close" aria-label="סגירה" onclick="closeDialog('statementBg')">✕</button></div>
+    <div class="statement">
+      <p>אנחנו ב-BBQ רוצים שכל מי שמתעניין באירוע מנגל יוכל להשתמש באתר בקלות, כולל אנשים עם מוגבלות. השקענו בהתאמת האתר להנחיות הנגישות לתכנים באינטרנט WCAG 2.0 ברמה AA, שעליהן מבוסס התקן הישראלי ת"י 5568, ככל שהדבר אפשרי באתר.</p>
+      <h4>מה עשינו באתר</h4>
+      <ul>
+        <li>אפשר להפעיל את כל האתר בעזרת המקלדת בלבד: מעבר בין רכיבים ב-Tab, פתיחה ב-Enter, וסגירת חלונות ב-Esc.</li>
+        <li>כפתורים, טפסים וחלונות מתויגים כך שתוכנות קורא מסך יוכלו להקריא אותם, ולתמונות יש טקסט חלופי.</li>
+        <li>קישור "דילוג לתוכן הראשי" בראש הדף.</li>
+        <li>תפריט נגישות (הכפתור הכחול בפינת המסך) עם הגדלת טקסט, ניגודיות גבוהה, עצירת אנימציות, הדגשת קישורים, גופן קריא וגווני אפור. ההגדרות נשמרות לביקור הבא.</li>
+        <li>האתר מכבד את הגדרת "הפחתת תנועה" של הטלפון או המחשב.</li>
+      </ul>
+      <h4>מגבלות ידועות</h4>
+      <ul>
+        <li>תמונות וסרטונים מאירועים מתוארים לפי הכיתוב שלהם. ייתכן שלחלק מהסרטונים אין כתוביות.</li>
+      </ul>
+      <h4>נגישות השירות באירוע עצמו</h4>
+      <p>השירות ניתן במקום שהלקוח בוחר. אם יש צורך בהתאמה מיוחדת באירוע, נשמח לתאם אותה מראש.</p>
+      <h4>נתקלתם בבעיה? דברו איתנו</h4>
+      <p>אם משהו באתר לא נגיש לכם, נשמח לשמוע ולתקן. אחראי הנגישות: דודי · טלפון <a href="tel:0523359599">052-335-9599</a> · <a href="https://wa.me/972527626562" target="_blank" rel="noopener">וואטסאפ<span class="sr-only"> (נפתח בחלון חדש)</span></a>.</p>
+      <p style="margin-top:12px;font-size:12.5px;color:var(--text3)">ההצהרה עודכנה ב-9 באוקטובר 2026.</p>
     </div>
   </div>
 </div>
@@ -365,30 +479,70 @@ const MENUS = {
 function renderGallery(){
   const grid=document.getElementById('galleryGrid');
   grid.innerHTML=GALLERY.map((g,i)=>`
-    <div class="gtile" onclick="openLightbox(${i})">
+    <button type="button" class="gtile" onclick="openLightbox(${i})" aria-label="${escHtml(mediaLabel(g,i))}">
       ${g.kind==='video'
-        ? `<video src="${escHtml(g.url)}#t=0.1" muted playsinline preload="metadata"></video><div class="gtile-play">▶</div>`
-        : `<img src="${escHtml(g.url)}" alt="${escHtml(g.cap)}" loading="lazy">`}
-      ${g.cap?`<div class="gtile-cap">${escHtml(g.cap)}</div>`:''}
-    </div>`).join('');
+        ? `<video src="${escHtml(g.url)}#t=0.1" muted playsinline preload="metadata" aria-hidden="true"></video><span class="gtile-play" aria-hidden="true">▶</span>`
+        : `<img src="${escHtml(g.url)}" alt="" loading="lazy">`}
+      ${g.cap?`<span class="gtile-cap" aria-hidden="true">${escHtml(g.cap)}</span>`:''}
+    </button>`).join('');
 }
-let lightboxIndex=-1;
+/* ===== accessibility menu ===== */
+const A11Y_ZOOMS=['100%','115%','130%','150%'];
+let a11y=(()=>{ try{ return JSON.parse(localStorage.getItem('mangalA11y')||'{}'); }catch(e){ return {}; } })();
+function applyA11y(){
+  const c=document.documentElement.classList;
+  [1,2,3].forEach(z=>c.toggle('a11y-z'+z, a11y.zoom===z));
+  ['contrast','still','links','font','gray'].forEach(k=>c.toggle('a11y-'+k, !!a11y[k]));
+  document.querySelectorAll('.a11y-opt[data-k]').forEach(b=>b.setAttribute('aria-pressed', String(!!a11y[b.dataset.k])));
+  const z=a11y.zoom||0;
+  document.getElementById('a11yZoomVal').textContent=A11Y_ZOOMS[z];
+  document.getElementById('a11yZoomOut').disabled=z===0;
+  document.getElementById('a11yZoomIn').disabled=z===A11Y_ZOOMS.length-1;
+  try{ localStorage.setItem('mangalA11y', JSON.stringify(a11y)); }catch(e){}
+}
+function a11yToggle(k){ a11y[k]=!a11y[k]; applyA11y(); }
+function a11yZoom(d){ a11y.zoom=Math.max(0,Math.min(A11Y_ZOOMS.length-1,(a11y.zoom||0)+d)); applyA11y(); }
+function a11yReset(){ a11y={}; applyA11y(); }
+function toggleA11y(){ document.getElementById('a11yPanel').hidden ? openA11y() : closeA11y(); }
+function openA11y(){
+  document.getElementById('a11yPanel').hidden=false;
+  document.getElementById('a11yBtn').setAttribute('aria-expanded','true');
+  document.querySelector('#a11yPanel .a11y-close').focus();
+}
+function closeA11y(){
+  document.getElementById('a11yPanel').hidden=true;
+  const btn=document.getElementById('a11yBtn');
+  btn.setAttribute('aria-expanded','false');
+  btn.focus();
+}
+function openStatement(){ openDialog('statementBg'); }
+
+function mediaLabel(g,i){
+  const kind=g.kind==='video'?'סרטון':'תמונה';
+  return g.cap ? `${kind}: ${g.cap}` : `${kind} ${i+1} מתוך ${GALLERY.length}`;
+}
+let lightboxIndex=-1, lightboxOpener=null;
 function openLightbox(i){
+  lightboxOpener=document.activeElement;
   lightboxIndex=i;
   renderLightbox();
 }
 function renderLightbox(){
   const g=GALLERY[lightboxIndex];
   const root=document.getElementById('lightboxRoot');
-  root.innerHTML=`<div class="lightbox" id="lightboxEl" onclick="if(event.target===this)closeLightbox()">
-    <button class="lb-close" onclick="closeLightbox()">✕</button>
-    <button class="lb-nav lb-prev" onclick="event.stopPropagation();lightboxShift(1)">›</button>
+  // keep keyboard focus on the same control when moving between photos
+  const focusedClass=root.contains(document.activeElement) ? document.activeElement.className : 'lb-close';
+  root.innerHTML=`<div class="lightbox" id="lightboxEl" role="dialog" aria-modal="true" aria-label="${escHtml(mediaLabel(g,lightboxIndex))}" onclick="if(event.target===this)closeLightbox()">
+    <button type="button" class="lb-close" aria-label="סגירה" onclick="closeLightbox()">✕</button>
+    <button type="button" class="lb-nav lb-prev" aria-label="הקודם" onclick="event.stopPropagation();lightboxShift(-1)">›</button>
     ${g.kind==='video'
-      ? `<video src="${escHtml(g.url)}" controls autoplay playsinline></video>`
-      : `<img src="${escHtml(g.url)}" alt="${escHtml(g.cap)}">`}
-    <button class="lb-nav lb-next" onclick="event.stopPropagation();lightboxShift(-1)">‹</button>
-    <div class="lb-counter">${lightboxIndex+1} / ${GALLERY.length}</div>
+      ? `<video src="${escHtml(g.url)}" controls ${document.documentElement.classList.contains('a11y-still')?'':'autoplay'} playsinline></video>`
+      : `<img src="${escHtml(g.url)}" alt="${escHtml(g.cap||mediaLabel(g,lightboxIndex))}">`}
+    <button type="button" class="lb-nav lb-next" aria-label="הבא" onclick="event.stopPropagation();lightboxShift(1)">‹</button>
+    <div class="lb-counter" aria-live="polite">${lightboxIndex+1} / ${GALLERY.length}</div>
   </div>`;
+  const again=root.querySelector('.'+focusedClass.split(' ').filter(Boolean).join('.'));
+  (again||root.querySelector('.lb-close')).focus();
   let sx=0,sy=0;
   const el=document.getElementById('lightboxEl');
   el.addEventListener('touchstart',(e)=>{ if(e.touches.length!==1)return; sx=e.touches[0].clientX; sy=e.touches[0].clientY; },{passive:true});
@@ -401,28 +555,30 @@ function lightboxShift(dir){
   lightboxIndex=(lightboxIndex+dir+GALLERY.length)%GALLERY.length;
   renderLightbox();
 }
-function closeLightbox(){ lightboxIndex=-1; document.getElementById('lightboxRoot').innerHTML=''; }
-document.addEventListener('keydown',(e)=>{
-  if(lightboxIndex<0)return;
-  if(e.key==='Escape')closeLightbox();
-  else if(e.key==='ArrowLeft')lightboxShift(1);
-  else if(e.key==='ArrowRight')lightboxShift(-1);
-});
+function closeLightbox(){
+  lightboxIndex=-1;
+  document.getElementById('lightboxRoot').innerHTML='';
+  if(lightboxOpener && lightboxOpener.focus) lightboxOpener.focus();
+}
 
 let selectedLevel=null;
 function renderLevels(){
   const wrap=document.getElementById('lvlGrid');
-  wrap.innerHTML=LEVELS.map(l=>`<div class="lvl-opt" data-lvl="${l.id}" onclick="selectLevel('${l.id}')">${l.label}<small>${l.sub}</small></div>`).join('');
+  wrap.innerHTML=LEVELS.map(l=>`<button type="button" class="lvl-opt" data-lvl="${l.id}" aria-pressed="false" onclick="selectLevel('${l.id}')">${l.label}<small>${l.sub}</small></button>`).join('');
 }
 function selectLevel(id){
   selectedLevel=id;
-  document.querySelectorAll('.lvl-opt').forEach(el=>el.classList.toggle('sel',el.dataset.lvl===id));
+  document.querySelectorAll('.lvl-opt').forEach(el=>{
+    const on=el.dataset.lvl===id;
+    el.classList.toggle('sel',on);
+    el.setAttribute('aria-pressed',String(on));
+  });
 }
 
 let activeMenuTab=LEVELS[0].id;
 function renderMenus(){
   const tabs=document.getElementById('menuTabs');
-  tabs.innerHTML=LEVELS.map(l=>`<button class="menu-tab ${l.id===activeMenuTab?'on':''}" onclick="setMenuTab('${l.id}')">${l.label}</button>`).join('');
+  tabs.innerHTML=LEVELS.map(l=>`<button type="button" class="menu-tab ${l.id===activeMenuTab?'on':''}" aria-pressed="${l.id===activeMenuTab}" onclick="setMenuTab('${l.id}')">${l.label}</button>`).join('');
   const cards=document.getElementById('menuCards');
   cards.innerHTML=LEVELS.map(l=>{
     const m=MENUS[l.id];
@@ -438,21 +594,59 @@ function renderMenus(){
     </div>`;
   }).join('');
 }
-function setMenuTab(id){activeMenuTab=id;renderMenus();}
+function setMenuTab(id){activeMenuTab=id;renderMenus();document.querySelector('#menuTabs .menu-tab.on').focus();}
 
 /* ===== windows: gallery / menus / booking ===== */
-function isOverlayOpen(){
-  return lightboxIndex>=0
-    || !document.getElementById('galleryModalBg').hidden
-    || !document.getElementById('menusModalBg').hidden
-    || !document.getElementById('bookModalBg').hidden;
+const DIALOGS=['galleryModalBg','menusModalBg','bookModalBg','statementBg'];
+const dialogOpeners={};
+function openDialog(id){
+  dialogOpeners[id]=document.activeElement;
+  const bg=document.getElementById(id);
+  bg.hidden=false;
+  bg.querySelector('.modal-close').focus();
 }
-function openGalleryModal(){ document.getElementById('galleryModalBg').hidden=false; }
-function closeGalleryModal(){ document.getElementById('galleryModalBg').hidden=true; }
-function openMenusModal(){ document.getElementById('menusModalBg').hidden=false; }
-function closeMenusModal(){ document.getElementById('menusModalBg').hidden=true; }
-function openBookModal(){ document.getElementById('bookModalBg').hidden=false; }
-function closeBookModal(){ document.getElementById('bookModalBg').hidden=true; }
+function closeDialog(id){
+  document.getElementById(id).hidden=true;
+  const back=dialogOpeners[id];
+  if(back && back.focus) back.focus();
+}
+function topDialog(){
+  if(lightboxIndex>=0) return document.getElementById('lightboxEl');
+  if(!document.getElementById('a11yPanel').hidden) return document.getElementById('a11yPanel');
+  const open=DIALOGS.map(id=>document.getElementById(id)).filter(el=>!el.hidden);
+  return open.length ? open[open.length-1].querySelector('.modal') : null;
+}
+function isOverlayOpen(){ return !!topDialog(); }
+function openGalleryModal(){ openDialog('galleryModalBg'); }
+function closeGalleryModal(){ closeDialog('galleryModalBg'); }
+function openMenusModal(){ openDialog('menusModalBg'); }
+function closeMenusModal(){ closeDialog('menusModalBg'); }
+function openBookModal(){ openDialog('bookModalBg'); }
+function closeBookModal(){ closeDialog('bookModalBg'); }
+document.addEventListener('keydown',(e)=>{
+  if(lightboxIndex>=0 && !e.altKey && !e.ctrlKey && !e.metaKey){
+    // RTL: the right arrow goes back, the left arrow goes forward
+    if(e.key==='ArrowLeft'){ lightboxShift(1); return; }
+    if(e.key==='ArrowRight'){ lightboxShift(-1); return; }
+  }
+  const top=topDialog();
+  if(!top) return;
+  if(e.key==='Escape'){
+    e.preventDefault();
+    if(lightboxIndex>=0) closeLightbox();
+    else if(!document.getElementById('a11yPanel').hidden) closeA11y();
+    else closeDialog(top.closest('.modal-bg').id);
+    return;
+  }
+  if(e.key==='Tab'){
+    const items=[...top.querySelectorAll('a[href],button:not([disabled]),input,select,textarea,video[controls],[tabindex]:not([tabindex="-1"])')]
+      .filter(el=>el.offsetParent!==null);
+    if(!items.length) return;
+    const first=items[0], last=items[items.length-1];
+    if(e.shiftKey && (document.activeElement===first || !top.contains(document.activeElement))){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && (document.activeElement===last || !top.contains(document.activeElement))){ e.preventDefault(); first.focus(); }
+  }
+});
 
 /* ===== Firebase ===== */
 const firebaseConfig = {
@@ -507,6 +701,7 @@ document.getElementById('bookForm').addEventListener('submit', async (e)=>{
     document.getElementById('doneName').textContent=name;
     document.getElementById('doneDate').textContent=new Date(date).toLocaleDateString('he-IL');
     document.getElementById('formDone').style.display='block';
+    document.getElementById('doneTitle').focus();
   }catch(err){
     console.error(err);
     errEl.textContent='אירעה שגיאה בשליחה, נסו שוב או צרו קשר טלפוני';
@@ -521,7 +716,7 @@ function applyMediaNav(){
 window.addEventListener('resize',applyMediaNav);
 applyMediaNav();
 
-renderGallery();renderLevels();renderMenus();loadGallery();
+renderGallery();renderLevels();renderMenus();loadGallery();applyA11y();
 
 /* החלקה ימינה בכל מקום באתר -> כניסה ללוח הניהול (מושבת כשחלון/לייטבוקס פתוח) */
 (function(){

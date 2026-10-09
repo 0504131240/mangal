@@ -752,8 +752,8 @@ window.addEventListener('resize',applyMediaNav);
 applyMediaNav();
 
 renderGallery();renderLevels();renderMenus();loadGallery();applyA11y();
-if(location.hash==='#privacy') openPrivacy();
-else if(location.hash==='#accessibility') openStatement();
+// direct links, e.g. the poster's QR code opens .../#book
+({'#book':openBookModal,'#gallery':openGalleryModal,'#menus':openMenusModal,'#privacy':openPrivacy,'#accessibility':openStatement}[location.hash]||(()=>{}))();
 
 /* החלקה ימינה בכל מקום באתר -> כניסה ללוח הניהול (מושבת כשחלון/לייטבוקס פתוח) */
 (function(){

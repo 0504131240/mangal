@@ -1,22 +1,11 @@
-import { getDoc, API_KEY } from './_firestore.js';
+import { BASE } from './_firestore.js';
 
-// True when idToken is a valid Firebase sign-in token of the admin account named in mangalSettings/admin.
+// The admins list is readable only by admins (the owners named in the security rules plus the
+// emails in mangalSettings/admins), so reading it with the caller's Firebase ID token is the check.
 export async function isAdmin(idToken) {
   if (typeof idToken !== 'string' || idToken.length < 100) return false;
-  const res = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${API_KEY}`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ idToken }),
-  });
-  if (res.status === 400) return false; // expired or forged token
-  if (!res.ok) throw new Error(`admin lookup failed: auth ${res.status}`);
-  const uid = (await res.json()).users?.[0]?.localId;
-  let doc;
-  try {
-    doc = await getDoc('mangalSettings/admin');
-  } catch (err) {
-    throw new Error(`admin lookup failed: ${err.message}`);
-  }
-  const adminUid = doc?.fields?.authUid?.stringValue;
-  return Boolean(uid && adminUid && uid === adminUid);
+  const res = await fetch(`${BASE}mangalSettings/admins`, { headers: { authorization: `Bearer ${idToken}` } });
+  if (res.ok || res.status === 404) return true; // 404: allowed to read, list not created yet
+  if (res.status === 400 || res.status === 401 || res.status === 403) return false; // malformed / invalid token, or not an admin
+  throw new Error(`admin check failed: firestore ${res.status}`);
 }

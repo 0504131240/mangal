@@ -1,10 +1,21 @@
 rules_version = '2';
-// Paste into Firebase console → Firestore Database → Rules.
-// The admin panel shows this text with the admin user id already filled in.
+// Paste into Firebase console → Firestore Database → Rules, with __OWNER_EMAILS__ replaced by the
+// owners' Google emails in quotes, e.g. 'a@gmail.com', 'b@gmail.com' (kept out of this public repo).
 service cloud.firestore {
   match /databases/{database}/documents {
+    function signedInEmail() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+    // owners always have access, and only they can change the list of added admins
+    function isOwner() {
+      return signedInEmail() && request.auth.token.email.lower() in [__OWNER_EMAILS__];
+    }
+    function adminsPath() {
+      return /databases/$(database)/documents/mangalSettings/admins;
+    }
     function isAdmin() {
-      return request.auth != null && request.auth.uid == '__ADMIN_UID__';
+      return isOwner() || (signedInEmail() && exists(adminsPath())
+        && request.auth.token.email.lower() in get(adminsPath()).data.emails);
     }
     function optionalText(v, max) {
       return v == null || (v is string && v.size() <= max);
@@ -41,11 +52,17 @@ service cloud.firestore {
       );
     }
 
-    // public: the gallery shown on the site, the admin's user id, and push subscriptions
+    // public: the gallery shown on the site, and push subscriptions
     // (a subscription can only receive pushes signed with the server's private VAPID key)
     match /mangalSettings/{doc} {
-      allow read: if doc in ['gallery', 'admin', 'push'] || isAdmin();
-      allow write: if isAdmin();
+      allow read: if doc in ['gallery', 'push'] || isAdmin();
+      allow write: if isAdmin() && doc != 'admins';
+    }
+    match /mangalSettings/admins {
+      allow write: if isOwner()
+        && request.resource.data.keys().hasOnly(['emails'])
+        && request.resource.data.emails is list
+        && request.resource.data.emails.size() <= 50;
     }
 
     match /{path=**} {

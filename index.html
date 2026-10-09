@@ -466,11 +466,14 @@ document.getElementById('bookForm').addEventListener('submit', async (e)=>{
   btn.disabled=true;btn.textContent='שולח...';
   try{
     const {db,collection,addDoc,serverTimestamp}=await fbInit();
-    await addDoc(collection(db,'mangalBookings'),{
+    const ref=await addDoc(collection(db,'mangalBookings'),{
       name,phone,email:email||null,date,guests,level:selectedLevel,location:location||null,notes:notes||null,
       status:'pending', totalPrice:0, paidAmount:0,
       createdAt:serverTimestamp(), createdAtMs:Date.now()
     });
+    // push notification to the owner's phone; the request is already saved, so a failure here is ignored
+    fetch('/api/push',{method:'POST',headers:{'content-type':'application/json'},keepalive:true,
+      body:JSON.stringify({action:'booking',id:ref.id})}).catch(()=>{});
     document.getElementById('bookForm').style.display='none';
     document.getElementById('doneName').textContent=name;
     document.getElementById('doneDate').textContent=new Date(date).toLocaleDateString('he-IL');

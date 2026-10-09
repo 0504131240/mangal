@@ -158,6 +158,7 @@ button{font-family:var(--font)}
 .set-txt small{display:block;font-size:11.5px;color:var(--text3);margin-top:2px}
 .set-btn{flex-shrink:0;border:1.5px solid var(--flame);background:var(--surface);color:var(--flame-dark);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer}
 .set-btn.on{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.set-test{width:100%;margin:-2px 0 8px;padding:10px;border-radius:var(--r2);border:1.5px dashed var(--border);background:transparent;color:var(--text2);font-weight:700;font-size:12.5px;cursor:pointer}
 .set-upload{display:block;text-align:center;padding:13px;border-radius:var(--r2);border:1.5px dashed var(--flame);background:var(--flame-bg);color:var(--flame-dark);font-weight:700;font-size:13.5px;cursor:pointer;margin-top:8px}
 .set-upload.disabled{opacity:.45;pointer-events:none}
 .upload-status{font-size:12px;color:var(--text2);text-align:center;margin-top:8px;font-weight:600;white-space:pre-line;overflow-wrap:anywhere}
@@ -256,7 +257,7 @@ async function fbInit(){
   const app=appMod.initializeApp(firebaseConfig);
   const db=fsMod.getFirestore(app);
   _fb={db,doc:fsMod.doc,getDoc:fsMod.getDoc,setDoc:fsMod.setDoc,updateDoc:fsMod.updateDoc,deleteDoc:fsMod.deleteDoc,addDoc:fsMod.addDoc,
-    onSnapshot:fsMod.onSnapshot,collection:fsMod.collection,query:fsMod.query,orderBy:fsMod.orderBy};
+    onSnapshot:fsMod.onSnapshot,collection:fsMod.collection,query:fsMod.query,orderBy:fsMod.orderBy,deleteField:fsMod.deleteField};
   return _fb;
 }
 const LEVELS = ['CLASIC','SPECIAL','CRAZY'];
@@ -396,14 +397,15 @@ async function doUnlock(){
 function unlockApp(){
   document.getElementById('lockScreen').style.display='none';
   document.getElementById('app').style.display='block';
+  if(location.hash==='#pending') setTab('pending');
   startListening();
+  syncPushSubscription();
 }
 
 /* ===== data ===== */
 let bookings=[];
 let knownPendingIds=new Set();
 let firstLoad=true;
-let notifPermission=false;
 
 async function startListening(){
   const {db,collection,query,orderBy,onSnapshot}=await fbInit();
@@ -415,8 +417,6 @@ async function startListening(){
   }, (err)=>{
     console.error(err);
   });
-  notifPermission = (typeof Notification!=='undefined' && Notification.permission==='granted');
-  updateNotifBtn();
 }
 function checkNewPending(){
   const currentPending=bookings.filter(b=>b.status==='pending').map(b=>b.id);
@@ -424,7 +424,8 @@ function checkNewPending(){
     const newOnes=currentPending.filter(id=>!knownPendingIds.has(id));
     if(newOnes.length){
       beep();
-      if(notifPermission){
+      // with push on, the service worker already shows a notification for this request
+      if(!pushActive && typeof Notification!=='undefined' && Notification.permission==='granted'){
         const b=bookings.find(x=>x.id===newOnes[0]);
         try{ new Notification('בקשת אירוע חדשה! 🔥', {body: b ? `${b.name} · ${b.guests} אנשים · ${b.date}` : 'בקשה חדשה התקבלה'}); }catch(e){}
       }
@@ -453,19 +454,107 @@ function showToast(msg){
   root.appendChild(el);
   setTimeout(()=>el.remove(),3800);
 }
-async function toggleNotifications(){
-  if(typeof Notification==='undefined'){showToast('הדפדפן לא תומך בהתראות');return;}
-  if(Notification.permission==='granted'){notifPermission=true;showToast('התראות כבר פעילות ✓');return;}
-  const perm=await Notification.requestPermission();
-  notifPermission = perm==='granted';
+/* ===== push notifications (reach the phone even when the app is closed) ===== */
+const VAPID_PUBLIC_KEY='BB5gbFkt0YrnB7jAywT5CWmMntuj8S0mt5oe3khYuHitM5YRzGOtYTAOD0KLkVJvUT08_c5fCfQUgWcJcIVgfSQ';
+let pushActive=false;
+const pushSupported=()=>'serviceWorker' in navigator && 'PushManager' in window && typeof Notification!=='undefined';
+async function currentPushSub(){
+  if(!pushSupported()) return null;
+  const reg=await navigator.serviceWorker.getRegistration();
+  return reg ? reg.pushManager.getSubscription() : null;
+}
+async function pushSubId(endpoint){ return 's'+(await sha256(endpoint)).slice(0,24); }
+function urlB64ToUint8Array(b64){
+  const pad='='.repeat((4-b64.length%4)%4);
+  const raw=atob((b64+pad).replace(/-/g,'+').replace(/_/g,'/'));
+  return Uint8Array.from(raw,c=>c.charCodeAt(0));
+}
+function deviceLabel(){
+  const ua=navigator.userAgent;
+  return /iPhone|iPad/.test(ua)?'iPhone':/Android/.test(ua)?'Android':'מחשב';
+}
+async function savePushSub(sub){
+  const j=sub.toJSON();
+  const {db,doc,setDoc}=await fbInit();
+  await setDoc(doc(db,'mangalSettings','push'),
+    {subs:{[await pushSubId(j.endpoint)]:{endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth,device:deviceLabel(),savedAtMs:Date.now()}}},
+    {merge:true});
+}
+// re-save on every open, so a device the server dropped (or a renewed subscription) is registered again
+async function syncPushSubscription(){
+  try{
+    const sub=await currentPushSub();
+    pushActive=!!sub && Notification.permission==='granted';
+    if(pushActive) await savePushSub(sub);
+  }catch(e){ console.error(e); }
   updateNotifBtn();
-  showToast(notifPermission?'התראות הופעלו ✓':'התראות לא אושרו');
+}
+async function toggleNotifications(){
+  if(pushActive){
+    if(!confirm('לכבות התראות במכשיר הזה?')) return;
+    try{
+      const sub=await currentPushSub();
+      if(sub){
+        const id=await pushSubId(sub.endpoint);
+        const {db,doc,updateDoc,deleteField}=await fbInit();
+        await updateDoc(doc(db,'mangalSettings','push'),{[`subs.${id}`]:deleteField()}).catch(()=>{});
+        await sub.unsubscribe();
+      }
+    }catch(e){ console.error(e); }
+    pushActive=false; updateNotifBtn(); showToast('ההתראות כובו במכשיר הזה');
+    return;
+  }
+  if(_isIOS && !_isStandalone){
+    alert('באייפון התראות עובדות רק מהאפליקציה המותקנת:\n1. בספארי: כפתור השיתוף ← "הוספה למסך הבית"\n2. לפתוח את "ניהול BBQ" ממסך הבית\n3. להיכנס להגדרות וללחוץ כאן שוב');
+    return;
+  }
+  if(!pushSupported()){ showToast('הדפדפן הזה לא תומך בהתראות'); return; }
+  const perm=await Notification.requestPermission();
+  if(perm!=='granted'){ showToast('ההתראות לא אושרו. אפשר לאשר אותן בהגדרות הדפדפן'); return; }
+  try{
+    const reg=await navigator.serviceWorker.register('sw-admin.js');
+    await navigator.serviceWorker.ready;
+    const sub=await reg.pushManager.getSubscription()
+      || await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:urlB64ToUint8Array(VAPID_PUBLIC_KEY)});
+    await savePushSub(sub);
+    pushActive=true; updateNotifBtn();
+    showToast('התראות הופעלו ✓ אפשר לשלוח התראת בדיקה');
+  }catch(e){
+    console.error(e); showToast('הפעלת ההתראות נכשלה: '+(e.message||e));
+  }
 }
 function updateNotifBtn(){
   const btn=document.getElementById('notifBtn');
   if(!btn) return;
-  btn.textContent = notifPermission ? 'פעיל ✓' : 'הפעלה';
-  btn.classList.toggle('on', notifPermission);
+  btn.textContent = pushActive ? 'פעיל ✓' : 'הפעלה';
+  btn.classList.toggle('on', pushActive);
+  const test=document.getElementById('pushTestRow');
+  if(test) test.hidden=!pushActive;
+}
+async function checkPushServer(){
+  let ok=false;
+  try{ const r=await fetch('/api/push',{cache:'no-store'}); ok=r.ok && (await r.json()).configured===true; }catch(e){}
+  const note=document.getElementById('pushNote');
+  if(note) note.innerHTML = ok ? '' :
+    `<div class="minfo" style="margin:0 0 8px">כדי שההתראות יגיעו גם כשהאפליקציה סגורה, צריך להוסיף ב-Vercel את המפתח VAPID_PRIVATE_KEY ולעשות Redeploy.</div>`;
+}
+async function sendTestPush(){
+  const btn=document.getElementById('pushTestBtn');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ שולח...'; }
+  try{
+    const r=await fetch('/api/push',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'test',passHash:adminPassHash})});
+    const j=await r.json().catch(()=>({}));
+    if(r.status===503) showToast('חסר המפתח VAPID_PRIVATE_KEY ב-Vercel');
+    else if(!r.ok) showToast('השליחה נכשלה: '+(j.error||r.status));
+    else if(!j.sent) showToast('לא נמצאו מכשירים פעילים'+(j.errors&&j.errors.length?': '+j.errors[0]:''));
+    else showToast(`נשלחה התראה ל-${j.sent} ${j.sent===1?'מכשיר':'מכשירים'} ✓`);
+  }catch(e){ showToast('השליחה נכשלה: '+(e.message||e)); }
+  if(btn){ btn.disabled=false; btn.textContent='📨 שליחת התראת בדיקה'; }
+}
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.addEventListener('message',(e)=>{
+    if(e.data && e.data.type==='open-tab' && e.data.tab) setTab(e.data.tab);
+  });
 }
 
 /* ===== tabs ===== */
@@ -965,9 +1054,13 @@ function openSettings(){
             <div class="set-txt"><b>👆 טביעת אצבע</b><small>כניסה לניהול בלי להקליד סיסמה</small></div>
             <button class="set-btn" id="bioBtn" onclick="toggleBiometricSetting()"></button>
           </div>
+          <div id="pushNote"></div>
           <div class="set-row">
-            <div class="set-txt"><b>🔔 התראות</b><small>התראה כשמגיעה בקשה חדשה, כשהניהול פתוח</small></div>
+            <div class="set-txt"><b>🔔 התראות</b><small>התראה לטלפון על כל בקשה חדשה, גם כשהאפליקציה סגורה</small></div>
             <button class="set-btn" id="notifBtn" onclick="toggleNotifications()"></button>
+          </div>
+          <div id="pushTestRow" hidden>
+            <button class="set-test" id="pushTestBtn" onclick="sendTestPush()">📨 שליחת התראת בדיקה</button>
           </div>
         </div>
         <div class="set-sec">
@@ -985,6 +1078,8 @@ function openSettings(){
     </div>`;
   updateBioBtn();
   updateNotifBtn();
+  syncPushSubscription();
+  checkPushServer();
   loadGalleryItems();
   checkStorage();
 }

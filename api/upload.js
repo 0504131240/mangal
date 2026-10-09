@@ -7,9 +7,9 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'vi
 const MAX_BYTES = 300 * 1024 * 1024;
 
 async function requireAdmin(pathname, clientPayload) {
-  let passHash = null;
-  try { passHash = JSON.parse(clientPayload || '{}').passHash; } catch {}
-  if (!(await isAdmin(passHash))) throw new Error('unauthorized');
+  let idToken = null;
+  try { idToken = JSON.parse(clientPayload || '{}').idToken; } catch {}
+  if (!(await isAdmin(idToken))) throw new Error('unauthorized');
   if (!/^gallery\/[\w.-]+$/.test(pathname)) throw new Error('bad pathname');
 }
 

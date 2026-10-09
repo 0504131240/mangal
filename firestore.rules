@@ -1,0 +1,55 @@
+rules_version = '2';
+// Paste into Firebase console → Firestore Database → Rules.
+// The admin panel shows this text with the admin user id already filled in.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && request.auth.uid == '__ADMIN_UID__';
+    }
+    function optionalText(v, max) {
+      return v == null || (v is string && v.size() <= max);
+    }
+    function validRequest(d) {
+      return d.keys().hasOnly(['name', 'phone', 'email', 'date', 'guests', 'level', 'location', 'notes',
+                               'status', 'totalPrice', 'paidAmount', 'createdAt', 'createdAtMs'])
+        && d.name is string && d.name.size() > 0 && d.name.size() <= 100
+        && d.phone is string && d.phone.size() > 0 && d.phone.size() <= 30
+        && optionalText(d.email, 200)
+        && d.date is string && d.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && d.guests is int && d.guests > 0 && d.guests <= 5000
+        && d.level in ['CLASIC', 'SPECIAL', 'CRAZY']
+        && optionalText(d.location, 300)
+        && optionalText(d.notes, 2000)
+        && d.status == 'pending' && d.totalPrice == 0 && d.paidAmount == 0
+        && d.createdAt == request.time
+        && d.createdAtMs is int;
+    }
+    // the notification server may read a request, and mark it notified, only right after it was sent
+    function justSubmitted() {
+      return 'createdAt' in resource.data && request.time < resource.data.createdAt + duration.value(15, 'm');
+    }
+
+    match /mangalBookings/{id} {
+      allow create: if isAdmin() || validRequest(request.resource.data);
+      allow get: if isAdmin() || justSubmitted();
+      allow list, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        justSubmitted()
+        && !('notifiedAtMs' in resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['notifiedAtMs'])
+        && request.resource.data.notifiedAtMs is int
+      );
+    }
+
+    // public: the gallery shown on the site, the admin's user id, and push subscriptions
+    // (a subscription can only receive pushes signed with the server's private VAPID key)
+    match /mangalSettings/{doc} {
+      allow read: if doc in ['gallery', 'admin', 'push'] || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}

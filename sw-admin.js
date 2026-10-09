@@ -16,7 +16,7 @@ self.addEventListener('activate',(e)=>{
 self.addEventListener('fetch',(e)=>{
   const url=new URL(e.request.url);
   if(url.origin!==location.origin || e.request.method!=='GET') return; // let Firebase/CDN requests pass through untouched
-  if(url.pathname.startsWith('/api/')) return;
+  if(url.pathname.startsWith('/api/') || url.pathname.endsWith('.rules')) return;
 
   if(e.request.mode==='navigate'){
     e.respondWith(

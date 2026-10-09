@@ -7,9 +7,9 @@ export default async function handler(req, res) {
   const auth = blobAuth(req);
   if (!auth.mode) return res.status(503).json({ error: 'storage-not-connected' });
 
-  const { url, passHash } = req.body || {};
+  const { url, idToken } = req.body || {};
   try {
-    if (!(await isAdmin(passHash))) return res.status(401).json({ error: 'unauthorized' });
+    if (!(await isAdmin(idToken))) return res.status(401).json({ error: 'unauthorized' });
   } catch (err) {
     return res.status(502).json({ error: err.message });
   }

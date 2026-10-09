@@ -1,15 +1,22 @@
-import { timingSafeEqual } from 'node:crypto';
-import { getDoc } from './_firestore.js';
+import { getDoc, API_KEY } from './_firestore.js';
 
-export async function isAdmin(passHash) {
-  if (typeof passHash !== 'string' || !/^[0-9a-f]{64}$/.test(passHash)) return false;
+// True when idToken is a valid Firebase sign-in token of the admin account named in mangalSettings/admin.
+export async function isAdmin(idToken) {
+  if (typeof idToken !== 'string' || idToken.length < 100) return false;
+  const res = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${API_KEY}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ idToken }),
+  });
+  if (res.status === 400) return false; // expired or forged token
+  if (!res.ok) throw new Error(`admin lookup failed: auth ${res.status}`);
+  const uid = (await res.json()).users?.[0]?.localId;
   let doc;
   try {
     doc = await getDoc('mangalSettings/admin');
   } catch (err) {
     throw new Error(`admin lookup failed: ${err.message}`);
   }
-  const stored = doc?.fields?.passHash?.stringValue;
-  if (typeof stored !== 'string' || stored.length !== passHash.length) return false;
-  return timingSafeEqual(Buffer.from(stored), Buffer.from(passHash));
+  const adminUid = doc?.fields?.authUid?.stringValue;
+  return Boolean(uid && adminUid && uid === adminUid);
 }

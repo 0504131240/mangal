@@ -1,10 +1,8 @@
 <!--
   לוח ניהול פרטי לעסק המנגלים - לא מקושר מהאתר הציבורי חוץ מקישור קטן בפוטר.
-  בכניסה ראשונה תתבקשו להגדיר סיסמת מנהל (נשמרת מוצפנת ב-Firestore).
-  אבטחה: אין כאן Firebase Auth אמיתי - ההגנה היא סיסמת אפליקציה בלבד, כמו
-  שאר האפליקציות בריפו הזה. מי שיודע את שם הפרויקט וה-collection יכול תיאורטית
-  לגשת ישירות ל-Firestore. לפרודקשן רציני מומלץ להגדיר Firestore Rules מחמירות
-  (ראו README.md בשורש הריפו).
+  הכניסה היא עם חשבון Firebase (מייל וסיסמה). בכניסה הראשונה נוצר החשבון,
+  ואחריה מוצגים חוקי האבטחה (firestore.rules) עם מזהה החשבון, להדבקה ב-Firebase.
+  החוקים מאפשרים גישה לפרטי הלקוחות רק לחשבון הזה (ראו README.md).
 -->
 <!DOCTYPE html>
 <html dir="rtl" lang="he">
@@ -52,6 +50,14 @@ button{font-family:var(--font)}
 .install-btn{width:100%;padding:11px;border-radius:var(--r2);border:1.5px dashed var(--border);background:transparent;color:var(--text2);font-weight:700;font-size:12.5px;cursor:pointer;margin-top:14px;font-family:var(--font)}
 .install-btn:hover{border-color:var(--flame);color:var(--flame-dark)}
 .lock-err{color:var(--bad);font-size:12.5px;margin-top:8px;display:none}
+.link-btn{display:block;margin:10px auto 0;background:none;border:none;color:var(--text2);font-size:12.5px;font-weight:600;text-decoration:underline;cursor:pointer;font-family:var(--font)}
+.rules-box{width:100%;height:170px;border:1.5px solid var(--border);border-radius:10px;padding:8px;font:11px/1.45 ui-monospace,Menlo,Consolas,monospace;background:var(--bg);color:var(--text);resize:vertical;margin-bottom:8px;text-align:left}
+.rules-steps{text-align:right;font-size:12.5px;color:var(--text2);line-height:1.7;margin:12px 18px 6px 0}
+.rules-steps a{color:var(--flame-dark);font-weight:700}
+.sec-status{font-size:13px;font-weight:700;padding:11px 13px;border-radius:var(--r2);margin-bottom:8px}
+.sec-status.ok{background:var(--ok-bg);color:var(--ok)}
+.sec-status.bad{background:var(--bad-bg);color:var(--bad)}
+.sec-status.wait{background:var(--surface2);color:var(--text2)}
 
 /* header */
 .hdr{background:linear-gradient(135deg,var(--char),#3A2113);color:#fff;padding:20px 16px 22px;border-radius:0 0 20px 20px}
@@ -262,33 +268,44 @@ async function fbInit(){
   if(_fb)return _fb;
   const appMod=await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js");
   const fsMod=await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js");
+  const authMod=await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js");
   const app=appMod.initializeApp(firebaseConfig);
   const db=fsMod.getFirestore(app);
+  const auth=authMod.getAuth(app);
   _fb={db,doc:fsMod.doc,getDoc:fsMod.getDoc,setDoc:fsMod.setDoc,updateDoc:fsMod.updateDoc,deleteDoc:fsMod.deleteDoc,addDoc:fsMod.addDoc,
-    onSnapshot:fsMod.onSnapshot,collection:fsMod.collection,query:fsMod.query,orderBy:fsMod.orderBy,deleteField:fsMod.deleteField};
+    onSnapshot:fsMod.onSnapshot,collection:fsMod.collection,query:fsMod.query,orderBy:fsMod.orderBy,deleteField:fsMod.deleteField,
+    auth,onAuthStateChanged:authMod.onAuthStateChanged,signIn:authMod.signInWithEmailAndPassword,
+    createUser:authMod.createUserWithEmailAndPassword,resetPassword:authMod.sendPasswordResetEmail,signOut:authMod.signOut};
   return _fb;
 }
 const LEVELS = ['CLASIC','SPECIAL','CRAZY'];
 const LEVEL_ICON = {'CLASIC':'🔥','SPECIAL':'🔥🔥','CRAZY':'👑'};
 const LEVEL_PRICE = {'CLASIC':170,'SPECIAL':220,'CRAZY':300};
 
-/* ===== auth (app-level password, hashed) ===== */
+/* ===== auth: Firebase Authentication (email + password); Firestore rules allow only this account ===== */
 async function sha256(str){
   const buf=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
-let adminPassHash=null;
+let adminUid=null;       // mangalSettings/admin.authUid
+let legacyPassHash=null; // the old shared app password, kept only until the account exists
+const lockErr=(msg)=>{ const e=document.getElementById('lockErr'); e.textContent=msg; e.style.display=msg?'block':'none'; };
 async function initLock(){
   try{
-    const {db,doc,getDoc}=await fbInit();
+    const {db,doc,getDoc,auth,onAuthStateChanged,signOut}=await fbInit();
     const snap=await getDoc(doc(db,'mangalSettings','admin'));
-    if(snap.exists() && snap.data().passHash){
-      adminPassHash=snap.data().passHash;
-      if(localStorage.getItem('mangalAdminUnlocked')==='1'){ unlockApp(); return; }
-      renderUnlockForm();
-    } else {
-      renderSetupForm();
+    const data=snap.exists()?snap.data():{};
+    adminUid=data.authUid||null;
+    legacyPassHash=data.passHash||null;
+    const user=await new Promise(res=>{ const off=onAuthStateChanged(auth,u=>{ off(); res(u); }); });
+    if(!adminUid){ renderSetupForm(); return; }
+    if(user && user.uid===adminUid){
+      if(localStorage.getItem('mangalBiometricCredId') && window.PublicKeyCredential) renderBiometricLock();
+      else unlockApp();
+      return;
     }
+    if(user) await signOut(auth);
+    renderLoginForm();
   }catch(err){
     console.error(err);
     renderLoadError(err);
@@ -296,41 +313,136 @@ async function initLock(){
 }
 function renderLoadError(err){
   document.getElementById('lockTitle').textContent='לא הצליח להתחבר';
-  document.getElementById('lockSub').textContent='נכשל חיבור למסד הנתונים (Firestore). ייתכן שחוקי האבטחה חוסמים את ה-collections mangalSettings/mangalBookings - יש להוסיף אותם בקונסולת Firebase (ראו README).';
+  document.getElementById('lockSub').textContent='נכשל החיבור למסד הנתונים. בדקו את החיבור לאינטרנט ונסו שוב.';
   document.getElementById('lockBody').innerHTML=`
     <div style="font-size:11px;color:var(--text3);direction:ltr;text-align:left;background:var(--bg);border-radius:8px;padding:8px;margin-bottom:10px;word-break:break-all">${esc(err&&err.message||String(err))}</div>
     <button class="main" onclick="location.reload()">ניסיון חדש</button>`;
 }
+function authErrorText(err){
+  const code=err&&err.code||'';
+  if(code==='auth/operation-not-allowed') return 'צריך להפעיל ב-Firebase כניסה עם מייל וסיסמה: Authentication ← Sign-in method ← Email/Password ← Enable, ואז לנסות שוב.';
+  if(code==='auth/invalid-email') return 'כתובת המייל לא תקינה';
+  if(code==='auth/weak-password') return 'הסיסמה חלשה מדי, צריך לפחות 6 תווים';
+  if(code==='auth/invalid-credential'||code==='auth/wrong-password'||code==='auth/user-not-found') return 'מייל או סיסמה שגויים';
+  if(code==='auth/too-many-requests') return 'יותר מדי ניסיונות. נסו שוב בעוד כמה דקות';
+  if(code==='auth/network-request-failed') return 'אין חיבור לאינטרנט';
+  return 'הפעולה נכשלה: '+(err&&err.message||err);
+}
 function renderSetupForm(){
-  document.getElementById('lockTitle').textContent='הגדרת סיסמת מנהל';
-  document.getElementById('lockSub').textContent='זו הכניסה הראשונה - בחרו סיסמה לניהול';
+  document.getElementById('lockTitle').textContent='יצירת חשבון ניהול';
+  document.getElementById('lockSub').textContent='כדי לנעול את פרטי הלקוחות, הכניסה לניהול עוברת למייל וסיסמה. עושים את זה פעם אחת.';
   document.getElementById('lockBody').innerHTML=`
-    <input type="password" id="p1" placeholder="סיסמה חדשה">
-    <input type="password" id="p2" placeholder="אימות סיסמה" onkeydown="if(event.key==='Enter')doSetup()">
-    <button class="main" onclick="doSetup()">הגדרת סיסמה</button>`;
+    <input type="email" id="suEmail" placeholder="המייל שלך" autocomplete="username" dir="ltr">
+    ${legacyPassHash?`<input type="password" id="suOld" placeholder="הסיסמה הנוכחית של הניהול" autocomplete="current-password">`:''}
+    <input type="password" id="suNew" placeholder="סיסמה לחשבון (לפחות 6 תווים)" autocomplete="new-password">
+    <input type="password" id="suNew2" placeholder="אימות הסיסמה" autocomplete="new-password" onkeydown="if(event.key==='Enter')doSetup()">
+    <button class="main" id="suBtn" onclick="doSetup()">יצירת חשבון</button>`;
 }
 async function doSetup(){
-  const p1=document.getElementById('p1').value, p2=document.getElementById('p2').value;
-  const errEl=document.getElementById('lockErr');
-  if(!p1||p1.length<4){errEl.textContent='סיסמה חייבת להכיל לפחות 4 תווים';errEl.style.display='block';return;}
-  if(p1!==p2){errEl.textContent='הסיסמאות אינן תואמות';errEl.style.display='block';return;}
-  errEl.style.display='none';
-  const {db,doc,setDoc}=await fbInit();
-  const hash=await sha256(p1);
-  await setDoc(doc(db,'mangalSettings','admin'),{passHash:hash});
-  localStorage.setItem('mangalAdminUnlocked','1');
-  unlockApp();
+  const email=document.getElementById('suEmail').value.trim();
+  const oldEl=document.getElementById('suOld');
+  const pw=document.getElementById('suNew').value, pw2=document.getElementById('suNew2').value;
+  if(!email){ lockErr('נא להזין מייל'); return; }
+  if(oldEl && await sha256(oldEl.value||'')!==legacyPassHash){ lockErr('הסיסמה הנוכחית שגויה'); return; }
+  if(pw.length<6){ lockErr('הסיסמה צריכה להכיל לפחות 6 תווים'); return; }
+  if(pw!==pw2){ lockErr('הסיסמאות אינן תואמות'); return; }
+  lockErr('');
+  const btn=document.getElementById('suBtn'); btn.disabled=true; btn.textContent='⏳ יוצר חשבון...';
+  try{
+    const {db,doc,setDoc,auth,createUser,signIn}=await fbInit();
+    let cred;
+    try{ cred=await createUser(auth,email,pw); }
+    catch(e){
+      // a previous attempt may have created the account without finishing; sign in to it instead
+      if(e.code==='auth/email-already-in-use') cred=await signIn(auth,email,pw);
+      else throw e;
+    }
+    adminUid=cred.user.uid;
+    // replaces the doc, so the old public password hash is removed too
+    await setDoc(doc(db,'mangalSettings','admin'),{authUid:adminUid});
+    legacyPassHash=null;
+    localStorage.setItem('mangalAdminEmail',email);
+    renderRulesStep();
+  }catch(e){
+    console.error(e); lockErr(authErrorText(e));
+    btn.disabled=false; btn.textContent='יצירת חשבון';
+  }
 }
-function renderUnlockForm(){
-  document.getElementById('lockTitle').textContent='ניהול BBQ';
-  const hasBio = !!localStorage.getItem('mangalBiometricCredId') && window.PublicKeyCredential;
-  document.getElementById('lockSub').textContent='הזינו סיסמה כדי להיכנס';
+async function rulesText(){
+  const r=await fetch('firestore.rules',{cache:'no-store'});
+  if(!r.ok) throw new Error('rules file '+r.status);
+  return (await r.text()).replaceAll('__ADMIN_UID__',adminUid);
+}
+const RULES_STEPS=`<ol class="rules-steps">
+  <li>לפתוח את <a href="https://console.firebase.google.com/project/mangal-b11fe/firestore/rules" target="_blank" rel="noopener">חוקי Firestore בקונסולת Firebase</a> (פרויקט mangal-b11fe ← Firestore Database ← Rules)</li>
+  <li>למחוק את כל מה שכתוב שם ולהדביק את החוקים שהעתקתם</li>
+  <li>ללחוץ <b>Publish</b></li>
+</ol>`;
+async function copyRules(btn){
+  const ta=document.getElementById('rulesBox');
+  try{ await navigator.clipboard.writeText(ta.value); }
+  catch(e){ ta.select(); try{ document.execCommand('copy'); }catch(err){} }
+  btn.textContent='✓ הועתק'; setTimeout(()=>{ btn.textContent='📋 העתקת החוקים'; },2000);
+}
+async function renderRulesStep(){
+  document.getElementById('lockTitle').textContent='✓ החשבון נוצר';
+  document.getElementById('lockSub').textContent='שלב אחרון: להדביק את חוקי האבטחה ב-Firebase. עד שזה נעשה, הנתונים עדיין פתוחים.';
+  let text='';
+  try{ text=await rulesText(); }catch(e){ text='שגיאה בטעינת החוקים: '+e.message; }
   document.getElementById('lockBody').innerHTML=`
-    ${hasBio?`<button id="biometricBtn" class="main" style="background:var(--char);margin-bottom:10px" onclick="doBiometricUnlock()">👆 כניסה עם טביעת אצבע</button><div style="font-size:11px;color:var(--text3);margin-bottom:10px">— או עם סיסמה —</div>`:''}
-    <input type="password" id="unlockInp" placeholder="סיסמה" onkeydown="if(event.key==='Enter')doUnlock()">
-    <button class="main" onclick="doUnlock()">כניסה</button>`;
-  if(hasBio) setTimeout(()=>doBiometricUnlock(),300);
-  else setTimeout(()=>{const i=document.getElementById('unlockInp');if(i)i.focus();},50);
+    <textarea id="rulesBox" class="rules-box" readonly dir="ltr">${esc(text)}</textarea>
+    <button class="main" style="background:var(--char)" onclick="copyRules(this)">📋 העתקת החוקים</button>
+    ${RULES_STEPS}
+    <button class="main" onclick="unlockApp()">המשך לניהול</button>`;
+}
+function renderLoginForm(){
+  document.getElementById('lockTitle').textContent='ניהול BBQ';
+  document.getElementById('lockSub').textContent='כניסה עם המייל והסיסמה של חשבון הניהול';
+  document.getElementById('lockBody').innerHTML=`
+    <input type="email" id="liEmail" placeholder="מייל" autocomplete="username" dir="ltr" value="${esc(localStorage.getItem('mangalAdminEmail')||'')}">
+    <input type="password" id="liPass" placeholder="סיסמה" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="main" id="liBtn" onclick="doLogin()">כניסה</button>
+    <button class="link-btn" onclick="doResetPassword()">שכחתי סיסמה</button>`;
+  setTimeout(()=>{ const el=document.getElementById(document.getElementById('liEmail').value?'liPass':'liEmail'); if(el) el.focus(); },50);
+}
+async function doLogin(){
+  const email=document.getElementById('liEmail').value.trim(), pw=document.getElementById('liPass').value;
+  if(!email||!pw){ lockErr('נא להזין מייל וסיסמה'); return; }
+  lockErr('');
+  const btn=document.getElementById('liBtn'); btn.disabled=true; btn.textContent='⏳ נכנס...';
+  try{
+    const {auth,signIn,signOut}=await fbInit();
+    const cred=await signIn(auth,email,pw);
+    if(cred.user.uid!==adminUid){ await signOut(auth); throw {code:'not-admin'}; }
+    localStorage.setItem('mangalAdminEmail',email);
+    unlockApp();
+  }catch(e){
+    lockErr(e.code==='not-admin'?'זה לא חשבון הניהול':authErrorText(e));
+    btn.disabled=false; btn.textContent='כניסה';
+    document.getElementById('liPass').value='';
+  }
+}
+async function doResetPassword(){
+  const email=(document.getElementById('liEmail')||{}).value||'';
+  if(!email.trim()){ lockErr('נא להזין את המייל ואז ללחוץ שוב על "שכחתי סיסמה"'); return; }
+  try{
+    const {auth,resetPassword}=await fbInit();
+    await resetPassword(auth,email.trim());
+    lockErr('');
+    document.getElementById('lockSub').textContent='נשלח מייל לאיפוס הסיסמה. בדקו גם בספאם.';
+  }catch(e){ lockErr(authErrorText(e)); }
+}
+function renderBiometricLock(){
+  document.getElementById('lockTitle').textContent='ניהול BBQ';
+  document.getElementById('lockSub').textContent='הניהול נעול';
+  document.getElementById('lockBody').innerHTML=`
+    <button id="biometricBtn" class="main" style="background:var(--char);margin-bottom:10px" onclick="doBiometricUnlock()">👆 פתיחה עם טביעת אצבע</button>
+    <button class="link-btn" onclick="renderLoginForm()">כניסה עם סיסמה</button>`;
+  setTimeout(()=>doBiometricUnlock(),300);
+}
+async function idToken(){
+  const {auth}=await fbInit();
+  return auth.currentUser ? auth.currentUser.getIdToken() : '';
 }
 
 /* ===== biometric (WebAuthn) ===== */
@@ -367,7 +479,7 @@ async function doBiometricUnlock(){
   const btn=document.getElementById('biometricBtn');
   if(btn){btn.disabled=true;btn.textContent='⏳ מאמת...';}
   const ok=await tryBiometric();
-  if(ok){ localStorage.setItem('mangalAdminUnlocked','1'); unlockApp(); }
+  if(ok){ unlockApp(); }
   else if(btn){btn.disabled=false;btn.textContent='👆 כניסה עם טביעת אצבע';}
 }
 async function toggleBiometricSetting(){
@@ -389,18 +501,6 @@ function updateBioBtn(){
   const has=!!localStorage.getItem('mangalBiometricCredId');
   btn.textContent = has ? 'פעיל ✓' : 'הפעלה';
   btn.classList.toggle('on', has);
-}
-async function doUnlock(){
-  const val=document.getElementById('unlockInp').value||'';
-  const hash=await sha256(val);
-  if(hash===adminPassHash){
-    localStorage.setItem('mangalAdminUnlocked','1');
-    unlockApp();
-  } else {
-    const err=document.getElementById('lockErr');
-    err.textContent='סיסמה שגויה';err.style.display='block';
-    document.getElementById('unlockInp').value='';
-  }
 }
 function unlockApp(){
   document.getElementById('lockScreen').style.display='none';
@@ -550,7 +650,7 @@ async function sendTestPush(){
   const btn=document.getElementById('pushTestBtn');
   if(btn){ btn.disabled=true; btn.textContent='⏳ שולח...'; }
   try{
-    const r=await fetch('/api/push',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'test',passHash:adminPassHash})});
+    const r=await fetch('/api/push',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'test',idToken:await idToken()})});
     const j=await r.json().catch(()=>({}));
     if(r.status===503) showToast('חסר המפתח VAPID_PRIVATE_KEY ב-Vercel');
     else if(!r.ok) showToast('השליחה נכשלה: '+(j.error||r.status));
@@ -1093,7 +1193,7 @@ function openSettings(){
         <div class="set-sec">
           <div class="set-title">כניסה והתראות</div>
           <div class="set-row">
-            <div class="set-txt"><b>👆 טביעת אצבע</b><small>כניסה לניהול בלי להקליד סיסמה</small></div>
+            <div class="set-txt"><b>👆 טביעת אצבע</b><small>נעילת הניהול בטביעת אצבע בכל פתיחה</small></div>
             <button class="set-btn" id="bioBtn" onclick="toggleBiometricSetting()"></button>
           </div>
           <div id="pushNote"></div>
@@ -1104,6 +1204,11 @@ function openSettings(){
           <div id="pushTestRow" hidden>
             <button class="set-test" id="pushTestBtn" onclick="sendTestPush()">📨 שליחת התראת בדיקה</button>
           </div>
+        </div>
+        <div class="set-sec">
+          <div class="set-title">אבטחת נתונים</div>
+          <div class="sec-status wait" id="secStatus">בודק...</div>
+          <button class="set-test" onclick="openRulesModal()">🔒 הצגת חוקי האבטחה להעתקה</button>
         </div>
         <div class="set-sec">
           <div class="set-title">תמונות וסרטונים באתר</div>
@@ -1122,8 +1227,36 @@ function openSettings(){
   updateNotifBtn();
   syncPushSubscription();
   checkPushServer();
+  checkDataLock();
   loadGalleryItems();
   checkStorage();
+}
+// asks Firestore, without signing in, for the bookings list: locked rules answer 403
+async function checkDataLock(){
+  let html, cls;
+  try{
+    const r=await fetch(`https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/mangalBookings?pageSize=1&key=${firebaseConfig.apiKey}`,{cache:'no-store'});
+    if(r.status===403){ cls='ok'; html='🔒 הנתונים נעולים. רק חשבון הניהול יכול לראות את פרטי הלקוחות.'; }
+    else if(r.ok){ cls='bad'; html='⚠️ הנתונים עדיין פתוחים לכל אחד. צריך להדביק את חוקי האבטחה ב-Firebase.'; }
+    else { cls='wait'; html='לא הצלחתי לבדוק כרגע ('+r.status+')'; }
+  }catch(e){ cls='wait'; html='לא הצלחתי לבדוק כרגע'; }
+  const el=document.getElementById('secStatus');
+  if(el){ el.className='sec-status '+cls; el.textContent=html; }
+}
+async function openRulesModal(){
+  let root=document.getElementById('capEditRoot');
+  if(!root){ root=document.createElement('div'); root.id='capEditRoot'; document.body.appendChild(root); }
+  let text='';
+  try{ text=await rulesText(); }catch(e){ text='שגיאה בטעינת החוקים: '+e.message; }
+  root.innerHTML=`
+    <div class="modal-bg cap-edit-bg" onclick="if(event.target===this)closeCaptionEditor()">
+      <div class="modal">
+        <div class="modal-top"><h3>🔒 חוקי אבטחה</h3><button class="modal-close" onclick="closeCaptionEditor()">✕</button></div>
+        <textarea id="rulesBox" class="rules-box" readonly dir="ltr">${esc(text)}</textarea>
+        <button class="btn-add-event" style="margin:0" onclick="copyRules(this)">📋 העתקת החוקים</button>
+        ${RULES_STEPS}
+      </div>
+    </div>`;
 }
 async function checkStorage(){
   let reason='';
@@ -1240,7 +1373,7 @@ async function removeMediaItem(i){
   }
   if(item.blob){
     fetch('/api/media-delete',{method:'POST',headers:{'content-type':'application/json'},
-      body:JSON.stringify({url:item.url,passHash:adminPassHash})}).catch(()=>{});
+      body:JSON.stringify({url:item.url,idToken:await idToken()})}).catch(()=>{});
   }
 }
 function setUploadStatus(text){
@@ -1291,7 +1424,7 @@ async function handleMediaFiles(fileList){
       const res=await uploadFn(name, body, {
         access:'public',
         handleUploadUrl:'/api/upload',
-        clientPayload:JSON.stringify({passHash:adminPassHash}),
+        clientPayload:JSON.stringify({idToken:await idToken()}),
         contentType:type,
         multipart:body.size>20*1024*1024,
         onUploadProgress:({percentage})=>{ if(uploading) setUploadStatus(`${prefix}מעלה ${isVideo?'סרטון':'תמונה'}... ${Math.round(percentage)}%`); }
@@ -1312,7 +1445,7 @@ async function handleMediaFiles(fileList){
 async function uploadServerReason(){
   try{
     const r=await fetch('/api/upload',{method:'POST',headers:{'content-type':'application/json'},
-      body:JSON.stringify({type:storageMode==='oidc'?'blob.generate-presigned-url':'blob.generate-client-token',payload:{pathname:'gallery/probe.jpg',multipart:false,clientPayload:JSON.stringify({passHash:adminPassHash})}})});
+      body:JSON.stringify({type:storageMode==='oidc'?'blob.generate-presigned-url':'blob.generate-client-token',payload:{pathname:'gallery/probe.jpg',multipart:false,clientPayload:JSON.stringify({idToken:await idToken()})}})});
     const j=await r.json().catch(()=>({}));
     return `שרת: ${r.status} ${j.error||''}`.trim();
   }catch(e){ return 'שרת לא זמין'; }

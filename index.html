@@ -118,43 +118,40 @@ section{padding:52px 0}
 .menu-terms li+li{border-top:1px dashed rgba(242,102,43,.35);padding-top:8px}
 
 /* ===== fire-style menus (html.menu-fire, always on) ===== */
-/* every menu card looks like CRAZY: steaks-over-fire photo fading into warm brown, gold headings and embers.
-   Only the window around it changes: cream (CLASIC), latte (SPECIAL), brown (CRAZY). */
+/* the window is always dark, like the site behind it; the menu card inside changes:
+   cream (CLASIC), latte (SPECIAL), brown with gold (CRAZY). Same shapes in all three; text colors follow the card. */
 .menu-hero{display:none}
 /* the menus window floats in the middle of the screen, also on phones */
 #menusModalBg{align-items:center;padding:12px}
 #menusModalBg .modal{border-radius:20px;border:1px solid rgba(255,170,110,.14);max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px)}
 html.menu-fire #menusModalBg .modal{
-  --m-bg:#F6EBDA;--m-text:#2E1B10;--m-line:rgba(140,70,30,.25);--m-border:rgba(200,90,40,.35);
-  --m-tab:rgba(255,255,255,.55);--m-tab-text:#5A3520;--m-terms:#9A320F;
-  background:var(--m-bg);color:var(--m-text);transition:background .35s}
-html.menu-fire #menusModalBg .modal[data-lvl="SPECIAL"]{
-  --m-bg:#D9BC93;--m-text:#24140A;--m-line:rgba(110,50,15,.3);--m-border:rgba(150,65,20,.45);
-  --m-tab:rgba(255,245,230,.4);--m-tab-text:#4A2A15;--m-terms:#7A240A}
-html.menu-fire #menusModalBg .modal[data-lvl="CRAZY"]{
-  --m-bg:#4A2E1C;--m-text:#FBF3EA;--m-line:rgba(244,199,102,.32);--m-border:rgba(232,178,82,.6);
-  --m-tab:rgba(255,255,255,.05);--m-tab-text:#E8CDB8;--m-terms:#FFC98A;
-  background:radial-gradient(120% 38% at 50% 0%,rgba(190,90,35,.35),rgba(190,90,35,0) 70%),var(--m-bg)}
+  --m-text:#F7EDE4;--m-line:rgba(242,102,43,.3);--m-border:rgba(242,102,43,.45);
+  --m-tab:rgba(255,255,255,.05);--m-tab-text:#E8CDB8;--m-terms:#FFB07A;
+  background:radial-gradient(120% 38% at 50% 0%,rgba(150,64,24,.32),rgba(150,64,24,0) 70%),var(--bg);color:var(--m-text)}
 html.menu-fire #menusModalBg .modal-top h3{color:var(--m-text)}
 html.menu-fire #menusModalBg .modal-close{background:var(--m-tab);color:var(--m-text);border:1px solid var(--m-line)}
 html.menu-fire .menu-tab{background:var(--m-tab);border-color:var(--m-border);color:var(--m-tab-text)}
 html.menu-fire .menu-tab.on{background:linear-gradient(180deg,#F2662B,#B83C14);border-color:#FF8A4C;color:#fff;box-shadow:0 0 18px rgba(242,102,43,.5),inset 0 1px 0 rgba(255,220,180,.35)}
 html.menu-fire .menu-card,html.menu-fire .menu-card.premium{
+  --c-bg:#F6EBDA;--c-text:#2E1B10;--c-text2:#4B2F1D;--c-head1:#D9541E;--c-head2:#9A320F;--c-line:rgba(140,70,30,.25);--c-ember:#F2662B;
+  position:relative;overflow:hidden;padding:0;color:var(--c-text);border:1px solid rgba(232,178,82,.6);background:var(--c-bg);
+  box-shadow:0 18px 46px rgba(0,0,0,.55),0 0 36px rgba(232,178,82,.16)}
+html.menu-fire .menu-card[data-lvl="SPECIAL"]{
+  --c-bg:#D9BC93;--c-text:#24140A;--c-text2:#3D2414;--c-head1:#B8400F;--c-head2:#7A240A;--c-line:rgba(110,50,15,.3);--c-ember:#E0601F}
+html.menu-fire .menu-card[data-lvl="CRAZY"]{
   --c-bg:#5A3822;--c-text:#FBF3EA;--c-text2:#F3E5D7;--c-head1:#FFEDB8;--c-head2:#F4C766;--c-line:rgba(244,199,102,.32);--c-ember:#E8B252;
-  position:relative;overflow:hidden;padding:0;color:var(--c-text);border:1px solid rgba(232,178,82,.6);
-  background:radial-gradient(110% 60% at 50% 100%,rgba(232,178,82,.12),rgba(232,178,82,0) 70%),var(--c-bg);
-  box-shadow:0 18px 46px rgba(40,16,4,.45),0 0 36px rgba(232,178,82,.18)}
-/* the photo fades straight into the card, with no line between them */
-html.menu-fire .menu-hero{display:block;position:relative;height:236px;overflow:hidden;
-  background:linear-gradient(180deg,rgba(90,56,34,0) 0%,rgba(90,56,34,.3) 45%,var(--c-bg) 100%),var(--img) center/cover}
+  background:radial-gradient(110% 60% at 50% 100%,rgba(232,178,82,.12),rgba(232,178,82,0) 70%),var(--c-bg)}
+/* the photo darkens behind the title, then fades into the card color, with no line between them */
+html.menu-fire .menu-hero{display:block;position:relative;height:280px;overflow:hidden;
+  background:linear-gradient(180deg,rgba(14,8,5,0) 0%,rgba(14,8,5,.45) 42%,rgba(14,8,5,.7) 66%,var(--c-bg) 100%),var(--img) center/cover}
 .mh-embers{position:absolute;left:0;right:0;top:0;height:calc(100% + 600px);background:url(images/embers.png) 0 0/400px auto repeat;
   mix-blend-mode:screen;opacity:.9;animation:fx-rise-near 12s linear infinite}
-html.menu-fire .menu-top{position:relative;margin:-104px 0 40px;padding:0 20px;flex-direction:column;justify-content:center;gap:10px;text-align:center}
+html.menu-fire .menu-top{position:relative;margin:-168px 0 104px;padding:0 20px;flex-direction:column;justify-content:center;gap:10px;text-align:center}
 html.menu-fire .menu-title{font-size:clamp(22px,6.4vw,30px);font-weight:700;color:#fff;letter-spacing:.3px;white-space:nowrap;
   text-shadow:0 2px 0 rgba(0,0,0,.6),0 0 22px rgba(242,102,43,.75),0 0 4px rgba(0,0,0,.8)}
 html.menu-fire .menu-badge,html.menu-fire .menu-card.premium .menu-badge{font-size:13.5px;padding:7px 16px;
   background:linear-gradient(180deg,#F6CF7A,#D9962F);color:#1C1007;box-shadow:0 0 18px rgba(232,178,82,.5)}
-html.menu-fire .menu-grid{padding:0 22px;gap:22px;text-align:center}
+html.menu-fire .menu-grid{position:relative;padding:0 22px;gap:22px;text-align:center}
 html.menu-fire .menu-grp b,html.menu-fire .menu-card.premium .menu-grp b{font-family:var(--font-head);font-size:18px;margin-bottom:8px;color:var(--c-head2)}
 @supports (-webkit-background-clip:text){
   html.menu-fire .menu-grp b,html.menu-fire .menu-card.premium .menu-grp b{background:linear-gradient(90deg,var(--c-head1),var(--c-head2));
@@ -734,7 +731,6 @@ let activeMenuTab=LEVELS[0].id;
 function renderMenus(){
   const tabs=document.getElementById('menuTabs');
   tabs.innerHTML=LEVELS.map(l=>`<button type="button" class="menu-tab ${l.id===activeMenuTab?'on':''}" aria-pressed="${l.id===activeMenuTab}" onclick="setMenuTab('${l.id}')">${l.label}</button>`).join('');
-  document.querySelector('#menusModalBg .modal').dataset.lvl=activeMenuTab;
   const cards=document.getElementById('menuCards');
   cards.innerHTML=LEVELS.map(l=>{
     const m=MENUS[l.id];

@@ -27,7 +27,9 @@
 <meta property="og:locale" content="he_IL">
 <meta name="twitter:card" content="summary_large_image">
 <script>try{const a=JSON.parse(localStorage.getItem('mangalA11y')||'{}');const c=document.documentElement.classList;
-if(a.zoom)c.add('a11y-z'+a.zoom);['contrast','still','links','font','gray'].forEach(k=>a[k]&&c.add('a11y-'+k));}catch(e){}</script>
+if(a.zoom)c.add('a11y-z'+a.zoom);['contrast','still','links','font','gray'].forEach(k=>a[k]&&c.add('a11y-'+k));}catch(e){}
+// design preview of the fire-style menus: ?menu=fire (customers don't see it)
+if(/[?&]menu=fire\b/.test(location.search))document.documentElement.classList.add('menu-fire');</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=Varela+Round&display=swap" rel="stylesheet">
@@ -111,6 +113,48 @@ section{padding:52px 0}
 .menu-terms{list-style:none;margin-top:18px;padding:14px 18px;border:1.5px solid rgba(242,102,43,.45);border-radius:var(--r2);
   background:var(--flame-bg);display:flex;flex-direction:column;gap:8px;text-align:center}
 .menu-terms li{font-family:var(--font-head);font-size:16px;font-weight:700;color:var(--flame-dark);line-height:1.4}
+
+/* ===== fire-style menus (preview, ?menu=fire) ===== */
+.menu-hero,.menu-flames{display:none}
+html.menu-fire #menusModalBg .modal{background:radial-gradient(120% 38% at 50% 0%,rgba(150,64,24,.38),rgba(150,64,24,0) 70%),var(--bg)}
+html.menu-fire .menu-tab{background:rgba(255,255,255,.04);border-color:rgba(242,102,43,.35);color:#E8CDB8}
+html.menu-fire .menu-tab.on{background:linear-gradient(180deg,#F2662B,#B83C14);border-color:#FF8A4C;color:#fff;box-shadow:0 0 18px rgba(242,102,43,.55),inset 0 1px 0 rgba(255,220,180,.35)}
+html.menu-fire .menu-card{position:relative;overflow:hidden;padding:0;color:var(--text);
+  background:radial-gradient(110% 60% at 50% 100%,rgba(242,102,43,.16),rgba(242,102,43,0) 70%),#120B08;
+  border:1px solid rgba(242,102,43,.45);box-shadow:0 18px 50px rgba(0,0,0,.55),0 0 36px rgba(242,102,43,.14)}
+html.menu-fire .menu-card.premium{border-color:rgba(232,178,82,.7);box-shadow:0 18px 50px rgba(0,0,0,.55),0 0 40px rgba(232,178,82,.2);
+  background:radial-gradient(110% 60% at 50% 100%,rgba(232,178,82,.14),rgba(232,178,82,0) 70%),#140C07}
+html.menu-fire .menu-hero{display:block;position:relative;height:200px;overflow:hidden;
+  background:linear-gradient(180deg,rgba(18,11,8,.05) 0%,rgba(18,11,8,.3) 45%,#120B08 100%),var(--img) center/cover}
+html.menu-fire .menu-card.premium .menu-hero{background:linear-gradient(180deg,rgba(20,12,7,.05) 0%,rgba(20,12,7,.3) 45%,#140C07 100%),var(--img) center/cover}
+.mh-embers{position:absolute;left:0;right:0;top:0;height:calc(100% + 600px);background:url(images/embers.png) 0 0/400px auto repeat;
+  mix-blend-mode:screen;opacity:.9;animation:fx-rise-near 12s linear infinite}
+html.menu-fire .menu-top{position:relative;margin:-64px 0 22px;padding:0 20px;flex-direction:column;justify-content:center;gap:10px;text-align:center}
+html.menu-fire .menu-title{font-size:30px;font-weight:700;color:#fff;letter-spacing:.5px;
+  text-shadow:0 2px 0 rgba(0,0,0,.6),0 0 22px rgba(242,102,43,.75),0 0 4px rgba(0,0,0,.8)}
+html.menu-fire .menu-badge{font-size:13.5px;padding:7px 16px;background:linear-gradient(180deg,#F2662B,#B83C14);color:#fff;
+  box-shadow:0 0 16px rgba(242,102,43,.5)}
+html.menu-fire .menu-card.premium .menu-badge{background:linear-gradient(180deg,#F6CF7A,#D9962F);color:#1C1007;box-shadow:0 0 18px rgba(232,178,82,.5)}
+html.menu-fire .menu-grid{padding:0 22px;gap:22px}
+html.menu-fire .menu-grp b{font-family:var(--font-head);font-size:18px;margin-bottom:8px;color:#FFB07A}
+@supports (-webkit-background-clip:text){
+  html.menu-fire .menu-grp b{background:linear-gradient(90deg,#FFD58A,#FF8A4C 55%,#F2662B);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;width:fit-content}
+  html.menu-fire .menu-card.premium .menu-grp b{background-image:linear-gradient(90deg,#FFE7A8,#F6CF7A 50%,#E8B252)}
+}
+html.menu-fire .menu-grp b::after{content:'';display:block;height:2px;width:46px;margin-top:6px;border-radius:2px;background:linear-gradient(90deg,#F2662B,rgba(242,102,43,0))}
+html.menu-fire .menu-grp ul{font-size:14.5px;color:#EADBCF}
+html.menu-fire .menu-grp li::before{content:'';display:inline-block;width:6px;height:6px;margin-inline-end:9px;vertical-align:middle;border-radius:50%;
+  background:radial-gradient(circle,#FFE0A0,#F2662B 70%);box-shadow:0 0 8px 1px rgba(242,102,43,.8)}
+html.menu-fire .menu-card.premium .menu-grp li::before{background:radial-gradient(circle,#FFF1C4,#E8B252 70%);box-shadow:0 0 8px 1px rgba(232,178,82,.8)}
+html.menu-fire .menu-note{margin:22px 22px 0;color:#EADBCF;border-top-color:rgba(242,102,43,.3)}
+html.menu-fire .menu-flames{display:block;height:74px;margin-top:4px;transform-origin:50% 100%;
+  background:url(images/flames-strip.jpg) bottom/auto 74px repeat-x;mix-blend-mode:screen;
+  -webkit-mask:linear-gradient(to top,#000 45%,transparent);mask:linear-gradient(to top,#000 45%,transparent);
+  animation:fx-flames 2.6s ease-in-out infinite alternate}
+html.menu-fire .menu-terms{border-color:rgba(242,102,43,.6);box-shadow:0 0 22px rgba(242,102,43,.15) inset}
+@media (prefers-reduced-motion:reduce){.mh-embers,.menu-flames{animation:none!important}}
+html.a11y-still .mh-embers,html.a11y-still .menu-flames{animation:none!important}
+html.a11y-contrast .mh-embers,html.a11y-contrast .menu-flames{display:none!important}
 
 /* booking form */
 .book-wrap{background:transparent;border:1px solid var(--border);border-radius:var(--r);padding:26px 22px;max-width:640px;margin:0 auto}
@@ -659,6 +703,7 @@ function renderMenus(){
   cards.innerHTML=LEVELS.map(l=>{
     const m=MENUS[l.id];
     return `<div class="menu-card ${m.premium?'premium':''} ${l.id===activeMenuTab?'on':''}" data-lvl="${l.id}">
+      <div class="menu-hero" aria-hidden="true" style="--img:url(images/menu-${l.id.toLowerCase()}.jpg)"><div class="mh-embers"></div></div>
       <div class="menu-top">
         <div class="menu-title">תפריט ${l.label}</div>
         <div class="menu-badge">${m.badge}</div>
@@ -667,6 +712,7 @@ function renderMenus(){
         ${m.groups.map(g=>`<div class="menu-grp"><b>${g.t}</b><ul>${g.items.map(it=>`<li>${it}</li>`).join('')}</ul></div>`).join('')}
       </div>
       <div class="menu-note">${m.note}</div>
+      <div class="menu-flames" aria-hidden="true"></div>
     </div>`;
   }).join('');
 }

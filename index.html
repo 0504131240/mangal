@@ -241,6 +241,10 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
 .big-card .txt span,.contact-card span{color:#F3E5D7}
 .big-card .ico{background:linear-gradient(135deg,rgba(244,199,102,.38),rgba(244,199,102,.1))}
 .big-card .arrow{color:#F4C766}
+/* centered, like the contact boxes: icon on top, text below; the arrow stays at the side */
+.big-card{position:relative;flex-direction:column;justify-content:center;gap:8px;text-align:center;padding:18px 44px}
+.big-card .txt{flex:none}
+.big-card .arrow{position:absolute;left:18px;top:50%;transform:translateY(-50%)}
 
 /* shared modal shells (gallery/menus/booking) */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:90;display:flex;align-items:flex-end;justify-content:center}

@@ -112,7 +112,12 @@ section{padding:52px 0}
 .menu-card.premium .menu-note{border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.8)}
 .menu-terms{list-style:none;margin-top:18px;padding:14px 18px;border:1.5px solid rgba(242,102,43,.45);border-radius:var(--r2);
   background:var(--flame-bg);display:flex;flex-direction:column;gap:8px;text-align:center}
-.menu-terms li{font-family:var(--font-head);font-size:16px;font-weight:700;color:var(--flame-dark);line-height:1.4}
+.menu-terms li{font-family:var(--font-head);font-size:16px;font-weight:700;color:var(--flame-dark);line-height:1.4;
+  display:flex;align-items:center;gap:10px;text-align:start}
+/* three separate terms: a glowing ember before each, and a line between them */
+.menu-terms li::before{content:'';flex:none;width:9px;height:9px;border-radius:50%;
+  background:radial-gradient(circle,#FFE0A0,#F2662B 70%);box-shadow:0 0 8px 1px rgba(242,102,43,.75)}
+.menu-terms li+li{border-top:1px dashed rgba(242,102,43,.35);padding-top:8px}
 
 /* ===== fire-style menus (preview, ?menu=fire) ===== */
 /* every menu opens with the steaks-over-fire photo; the window goes from cream (CLASIC) to darker (SPECIAL) to dark (CRAZY) */
@@ -167,6 +172,7 @@ html.menu-fire .menu-flames{display:block;height:78px;margin-top:16px;transform-
   animation:fx-flames 2.6s ease-in-out infinite alternate}
 html.menu-fire .menu-terms{background:rgba(242,102,43,.08);border-color:var(--m-border)}
 html.menu-fire .menu-terms li{color:var(--m-terms)}
+html.menu-fire .menu-terms li+li{border-top-color:var(--m-line)}
 @media (prefers-reduced-motion:reduce){.mh-embers,.menu-flames{animation:none!important}}
 html.a11y-still .mh-embers,html.a11y-still .menu-flames{animation:none!important}
 html.a11y-contrast .mh-embers{display:none!important}

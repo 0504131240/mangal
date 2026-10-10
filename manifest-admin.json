@@ -3,7 +3,7 @@
   "short_name": "ניהול BBQ",
   "description": "לוח ניהול לעסק BBQ - חגיגת ברבקיו משחררת",
   "start_url": "admin.html",
-  "scope": ".",
+  "scope": "admin.html",
   "id": "bbq-admin",
   "display": "standalone",
   "orientation": "portrait",
@@ -12,7 +12,29 @@
   "dir": "rtl",
   "lang": "he",
   "icons": [
-    { "src": "images/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "images/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    {
+      "src": "images/app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "images/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "images/app-icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "images/app-icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }

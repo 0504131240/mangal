@@ -111,7 +111,7 @@ section{padding:52px 0}
 .menu-terms{list-style:none;margin-top:18px;padding:14px 18px;border:1.5px solid rgba(242,102,43,.45);border-radius:var(--r2);
   background:var(--flame-bg);display:flex;flex-direction:column;gap:8px;text-align:center}
 .menu-terms li{font-family:var(--font-head);font-size:16px;font-weight:700;color:var(--flame-dark);line-height:1.4;
-  display:flex;align-items:center;gap:10px;text-align:start}
+  display:flex;align-items:center;justify-content:center;gap:10px;text-align:center}
 /* three separate terms: a glowing ember before each, and a line between them */
 .menu-terms li::before{content:'';flex:none;width:9px;height:9px;border-radius:50%;
   background:radial-gradient(circle,#FFE0A0,#F2662B 70%);box-shadow:0 0 8px 1px rgba(242,102,43,.75)}
@@ -152,17 +152,23 @@ html.menu-fire .menu-title{font-size:30px;font-weight:700;color:#fff;letter-spac
   text-shadow:0 2px 0 rgba(0,0,0,.6),0 0 22px rgba(242,102,43,.75),0 0 4px rgba(0,0,0,.8)}
 html.menu-fire .menu-badge{font-size:13.5px;padding:7px 16px;background:linear-gradient(180deg,#F2662B,#B83C14);color:#fff;box-shadow:0 0 16px rgba(242,102,43,.5)}
 html.menu-fire .menu-card.premium .menu-badge{background:linear-gradient(180deg,#F6CF7A,#D9962F);color:#1C1007;box-shadow:0 0 18px rgba(232,178,82,.5)}
-html.menu-fire .menu-grid{padding:0 22px;gap:22px}
+html.menu-fire .menu-grid{padding:0 22px;gap:22px;text-align:center}
 html.menu-fire .menu-grp b,html.menu-fire .menu-card.premium .menu-grp b{font-family:var(--font-head);font-size:18px;margin-bottom:8px;color:var(--m-head2)}
 @supports (-webkit-background-clip:text){
   html.menu-fire .menu-grp b,html.menu-fire .menu-card.premium .menu-grp b{background:linear-gradient(90deg,var(--m-head1),var(--m-head2));
     -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;width:fit-content}
 }
-html.menu-fire .menu-grp b::after{content:'';display:block;height:2px;width:46px;margin-top:6px;border-radius:2px;background:linear-gradient(90deg,var(--m-ember),transparent)}
+html.menu-fire .menu-grp b{margin-inline:auto}
+html.menu-fire .menu-grp b::after{content:'';display:block;height:2px;width:64px;margin:6px auto 0;border-radius:2px;background:linear-gradient(90deg,transparent,var(--m-ember),transparent)}
 html.menu-fire .menu-grp ul,html.menu-fire .menu-card.premium .menu-grp ul{font-size:14.5px;color:var(--m-text2)}
 html.menu-fire .menu-grp li::before{content:'';display:inline-block;width:6px;height:6px;margin-inline-end:9px;vertical-align:middle;border-radius:50%;
   background:radial-gradient(circle,#FFE0A0,var(--m-ember) 70%);box-shadow:0 0 7px 1px var(--m-ember)}
 html.menu-fire .menu-note,html.menu-fire .menu-card.premium .menu-note{margin:22px 22px 0;padding-bottom:18px;color:var(--m-text2);border-top-color:var(--m-line)}
+.menu-kosher{display:flex;align-items:center;justify-content:center;gap:10px;width:fit-content;margin:0 auto 18px;padding:9px 20px;
+  border-radius:999px;border:1.5px solid var(--m-border,rgba(242,102,43,.45));background:rgba(242,102,43,.1);
+  font-family:var(--font-head);font-size:16px;font-weight:700;color:var(--m-terms,var(--flame-dark))}
+.mk-ico{display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;flex:none;
+  background:linear-gradient(180deg,#F2662B,#B83C14);color:#fff;font-size:13px;box-shadow:0 0 10px rgba(242,102,43,.5)}
 html.menu-fire .menu-terms{background:rgba(242,102,43,.08);border-color:var(--m-border)}
 html.menu-fire .menu-terms li{color:var(--m-terms)}
 html.menu-fire .menu-terms li+li{border-top-color:var(--m-line)}
@@ -225,6 +231,13 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
 .big-card .txt b{display:block;font-family:var(--font-head);font-size:15.5px;color:var(--text)}
 .big-card .txt span{font-size:12px;color:var(--text2)}
 .big-card .arrow{font-size:18px;color:var(--text3)}
+/* home buttons and contact boxes in the CRAZY menu colors: warm brown with gold */
+.big-card,.contact-card{background:linear-gradient(160deg,#5E3B24,#4A2E1C);border-color:rgba(244,199,102,.45);box-shadow:0 12px 30px rgba(0,0,0,.4),0 0 22px rgba(232,178,82,.12)}
+.big-card:hover,.contact-card:hover{border-color:rgba(244,199,102,.85)}
+.big-card .txt b,.contact-card b{color:#FBF3EA}
+.big-card .txt span,.contact-card span{color:#F3E5D7}
+.big-card .ico{background:linear-gradient(135deg,rgba(244,199,102,.38),rgba(244,199,102,.1))}
+.big-card .arrow{color:#F4C766}
 
 /* shared modal shells (gallery/menus/booking) */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:90;display:flex;align-items:flex-end;justify-content:center}
@@ -380,6 +393,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
 <div class="modal-bg" id="menusModalBg" hidden onclick="if(event.target===this)closeMenusModal()">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="menusTitle">
     <div class="modal-top"><h3 id="menusTitle">תפריטי האירועים</h3><button type="button" class="modal-close" aria-label="סגירה" onclick="closeMenusModal()">✕</button></div>
+    <p class="menu-kosher"><span class="mk-ico" aria-hidden="true">✓</span>הבשרים בכשרות קהילות</p>
     <div id="menuBlock">
       <div class="menu-tabs" id="menuTabs"></div>
       <div id="menuCards"></div>

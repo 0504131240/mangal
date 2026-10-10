@@ -6,7 +6,7 @@
    - הכניסה לניהול (admin.html) היא עם חשבון Google; חוקי האבטחה ב-firestore.rules.
 -->
 <!DOCTYPE html>
-<html dir="rtl" lang="he">
+<html dir="rtl" lang="he" class="menu-fire">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -27,9 +27,7 @@
 <meta property="og:locale" content="he_IL">
 <meta name="twitter:card" content="summary_large_image">
 <script>try{const a=JSON.parse(localStorage.getItem('mangalA11y')||'{}');const c=document.documentElement.classList;
-if(a.zoom)c.add('a11y-z'+a.zoom);['contrast','still','links','font','gray'].forEach(k=>a[k]&&c.add('a11y-'+k));}catch(e){}
-// design preview of the fire-style menus: ?menu=fire (customers don't see it)
-if(/[?&]menu=fire\b/.test(location.search))document.documentElement.classList.add('menu-fire');</script>
+if(a.zoom)c.add('a11y-z'+a.zoom);['contrast','still','links','font','gray'].forEach(k=>a[k]&&c.add('a11y-'+k));}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=Varela+Round&display=swap" rel="stylesheet">
@@ -119,7 +117,7 @@ section{padding:52px 0}
   background:radial-gradient(circle,#FFE0A0,#F2662B 70%);box-shadow:0 0 8px 1px rgba(242,102,43,.75)}
 .menu-terms li+li{border-top:1px dashed rgba(242,102,43,.35);padding-top:8px}
 
-/* ===== fire-style menus (preview, ?menu=fire) ===== */
+/* ===== fire-style menus (html.menu-fire, always on) ===== */
 /* every menu opens with the steaks-over-fire photo; the window goes from cream (CLASIC) to darker (SPECIAL) to dark (CRAZY) */
 .menu-hero{display:none}
 html.menu-fire #menusModalBg .modal{

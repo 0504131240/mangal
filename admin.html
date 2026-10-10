@@ -179,6 +179,7 @@ button{font-family:var(--font)}
 .set-btn.on{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
 .set-test{width:100%;margin:-2px 0 8px;padding:10px;border-radius:var(--r2);border:1.5px dashed var(--border);background:transparent;color:var(--text2);font-weight:700;font-size:12.5px;cursor:pointer}
 .set-upload{display:block;text-align:center;padding:13px;border-radius:var(--r2);border:1.5px dashed var(--flame);background:var(--flame-bg);color:var(--flame-dark);font-weight:700;font-size:13.5px;cursor:pointer;margin-top:8px}
+.set-restore{display:block;width:100%;margin-top:12px;padding:11px;border-radius:var(--r2);border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-family:var(--font);font-weight:700;font-size:13.5px;cursor:pointer}
 .set-upload.disabled{opacity:.45;pointer-events:none}
 .upload-status{font-size:12px;color:var(--text2);text-align:center;margin-top:8px;font-weight:600;white-space:pre-line;overflow-wrap:anywhere}
 .media-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:12px}
@@ -1219,6 +1220,7 @@ function openSettings(){
           <div class="upload-status" id="uploadStatus" hidden></div>
           <div class="media-hint">לחיצה על תמונה לעריכת הכיתוב שלה</div>
           <div class="media-grid" id="mediaGrid"><div class="empty">טוען...</div></div>
+          <button type="button" class="set-restore" id="restoreDefaults" hidden onclick="restoreDefaultMedia()"></button>
         </div>
       </div>
     </div>`;
@@ -1315,9 +1317,24 @@ async function saveGalleryItems(items){
   const {db,doc,setDoc}=await fbInit();
   await setDoc(doc(db,'mangalSettings','gallery'),{items, updatedAtMs:Date.now()});
 }
+// the starting photos that were removed from the site, so they can be brought back in one tap
+function missingDefaults(){
+  return galleryItems ? DEFAULT_GALLERY.filter(d=>!galleryItems.some(g=>g.url===d.url)) : [];
+}
+async function restoreDefaultMedia(){
+  const missing=missingDefaults();
+  if(!missing.length) return;
+  if(!confirm(`להחזיר לאתר ${missing.length} תמונות מקוריות?`)) return;
+  try{
+    await saveGalleryItems([...galleryItems, ...missing.map(g=>({...g}))]);
+    showToast('התמונות חזרו לאתר ✓');
+  }catch(e){ console.error(e); showToast('השחזור נכשל'); loadGalleryItems(); }
+}
 function renderMediaGrid(){
   const el=document.getElementById('mediaGrid');
   if(!el) return;
+  const restore=document.getElementById('restoreDefaults'), missing=missingDefaults().length;
+  if(restore){ restore.hidden=!missing; restore.textContent=`↺ החזרת התמונות המקוריות שהוסרו (${missing})`; }
   if(galleryItems===null){ el.innerHTML=`<div class="empty">לא הצליח לטעון את הגלריה</div>`; return; }
   if(!galleryItems.length){ el.innerHTML=`<div class="empty">אין כרגע תמונות באתר</div>`; return; }
   el.innerHTML=galleryItems.map((g,i)=>`

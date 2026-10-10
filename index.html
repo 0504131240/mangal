@@ -121,7 +121,7 @@ section{padding:52px 0}
 
 /* ===== fire-style menus (preview, ?menu=fire) ===== */
 /* every menu opens with the steaks-over-fire photo; the window goes from cream (CLASIC) to darker (SPECIAL) to dark (CRAZY) */
-.menu-hero,.menu-flames{display:none}
+.menu-hero{display:none}
 html.menu-fire #menusModalBg .modal{
   --m-bg:#F6EBDA;--m-card:#FCF4E8;--m-text:#2E1B10;--m-text2:#4B2F1D;--m-head1:#D9541E;--m-head2:#9A320F;--m-line:rgba(140,70,30,.25);
   --m-border:rgba(200,90,40,.35);--m-tab:rgba(255,255,255,.55);--m-tab-text:#5A3520;--m-terms:#9A320F;--m-ember:#F2662B;
@@ -164,17 +164,12 @@ html.menu-fire .menu-grp b::after{content:'';display:block;height:2px;width:46px
 html.menu-fire .menu-grp ul,html.menu-fire .menu-card.premium .menu-grp ul{font-size:14.5px;color:var(--m-text2)}
 html.menu-fire .menu-grp li::before{content:'';display:inline-block;width:6px;height:6px;margin-inline-end:9px;vertical-align:middle;border-radius:50%;
   background:radial-gradient(circle,#FFE0A0,var(--m-ember) 70%);box-shadow:0 0 7px 1px var(--m-ember)}
-html.menu-fire .menu-note,html.menu-fire .menu-card.premium .menu-note{margin:22px 22px 0;color:var(--m-text2);border-top-color:var(--m-line)}
-/* the grill: fire on a dark strip at the bottom of each menu */
-html.menu-fire .menu-flames{display:block;height:78px;margin-top:16px;transform-origin:50% 100%;
-  background:url(images/flames-strip.jpg) bottom/auto 78px repeat-x,#0E0907;
-  -webkit-mask:linear-gradient(to top,#000 70%,transparent);mask:linear-gradient(to top,#000 70%,transparent);
-  animation:fx-flames 2.6s ease-in-out infinite alternate}
+html.menu-fire .menu-note,html.menu-fire .menu-card.premium .menu-note{margin:22px 22px 0;padding-bottom:18px;color:var(--m-text2);border-top-color:var(--m-line)}
 html.menu-fire .menu-terms{background:rgba(242,102,43,.08);border-color:var(--m-border)}
 html.menu-fire .menu-terms li{color:var(--m-terms)}
 html.menu-fire .menu-terms li+li{border-top-color:var(--m-line)}
-@media (prefers-reduced-motion:reduce){.mh-embers,.menu-flames{animation:none!important}}
-html.a11y-still .mh-embers,html.a11y-still .menu-flames{animation:none!important}
+@media (prefers-reduced-motion:reduce){.mh-embers{animation:none!important}}
+html.a11y-still .mh-embers{animation:none!important}
 html.a11y-contrast .mh-embers{display:none!important}
 
 /* booking form */
@@ -734,7 +729,6 @@ function renderMenus(){
         ${m.groups.map(g=>`<div class="menu-grp"><b>${g.t}</b><ul>${g.items.map(it=>`<li>${it}</li>`).join('')}</ul></div>`).join('')}
       </div>
       <div class="menu-note">${m.note}</div>
-      <div class="menu-flames" aria-hidden="true"></div>
     </div>`;
   }).join('');
 }

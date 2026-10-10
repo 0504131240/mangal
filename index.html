@@ -169,8 +169,9 @@ html.menu-fire .menu-note,html.menu-fire .menu-card.premium .menu-note{margin:22
 .menu-kosher{display:flex;align-items:center;justify-content:center;gap:10px;width:fit-content;margin:0 auto 18px;padding:9px 20px;
   border-radius:999px;border:1.5px solid var(--m-border,rgba(242,102,43,.45));background:rgba(242,102,43,.1);
   font-family:var(--font-head);font-size:16px;font-weight:700;color:var(--m-terms,var(--flame-dark))}
-.mk-ico{display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;flex:none;
-  background:linear-gradient(180deg,#F2662B,#B83C14);color:#fff;font-size:13px;box-shadow:0 0 10px rgba(242,102,43,.5)}
+/* an ember on each side, like the terms at the bottom */
+.menu-kosher::before,.menu-kosher::after{content:'';flex:none;width:9px;height:9px;border-radius:50%;
+  background:radial-gradient(circle,#FFE0A0,#F2662B 70%);box-shadow:0 0 8px 1px rgba(242,102,43,.75)}
 html.menu-fire .menu-terms{background:rgba(242,102,43,.08);border-color:var(--m-border)}
 html.menu-fire .menu-terms li{color:var(--m-terms)}
 html.menu-fire .menu-terms li+li{border-top-color:var(--m-line)}
@@ -395,7 +396,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
 <div class="modal-bg" id="menusModalBg" hidden onclick="if(event.target===this)closeMenusModal()">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="menusTitle">
     <div class="modal-top"><h3 id="menusTitle">תפריטי האירועים</h3><button type="button" class="modal-close" aria-label="סגירה" onclick="closeMenusModal()">✕</button></div>
-    <p class="menu-kosher"><span class="mk-ico" aria-hidden="true">✓</span>הבשרים בכשרות קהילות</p>
+    <p class="menu-kosher">הבשרים בכשרות קהילות</p>
     <div id="menuBlock">
       <div class="menu-tabs" id="menuTabs"></div>
       <div id="menuCards"></div>

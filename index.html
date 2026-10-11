@@ -934,7 +934,11 @@ function renderMenus(){
   }).join('');
 }
 function setMenuTab(id){
+  const was=activeMenuTab;
   activeMenuTab=id; renderMenus();
+  // a menu opened from the chooser is its own back step: back returns to the chooser
+  if(!was && id) overlayOpened();
+  else if(was && !id) overlayClosed();
   document.querySelector('#menusModalBg .modal').scrollTop=0;
   (id ? document.querySelector('#menuTabs .menu-tab.on') : document.querySelector('.mc-card')).focus();
 }
@@ -969,7 +973,8 @@ function isOverlayOpen(){ return !!topDialog(); }
 let backDepth=0, skipPops=0;
 function openLayers(){
   return (lightboxIndex>=0?1:0)+(document.getElementById('a11yPanel').hidden?0:1)
-    +DIALOGS.filter(id=>!document.getElementById(id).hidden).length;
+    +DIALOGS.filter(id=>!document.getElementById(id).hidden).length
+    +(activeMenuTab && !document.getElementById('menusModalBg').hidden ? 1 : 0);
 }
 function overlayOpened(){
   history.pushState({bbqOverlay:true},''); backDepth++;
@@ -987,9 +992,11 @@ addEventListener('popstate',()=>{
   backDepth--;
   const top=topDialog();
   if(!top) return;
+  const topId=top.closest('.modal-bg')?.id;
   if(lightboxIndex>=0) closeLightbox();
   else if(!document.getElementById('a11yPanel').hidden) closeA11y();
-  else closeDialog(top.closest('.modal-bg').id);
+  else if(topId==='menusModalBg' && activeMenuTab) setMenuTab(null);
+  else closeDialog(topId);
 });
 function openGalleryModal(){ openDialog('galleryModalBg'); }
 function closeGalleryModal(){ closeDialog('galleryModalBg'); }

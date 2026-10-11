@@ -56,7 +56,8 @@ a{color:inherit}
 .wrap{max-width:920px;margin:0 auto;padding:0 16px}
 
 /* nav */
-.nav{position:sticky;top:0;z-index:40;background:rgba(14,9,7,.82);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,170,110,.12)}
+/* no line or panel under the header: it sits on the page background and the ad fades in below it */
+.nav{position:sticky;top:0;z-index:40}
 .nav-in{max-width:920px;margin:0 auto;padding:8px 16px;display:flex;flex-direction:column;align-items:center;gap:4px}
 .brand{display:flex;align-items:center;justify-content:center}
 .logo-wrap{--logo:96px;position:relative;display:block;width:var(--logo);height:var(--logo)}
@@ -300,8 +301,9 @@ footer a{color:#F3C08A;text-decoration:none;font-weight:600}
 
 /* home: banner + big buttons that open windows */
 .short-banner{position:relative;overflow:hidden}
-/* trims the poster's white bottom-left corner and lets the sparks show through its lower edge */
-.short-banner img{display:block;width:100%;height:auto;margin-bottom:-2.6%;-webkit-mask-image:linear-gradient(to bottom,#000 82%,transparent);mask-image:linear-gradient(to bottom,#000 82%,transparent)}
+/* fades in under the header, trims the poster's white bottom-left corner and lets the sparks show through its lower edge */
+.short-banner img{display:block;width:100%;height:auto;margin-bottom:-2.6%;
+  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 10%,#000 82%,transparent);mask-image:linear-gradient(to bottom,transparent,#000 10%,#000 82%,transparent)}
 /* flicker over the poster's own flames */
 .short-banner::after{content:'';position:absolute;left:0;right:0;bottom:0;height:42%;pointer-events:none;mix-blend-mode:screen;
   background:radial-gradient(75% 80% at 50% 100%,rgba(255,120,30,.32),rgba(255,120,30,0) 72%);transform-origin:50% 100%;animation:fx-flicker 2.3s ease-in-out infinite alternate}

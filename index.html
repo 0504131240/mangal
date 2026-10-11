@@ -63,7 +63,14 @@ a{color:inherit}
 /* the background fills the logo file's thin transparent margin */
 .brand img{position:relative;display:block;height:100%;width:100%;object-fit:cover;border-radius:50%;background:#F9F4E8;
   box-shadow:0 0 0 2px rgba(255,140,60,.7),0 0 26px rgba(255,100,30,.7),0 6px 22px rgba(0,0,0,.55)}
-.nav-in{padding-top:14px;padding-bottom:12px}
+.nav-in{padding-top:14px;padding-bottom:12px;flex-direction:row;justify-content:space-between;gap:12px}
+/* "ברוכים הבאים" on the right, the logo in the left corner */
+.nav-welcome{font-family:var(--font-head);font-weight:700;font-size:clamp(24px,7.4vw,36px);line-height:1.15;color:#FFB07A;
+  filter:drop-shadow(0 0 14px rgba(242,102,43,.45)) drop-shadow(0 2px 2px rgba(0,0,0,.6))}
+@supports (-webkit-background-clip:text){
+  .nav-welcome{background:linear-gradient(180deg,#FFE7A8,#FFB25A 45%,#F2662B);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+}
+.brand{position:relative;z-index:1}
 /* the header logo: a pulsing fire glow behind it and sparks rising around it */
 .logo-wrap::before{content:'';position:absolute;inset:-26px;border-radius:50%;background:radial-gradient(circle,rgba(255,120,40,.6),rgba(255,80,20,.18) 45%,transparent 70%);animation:logo-pulse 2.2s ease-in-out infinite alternate}
 .logo-sparks{position:absolute;inset:-44px;border-radius:50%;background:url(images/embers.png) 0 0/160px auto repeat;mix-blend-mode:screen;filter:brightness(1.6) saturate(1.3);
@@ -368,19 +375,37 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
 
 <nav class="nav" aria-label="ניווט ראשי">
   <div class="nav-in">
-    <div class="brand">
-      <span class="logo-wrap">
-        <span class="logo-sparks" aria-hidden="true"></span>
-        <img src="images/logo-v2.png" alt="BBQ · חגיגת ברבקיו משחררת">
-      </span>
-    </div>
+    <p class="nav-welcome" id="navWelcome">ברוכים הבאים</p>
     <div class="nav-links" style="display:none" id="navLinksWide">
       <a href="#gallery" onclick="openGalleryModal();return false">גלריה</a>
       <a href="#menus" onclick="openMenusModal();return false">תפריטים</a>
       <a href="#contact">יצירת קשר</a>
     </div>
+    <div class="brand">
+      <span class="logo-wrap" id="logoWrap">
+        <span class="logo-sparks" aria-hidden="true"></span>
+        <img src="images/logo-v2.png" alt="BBQ · חגיגת ברבקיו משחררת">
+      </span>
+    </div>
   </div>
 </nav>
+<script>
+// on opening the site the logo starts at the right and rolls to its place in the left corner
+// (turning exactly as far as a wheel of its size would roll), and "ברוכים הבאים" fades in behind it
+(function(){
+  const html=document.documentElement;
+  if(html.classList.contains('a11y-still') || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const wrap=document.getElementById('logoWrap'), img=wrap.querySelector('img'), text=document.getElementById('navWelcome');
+  if(!wrap.animate) return;
+  const inner=wrap.closest('.nav-in'), cs=getComputedStyle(inner);
+  const dx=inner.getBoundingClientRect().right-parseFloat(cs.paddingRight)-wrap.getBoundingClientRect().right;
+  if(dx<20) return;
+  const turn=dx/(Math.PI*wrap.offsetWidth)*360, opts={duration:1800, easing:'cubic-bezier(.3,.7,.35,1)', fill:'backwards'};
+  wrap.animate([{transform:`translateX(${dx}px)`},{transform:'translateX(0)'}], opts);
+  img.animate([{transform:`rotate(${turn}deg)`},{transform:'rotate(0deg)'}], opts);
+  text.animate([{opacity:0, transform:'translateX(14px)'},{opacity:1, transform:'translateX(0)'}], {duration:1300, delay:450, easing:'ease-out', fill:'backwards'});
+})();
+</script>
 
 <!-- banner + three big buttons; gallery, menus and booking each open in a window -->
 <main id="main" tabindex="-1">

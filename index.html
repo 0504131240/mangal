@@ -12,13 +12,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0E0907">
 <title>BBQ · חגיגת ברבקיו משחררת</title>
-<meta name="description" content="חוויית מנגל יוקרתית שמגיעה עד אליכם. תפריטים, גלריה והזמנת אירוע באתר.">
+<meta name="description" content="חוויית מנגל יוקרתית שמגיעה עד אליכם. תפריטים, גלריה ובדיקת זמינות לאירוע באתר.">
 <!-- link preview (WhatsApp, Facebook...): without these, apps pick the transparent logo and show it cropped on black -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://mangal-belahavot.vercel.app/">
 <meta property="og:site_name" content="BBQ · חגיגת ברבקיו משחררת">
 <meta property="og:title" content="BBQ · חגיגת ברבקיו משחררת">
-<meta property="og:description" content="חוויית מנגל יוקרתית שמגיעה עד אליכם. תפריטים, גלריה והזמנת אירוע באתר.">
+<meta property="og:description" content="חוויית מנגל יוקרתית שמגיעה עד אליכם. תפריטים, גלריה ובדיקת זמינות לאירוע באתר.">
 <meta property="og:image" content="https://mangal-belahavot.vercel.app/images/share-card.jpg">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
@@ -254,6 +254,12 @@ html.a11y-contrast .mh-embers{display:none!important}
 .massage-check b{font-size:14.5px;color:var(--text)}
 .massage-check small{font-size:12.5px;line-height:1.5;color:var(--text2)}
 
+/* availability-check note at the top of the form */
+.avail-note{display:flex;gap:10px;align-items:flex-start;margin-bottom:16px;padding:13px 14px;border-radius:var(--r2);
+  border:2px solid var(--flame);background:var(--flame-bg);font-size:14px;line-height:1.55;color:var(--text)}
+.avail-note b{color:var(--flame-dark)}
+.avail-ico{font-size:20px;line-height:1.2}
+
 /* booking form */
 .book-wrap{background:transparent;border:1px solid var(--border);border-radius:var(--r);padding:26px 22px;max-width:640px;margin:0 auto}
 .lvl-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:4px}
@@ -461,7 +467,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
     <button type="button" class="big-card" onclick="openGalleryModal()"><div class="ico" aria-hidden="true">📷</div><div class="txt"><b>תמונות מאירועים</b><span>הצצה לאירועים קודמים</span></div><div class="arrow" aria-hidden="true">‹</div></button>
     <button type="button" class="big-card" onclick="openMenusModal()"><div class="ico" aria-hidden="true">📋</div><div class="txt"><b>תפריטים</b><span>CLASIC · SPECIAL · CRAZY</span></div><div class="arrow" aria-hidden="true">‹</div></button>
     <button type="button" class="big-card" onclick="openMassageModal()"><div class="ico" aria-hidden="true">🧖</div><div class="txt"><b>הצעה מיוחדת לימי גיבוש</b><span>ספא לקבוצה, עם אפשרות למסאז'יסט</span></div><div class="arrow" aria-hidden="true">‹</div></button>
-    <button type="button" class="big-card" onclick="openBookModal()"><div class="ico" aria-hidden="true">📅</div><div class="txt"><b>הזמנת אירוע</b><span>בוחרים תאריך ורמה</span></div><div class="arrow" aria-hidden="true">‹</div></button>
+    <button type="button" class="big-card" onclick="openBookModal()"><div class="ico" aria-hidden="true">📅</div><div class="txt"><b>בדיקת זמינות</b><span>שולחים פרטים ונחזור אליכם לאשר</span></div><div class="arrow" aria-hidden="true">‹</div></button>
   </div>
 </div>
 
@@ -528,7 +534,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
       </section>
       <div class="massage-how">
         <b>דברו איתנו</b>
-        <span>לוחצים על הכפתור וממשיכים איתנו בוואטסאפ, או מסמנים בטופס ההזמנה "פרטים על ספא / מסאז'", ונחזור אליכם עם הצעה מותאמת לגודל הקבוצה. הכל מתואם דרכנו, מול איש קשר אחד.</span>
+        <span>לוחצים על הכפתור וממשיכים איתנו בוואטסאפ, או מסמנים בטופס בדיקת הזמינות "פרטים על ספא / מסאז'", ונחזור אליכם עם הצעה מותאמת לגודל הקבוצה. הכל מתואם דרכנו, מול איש קשר אחד.</span>
       </div>
     </div>
   </div>
@@ -536,9 +542,13 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
 
 <div class="modal-bg" id="bookModalBg" hidden onclick="if(event.target===this)closeBookModal()">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="bookTitle">
-    <div class="modal-top"><h3 id="bookTitle">טופס הזמנת אירוע</h3><button type="button" class="modal-close" aria-label="סגירה" onclick="closeBookModal()">✕</button></div>
+    <div class="modal-top"><h3 id="bookTitle">בדיקת זמינות לאירוע</h3><button type="button" class="modal-close" aria-label="סגירה" onclick="closeBookModal()">✕</button></div>
     <div class="book-wrap" id="bookWrap" style="padding:0;border:none">
-      <form id="bookForm">
+      <form id="bookForm" aria-describedby="availNote">
+        <div class="avail-note" id="availNote" role="note">
+          <span class="avail-ico" aria-hidden="true">📅</span>
+          <span><b>זו בדיקת זמינות בלבד, לא הזמנה סופית.</b> נבדוק שהתאריך פנוי עבורנו ונחזור אליכם לאשר. האירוע נקבע רק אחרי שנאשר אותו איתכם.</span>
+        </div>
         <div class="fld">
           <label for="fName">שם מלא *</label>
           <input type="text" id="fName" required autocomplete="name">
@@ -597,14 +607,14 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
           <label for="fNotes">הערות נוספות</label>
           <textarea id="fNotes" placeholder="אלרגיות, בקשות מיוחדות..."></textarea>
         </div>
-        <p class="privacy-note" id="privacyNote">הפרטים משמשים רק כדי לטפל בבקשה ולחזור אליכם. השדות עם * נחוצים לטיפול בהזמנה, ואין חובה חוקית למסור אותם. פרטים נוספים ב<button type="button" class="inline-link" onclick="openPrivacy()">מדיניות הפרטיות</button>.</p>
-        <button type="submit" class="btn btn-send" id="sendBtn" aria-describedby="privacyNote">שליחת בקשת הזמנה 🔥</button>
+        <p class="privacy-note" id="privacyNote">הפרטים משמשים רק כדי לטפל בבקשה ולחזור אליכם. השדות עם * נחוצים לטיפול בבקשה, ואין חובה חוקית למסור אותם. פרטים נוספים ב<button type="button" class="inline-link" onclick="openPrivacy()">מדיניות הפרטיות</button>.</p>
+        <button type="submit" class="btn btn-send" id="sendBtn" aria-describedby="privacyNote">שליחה לבדיקת זמינות 🔥</button>
         <div class="form-err" id="formErr" role="alert"></div>
       </form>
       <div class="form-done" id="formDone" style="display:none" role="status">
         <div class="form-done-ico" aria-hidden="true">✅</div>
         <h3 id="doneTitle" tabindex="-1">הבקשה התקבלה!</h3>
-        <p>תודה <span id="doneName"></span>, קיבלנו את הבקשה שלכם לתאריך <span id="doneDate"></span>.<br>ניצור קשר בהקדם לאישור סופי ותיאום פרטים.</p>
+        <p>תודה <span id="doneName"></span>, קיבלנו את הבקשה לבדיקת זמינות לתאריך <span id="doneDate"></span>.<br><b>זו עדיין לא הזמנה סופית:</b> נבדוק שהתאריך פנוי ונחזור אליכם בהקדם. האירוע נקבע רק אחרי שנאשר אותו איתכם.</p>
       </div>
     </div>
   </div>
@@ -665,13 +675,13 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
       <p>BBQ · חגיגת ברבקיו משחררת (דודי) מכבדים את הפרטיות שלכם. כאן מוסבר איזה מידע נאסף באתר, למה, ומה הזכויות שלכם.</p>
       <h4>איזה מידע נאסף</h4>
       <ul>
-        <li>רק מה שממלאים בטופס הזמנת האירוע: שם, טלפון, מייל (לא חובה), תאריך ושעת נטילת ידיים, מספר הגברים והנשים, רמת התפריט, האם ביקשתם פרטים על ספא / מסאז' (לא חובה), מיקום (לא חובה) והערות (לא חובה).</li>
+        <li>רק מה שממלאים בטופס בדיקת הזמינות: שם, טלפון, מייל (לא חובה), תאריך ושעת נטילת ידיים, מספר הגברים והנשים, רמת התפריט, האם ביקשתם פרטים על ספא / מסאז' (לא חובה), מיקום (לא חובה) והערות (לא חובה).</li>
         <li>האתר לא משתמש בעוגיות מעקב, בפרסום או בכלי ניתוח תנועה.</li>
         <li>הגדרות הנגישות שבחרתם ועותק של רשימת התמונות נשמרים רק בדפדפן שלכם, ולא נשלחים אלינו.</li>
         <li>ספקי האחסון של האתר עשויים לשמור רישומים טכניים (כמו כתובת IP) לצורכי אבטחה ותפעול.</li>
       </ul>
       <h4>למה המידע משמש</h4>
-      <p>כדי לטפל בבקשת ההזמנה, לחזור אליכם, לתאם את האירוע ואת התשלום, ולנהל את רישום ההזמנות. לא נשלח לכם פרסומות בלי הסכמה מפורשת.</p>
+      <p>כדי לטפל בבקשה, לבדוק זמינות, לחזור אליכם, לתאם את האירוע ואת התשלום, ולנהל את רישום ההזמנות. לא נשלח לכם פרסומות בלי הסכמה מפורשת.</p>
       <h4>האם חובה למסור את הפרטים</h4>
       <p>אין חובה חוקית למסור אותם. בלי השדות המסומנים בכוכבית לא נוכל לטפל בבקשה.</p>
       <h4>איפה המידע נשמר ומי רואה אותו</h4>
@@ -1067,7 +1077,7 @@ document.getElementById('bookForm').addEventListener('submit', async (e)=>{
     console.error(err);
     errEl.textContent='אירעה שגיאה בשליחה, נסו שוב או צרו קשר טלפוני';
     errEl.style.display='block';
-    btn.disabled=false;btn.textContent='שליחת בקשת הזמנה 🔥';
+    btn.disabled=false;btn.textContent='שליחה לבדיקת זמינות 🔥';
   }
 });
 

@@ -119,6 +119,9 @@ section{padding:52px 0}
 .lb-nav:active{transform:translateY(-50%) scale(.92)}
 .lb-prev{right:8px}
 .lb-next{left:8px}
+/* the photo's caption, under the big photo */
+.lb-cap{flex:none;margin:0 auto;padding:4px 20px 12px;max-width:560px;text-align:center;font-size:15px;font-weight:600;line-height:1.5;color:#FBF3EA;text-shadow:0 1px 3px rgba(0,0,0,.7)}
+.lb-cap[hidden]{display:none}
 /* a row of small photos at the bottom: scroll through them and tap one to open it */
 .lb-strip{flex:none;display:flex;gap:8px;overflow-x:auto;padding:10px 12px calc(12px + env(safe-area-inset-bottom,0px));
   background:rgba(0,0,0,.45);border-top:1px solid rgba(255,170,110,.15);scrollbar-width:none;-webkit-overflow-scrolling:touch}
@@ -838,6 +841,7 @@ function buildLightbox(){
       <div id="lbMedia" style="display:contents"></div>
       <button type="button" class="lb-nav lb-next" aria-label="הבא" onclick="lightboxShift(1)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
+    <p class="lb-cap" id="lbCap" aria-live="polite"></p>
     <div class="lb-strip" id="lbStrip" role="group" aria-label="כל התמונות">
       ${GALLERY.map((g,i)=>`<button type="button" class="lb-thumb" data-i="${i}" aria-label="${escHtml(mediaLabel(g,i))}" onclick="lightboxGo(${i})">
         ${g.kind==='video'
@@ -860,6 +864,8 @@ function renderLightbox(first){
   const g=GALLERY[lightboxIndex];
   document.getElementById('lightboxEl').setAttribute('aria-label', mediaLabel(g,lightboxIndex));
   document.getElementById('lbCounter').textContent=`${lightboxIndex+1} מתוך ${GALLERY.length}`;
+  const cap=document.getElementById('lbCap');
+  cap.textContent=g.cap||''; cap.hidden=!g.cap;
   document.getElementById('lbMedia').innerHTML = g.kind==='video'
     ? `<video src="${escHtml(g.url)}" controls ${document.documentElement.classList.contains('a11y-still')?'':'autoplay'} playsinline></video>`
     : `<img src="${escHtml(g.url)}" alt="${escHtml(g.cap||mediaLabel(g,lightboxIndex))}">`;

@@ -94,15 +94,29 @@ section{padding:52px 0}
 .gtile video{pointer-events:none;background:#000}
 .gtile-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;padding-left:3px;pointer-events:none}
 .gtile-cap{position:absolute;inset-inline:0;bottom:0;padding:8px 10px 7px;background:linear-gradient(0deg,rgba(0,0,0,.55),transparent);color:#fff;font-size:11.5px;font-weight:600}
-.lightbox{position:fixed;inset:0;background:rgba(15,9,6,.92);z-index:100;display:flex;align-items:center;justify-content:center;padding:24px}
-.lightbox img,.lightbox video{max-width:min(92vw,560px);max-height:80vh;border-radius:14px}
-.lightbox video{background:#000}
-.lb-close{position:absolute;top:18px;left:18px;background:rgba(255,255,255,.15);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:18px;cursor:pointer;z-index:2}
-.lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:22px;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center}
-.lb-prev{right:14px}
-.lb-next{left:14px}
-.lb-counter{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.75);font-size:12px;font-weight:600;background:rgba(0,0,0,.35);padding:5px 12px;border-radius:20px}
-@media(max-width:480px){.lb-nav{width:38px;height:38px;font-size:18px}.lb-prev{right:6px}.lb-next{left:6px}}
+.lightbox{position:fixed;inset:0;background:rgba(15,9,6,.95);z-index:100;display:flex;flex-direction:column}
+/* the big photo with an arrow on each side */
+.lb-stage{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:64px 62px 10px}
+.lb-stage img,.lb-stage video{max-width:100%;max-height:100%;object-fit:contain;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.6)}
+.lb-stage video{background:#000}
+.lb-close{position:absolute;top:16px;left:16px;background:rgba(255,255,255,.15);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:18px;cursor:pointer;z-index:2}
+.lb-counter{position:absolute;top:24px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.85);font-size:13px;font-weight:700;background:rgba(0,0,0,.4);padding:5px 14px;border-radius:20px}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:48px;height:48px;border-radius:50%;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,190,140,.7);color:#fff;padding:0;
+  background:linear-gradient(180deg,rgba(242,102,43,.92),rgba(184,60,20,.92));box-shadow:0 0 18px rgba(242,102,43,.55),0 4px 12px rgba(0,0,0,.5)}
+.lb-nav:active{transform:translateY(-50%) scale(.92)}
+.lb-prev{right:8px}
+.lb-next{left:8px}
+/* a row of small photos at the bottom: scroll through them and tap one to open it */
+.lb-strip{flex:none;display:flex;gap:8px;overflow-x:auto;padding:10px 12px calc(12px + env(safe-area-inset-bottom,0px));
+  background:rgba(0,0,0,.45);border-top:1px solid rgba(255,170,110,.15);scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.lb-strip::-webkit-scrollbar{display:none}
+.lb-thumb{position:relative;flex:none;width:62px;height:62px;padding:0;border-radius:10px;overflow:hidden;cursor:pointer;
+  border:2px solid transparent;background:#1A120E;opacity:.55;transition:opacity .2s,border-color .2s}
+.lb-thumb img,.lb-thumb video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.lb-thumb .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;text-shadow:0 1px 4px #000}
+.lb-thumb[aria-current="true"]{opacity:1;border-color:#F2662B;box-shadow:0 0 12px rgba(242,102,43,.6)}
+@media(max-width:480px){.lb-stage{padding:64px 52px 8px}.lb-nav{width:42px;height:42px}.lb-prev{right:5px}.lb-next{left:5px}.lb-thumb{width:56px;height:56px}}
 
 /* menus */
 .menu-tabs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:22px}
@@ -603,6 +617,7 @@ async function loadGallery(){
     GALLERY=list;
     renderGallery();
     if(lightboxIndex>=GALLERY.length) closeLightbox();
+    else if(lightboxIndex>=0) buildLightbox();
   }catch(e){}
 }
 function escHtml(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -697,31 +712,53 @@ let lightboxIndex=-1, lightboxOpener=null;
 function openLightbox(i){
   lightboxOpener=document.activeElement;
   lightboxIndex=i;
-  renderLightbox();
+  buildLightbox();
 }
-function renderLightbox(){
-  const g=GALLERY[lightboxIndex];
+// the window, the arrows and the row of small photos; renderLightbox then swaps the big photo
+function buildLightbox(){
   const root=document.getElementById('lightboxRoot');
-  // keep keyboard focus on the same control when moving between photos
-  const focusedClass=root.contains(document.activeElement) ? document.activeElement.className : 'lb-close';
-  root.innerHTML=`<div class="lightbox" id="lightboxEl" role="dialog" aria-modal="true" aria-label="${escHtml(mediaLabel(g,lightboxIndex))}" onclick="if(event.target===this)closeLightbox()">
+  root.innerHTML=`<div class="lightbox" id="lightboxEl" role="dialog" aria-modal="true">
     <button type="button" class="lb-close" aria-label="סגירה" onclick="closeLightbox()">✕</button>
-    <button type="button" class="lb-nav lb-prev" aria-label="הקודם" onclick="event.stopPropagation();lightboxShift(-1)">›</button>
-    ${g.kind==='video'
-      ? `<video src="${escHtml(g.url)}" controls ${document.documentElement.classList.contains('a11y-still')?'':'autoplay'} playsinline></video>`
-      : `<img src="${escHtml(g.url)}" alt="${escHtml(g.cap||mediaLabel(g,lightboxIndex))}">`}
-    <button type="button" class="lb-nav lb-next" aria-label="הבא" onclick="event.stopPropagation();lightboxShift(1)">‹</button>
-    <div class="lb-counter" aria-live="polite">${lightboxIndex+1} / ${GALLERY.length}</div>
+    <div class="lb-counter" id="lbCounter" aria-live="polite"></div>
+    <div class="lb-stage" id="lbStage" onclick="if(event.target===this)closeLightbox()">
+      <button type="button" class="lb-nav lb-prev" aria-label="הקודם" onclick="lightboxShift(-1)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div id="lbMedia" style="display:contents"></div>
+      <button type="button" class="lb-nav lb-next" aria-label="הבא" onclick="lightboxShift(1)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <div class="lb-strip" id="lbStrip" role="group" aria-label="כל התמונות">
+      ${GALLERY.map((g,i)=>`<button type="button" class="lb-thumb" data-i="${i}" aria-label="${escHtml(mediaLabel(g,i))}" onclick="lightboxGo(${i})">
+        ${g.kind==='video'
+          ? `<video src="${escHtml(g.url)}#t=0.1" muted playsinline preload="metadata"></video><span class="play" aria-hidden="true">▶</span>`
+          : `<img src="${escHtml(g.url)}" alt="" loading="lazy">`}</button>`).join('')}
+    </div>
   </div>`;
-  const again=root.querySelector('.'+focusedClass.split(' ').filter(Boolean).join('.'));
-  (again||root.querySelector('.lb-close')).focus();
+  // swipe the big photo to move between photos (the row below scrolls on its own)
   let sx=0,sy=0;
-  const el=document.getElementById('lightboxEl');
-  el.addEventListener('touchstart',(e)=>{ if(e.touches.length!==1)return; sx=e.touches[0].clientX; sy=e.touches[0].clientY; },{passive:true});
-  el.addEventListener('touchend',(e)=>{
+  const stage=document.getElementById('lbStage');
+  stage.addEventListener('touchstart',(e)=>{ if(e.touches.length!==1)return; sx=e.touches[0].clientX; sy=e.touches[0].clientY; },{passive:true});
+  stage.addEventListener('touchend',(e)=>{
     const t=e.changedTouches[0]; const dx=t.clientX-sx, dy=t.clientY-sy;
     if(Math.abs(dx)>60 && Math.abs(dy)<60){ lightboxShift(dx<0?1:-1); }
   },{passive:true});
+  renderLightbox(true);
+  root.querySelector('.lb-close').focus();
+}
+function renderLightbox(first){
+  const g=GALLERY[lightboxIndex];
+  document.getElementById('lightboxEl').setAttribute('aria-label', mediaLabel(g,lightboxIndex));
+  document.getElementById('lbCounter').textContent=`${lightboxIndex+1} מתוך ${GALLERY.length}`;
+  document.getElementById('lbMedia').innerHTML = g.kind==='video'
+    ? `<video src="${escHtml(g.url)}" controls ${document.documentElement.classList.contains('a11y-still')?'':'autoplay'} playsinline></video>`
+    : `<img src="${escHtml(g.url)}" alt="${escHtml(g.cap||mediaLabel(g,lightboxIndex))}">`;
+  document.querySelectorAll('#lbStrip .lb-thumb').forEach(t=>{
+    const on=Number(t.dataset.i)===lightboxIndex;
+    t.setAttribute('aria-current', String(on));
+    if(on) t.scrollIntoView({block:'nearest', inline:'center', behavior: first ? 'auto' : 'smooth'});
+  });
+}
+function lightboxGo(i){
+  lightboxIndex=i;
+  renderLightbox();
 }
 function lightboxShift(dir){
   lightboxIndex=(lightboxIndex+dir+GALLERY.length)%GALLERY.length;

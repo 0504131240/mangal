@@ -1076,8 +1076,8 @@ addEventListener('popstate',()=>{
 });
 
 /* ===== share the public site (not the admin) ===== */
-// WhatsApp and other apps show the site's own preview (title, description, image), so they get just the link
-// with a 🔥 after it: a message that is only a link makes WhatsApp hide the link and keep only the preview.
+// WhatsApp and other apps show the site's own preview (title, description, image), so they get just the link,
+// between two emojis: WhatsApp hides a link that starts or ends the message and keeps only the preview.
 // The text goes only into email, which shows no preview.
 const SHARE_TEXT='BBQ · חגיגת ברבקיו משחררת 🔥 מנגל לאירועים עם דודי: תמונות, תפריטים ובדיקת זמינות לאירוע';
 const publicSiteUrl=()=>location.origin+'/';
@@ -1085,7 +1085,7 @@ function openShare(){
   viewOpened(openShare);
   const url=publicSiteUrl();
   const msg=`${SHARE_TEXT}\n${url}`;
-  const linkMsg=`${url} 🔥`;
+  const linkMsg=`🔥 ${url} 🔥`;
   document.getElementById('modalRoot').innerHTML=`
     <div class="modal-bg" onclick="if(event.target===this)closeModal()">
       <div class="modal">
@@ -1110,7 +1110,7 @@ async function copySiteLink(){
   showToast('הקישור הועתק ✓');
 }
 async function nativeShare(){
-  try{ await navigator.share({text:`${publicSiteUrl()} 🔥`}); closeModal(); }
+  try{ await navigator.share({text:`🔥 ${publicSiteUrl()} 🔥`}); closeModal(); }
   catch(e){ /* the person closed the share sheet */ }
 }
 // men + women fill in the total; the total stays editable for bookings that only have a total

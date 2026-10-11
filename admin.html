@@ -1076,7 +1076,9 @@ addEventListener('popstate',()=>{
 });
 
 /* ===== share the public site (not the admin) ===== */
-const SHARE_TEXT='BBQ · חגיגת ברבקיו משחררת 🔥 מנגל לאירועים עם דודי: תמונות, תפריטים והזמנת אירוע';
+// WhatsApp and other apps show the site's own preview (title, description, image), so they get only the link;
+// the text goes only into email, which shows no preview
+const SHARE_TEXT='BBQ · חגיגת ברבקיו משחררת 🔥 מנגל לאירועים עם דודי: תמונות, תפריטים ובדיקת זמינות לאירוע';
 const publicSiteUrl=()=>location.origin+'/';
 function openShare(){
   viewOpened(openShare);
@@ -1087,7 +1089,7 @@ function openShare(){
       <div class="modal">
         <div class="modal-top"><h3>📤 שיתוף האתר</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
         <div class="share-opts">
-          <a class="share-opt" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener" onclick="setTimeout(closeModal,300)"><span class="ico">💬</span>וואטסאפ</a>
+          <a class="share-opt" href="https://wa.me/?text=${encodeURIComponent(url)}" target="_blank" rel="noopener" onclick="setTimeout(closeModal,300)"><span class="ico">💬</span>וואטסאפ</a>
           <a class="share-opt" href="mailto:?subject=${encodeURIComponent('BBQ · מנגל לאירועים')}&body=${encodeURIComponent(msg)}" onclick="setTimeout(closeModal,300)"><span class="ico">✉️</span>מייל</a>
           <button class="share-opt" onclick="copySiteLink()"><span class="ico">🔗</span>העתקת קישור</button>
           ${navigator.share?`<button class="share-opt" onclick="nativeShare()"><span class="ico">⋯</span>אפליקציה אחרת</button>`:''}
@@ -1106,7 +1108,7 @@ async function copySiteLink(){
   showToast('הקישור הועתק ✓');
 }
 async function nativeShare(){
-  try{ await navigator.share({title:'BBQ · חגיגת ברבקיו משחררת', text:SHARE_TEXT, url:publicSiteUrl()}); closeModal(); }
+  try{ await navigator.share({url:publicSiteUrl()}); closeModal(); }
   catch(e){ /* the person closed the share sheet */ }
 }
 // men + women fill in the total; the total stays editable for bookings that only have a total

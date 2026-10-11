@@ -22,7 +22,7 @@ service cloud.firestore {
     }
     function validRequest(d) {
       return d.keys().hasOnly(['name', 'phone', 'email', 'date', 'washTime', 'guests', 'men', 'women', 'level',
-                               'location', 'notes', 'status', 'totalPrice', 'paidAmount', 'createdAt', 'createdAtMs'])
+                               'massage', 'location', 'notes', 'status', 'totalPrice', 'paidAmount', 'createdAt', 'createdAtMs'])
         && d.name is string && d.name.size() > 0 && d.name.size() <= 100
         && d.phone is string && d.phone.size() > 0 && d.phone.size() <= 30
         && optionalText(d.email, 200)
@@ -32,6 +32,7 @@ service cloud.firestore {
         && ((!('men' in d) && !('women' in d))
             || (d.men is int && d.women is int && d.men >= 0 && d.women >= 0 && d.men + d.women == d.guests))
         && d.level in ['CLASIC', 'SPECIAL', 'CRAZY']
+        && (!('massage' in d) || d.massage is bool)
         && optionalText(d.location, 300)
         && optionalText(d.notes, 2000)
         && d.status == 'pending' && d.totalPrice == 0 && d.paidAmount == 0

@@ -211,6 +211,24 @@ html.menu-fire .menu-terms li+li{border-top-color:var(--m-line)}
 html.a11y-still .mh-embers{animation:none!important}
 html.a11y-contrast .mh-embers{display:none!important}
 
+/* massage add-on: its window and the checkbox in the booking form */
+.massage{display:flex;flex-direction:column;gap:16px}
+.massage-lead{font-size:16px;line-height:1.6;color:var(--text)}
+.massage-list{list-style:none;display:flex;flex-direction:column;gap:10px}
+.massage-list li{display:flex;align-items:flex-start;gap:10px;font-size:14.5px;line-height:1.5;color:var(--text2)}
+.massage-list li::before{content:'';flex:none;width:8px;height:8px;margin-top:7px;border-radius:50%;
+  background:radial-gradient(circle,#FFE0A0,#F2662B 70%);box-shadow:0 0 8px 1px rgba(242,102,43,.7)}
+.massage-how{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border-radius:var(--r2);border:1.5px solid rgba(242,102,43,.45);background:var(--flame-bg);font-size:14px;line-height:1.55;color:var(--text2)}
+.massage-how b{font-family:var(--font-head);font-size:16px;color:var(--flame-dark)}
+.massage-wa{display:block;text-align:center;padding:12px;border-radius:var(--r2);border:1.5px solid rgba(232,178,82,.5);color:#F4C766;font-weight:700;text-decoration:none}
+.massage-check{display:flex;align-items:flex-start;gap:12px;margin-top:16px;padding:14px;border-radius:var(--r2);cursor:pointer;
+  border:1.5px solid var(--border);background:var(--surface);transition:border-color .15s,background .15s}
+.massage-check:has(input:checked){border-color:var(--flame);background:var(--flame-bg)}
+.massage-check input{flex:none;width:22px;height:22px;margin-top:1px;accent-color:#F2662B;cursor:pointer}
+.massage-check span{display:flex;flex-direction:column;gap:3px}
+.massage-check b{font-size:14.5px;color:var(--text)}
+.massage-check small{font-size:12.5px;line-height:1.5;color:var(--text2)}
+
 /* booking form */
 .book-wrap{background:transparent;border:1px solid var(--border);border-radius:var(--r);padding:26px 22px;max-width:640px;margin:0 auto}
 .lvl-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:4px}
@@ -414,6 +432,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
   <div class="big-cards">
     <button type="button" class="big-card" onclick="openGalleryModal()"><div class="ico" aria-hidden="true">📷</div><div class="txt"><b>תמונות מאירועים</b><span>הצצה לאירועים קודמים</span></div><div class="arrow" aria-hidden="true">‹</div></button>
     <button type="button" class="big-card" onclick="openMenusModal()"><div class="ico" aria-hidden="true">📋</div><div class="txt"><b>תפריטים</b><span>CLASIC · SPECIAL · CRAZY</span></div><div class="arrow" aria-hidden="true">‹</div></button>
+    <button type="button" class="big-card" onclick="openMassageModal()"><div class="ico" aria-hidden="true">💆</div><div class="txt"><b>הצעה מיוחדת לימי גיבוש</b><span>מנגל + ספא ומסאז' לקבוצות</span></div><div class="arrow" aria-hidden="true">‹</div></button>
     <button type="button" class="big-card" onclick="openBookModal()"><div class="ico" aria-hidden="true">📅</div><div class="txt"><b>הזמנת אירוע</b><span>בוחרים תאריך ורמה</span></div><div class="arrow" aria-hidden="true">‹</div></button>
   </div>
 </div>
@@ -468,6 +487,27 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
   </div>
 </div>
 
+<div class="modal-bg" id="massageModalBg" hidden onclick="if(event.target===this)closeDialog('massageModalBg')">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="massageTitle">
+    <div class="modal-top"><h3 id="massageTitle">הצעה מיוחדת לימי גיבוש 💆</h3><button type="button" class="modal-close" aria-label="סגירה" onclick="closeDialog('massageModalBg')">✕</button></div>
+    <div class="massage">
+      <p class="massage-lead">עושים יום גיבוש, ערב חברה או אירוע צוות? אפשר להוסיף למנגל גם <b>ספא ומסאז'</b>: מעסה מקצועי מגיע אליכם ומפנק את חברי הקבוצה, בזמן שהמנגל על האש.</p>
+      <ul class="massage-list">
+        <li>מתאים לימי גיבוש, ערבי חברה, אירועי צוות וקבוצות</li>
+        <li>מעסה מקצועי מגיע עד אליכם, לאותו מקום של האירוע</li>
+        <li>מסאז' לחברי הקבוצה, אחד אחרי השני, בזמן שכולם נהנים</li>
+        <li>הכל מתואם דרכנו, בהזמנה אחת ומול איש קשר אחד</li>
+      </ul>
+      <div class="massage-how">
+        <b>דברו איתנו</b>
+        <span>מסמנים בטופס ההזמנה "מעוניינים גם בספא ומסאז'", או כותבים לנו בוואטסאפ, ונחזור אליכם עם הצעה מותאמת לגודל הקבוצה.</span>
+      </div>
+      <button type="button" class="btn btn-send" onclick="bookWithMassage()">להזמנת יום גיבוש עם ספא ומסאז' 💆</button>
+      <a class="massage-wa" href="https://wa.me/972527626562?text=%D7%94%D7%99%D7%99%20%D7%93%D7%95%D7%93%D7%99%21%20%D7%9E%D7%AA%D7%A2%D7%A0%D7%99%D7%99%D7%A0%D7%99%D7%9D%20%D7%91%D7%99%D7%95%D7%9D%20%D7%92%D7%99%D7%91%D7%95%D7%A9%20%D7%A2%D7%9D%20%D7%9E%D7%A0%D7%92%D7%9C%2C%20%D7%A1%D7%A4%D7%90%20%D7%95%D7%9E%D7%A1%D7%90%D7%96%27%20%F0%9F%94%A5%F0%9F%92%86" target="_blank" rel="noopener">💬 לשאלות בוואטסאפ<span class="sr-only"> (נפתח בחלון חדש)</span></a>
+    </div>
+  </div>
+</div>
+
 <div class="modal-bg" id="bookModalBg" hidden onclick="if(event.target===this)closeBookModal()">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="bookTitle">
     <div class="modal-top"><h3 id="bookTitle">טופס הזמנת אירוע</h3><button type="button" class="modal-close" aria-label="סגירה" onclick="closeBookModal()">✕</button></div>
@@ -516,6 +556,10 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
           <span class="fld-label" id="lvlLabel">רמת אירוע *</span>
           <div class="lvl-grid" id="lvlGrid" role="group" aria-labelledby="lvlLabel"></div>
         </div>
+        <label class="massage-check" for="fMassage">
+          <input type="checkbox" id="fMassage">
+          <span><b>💆 מעוניינים גם בספא ומסאז' (לימי גיבוש וקבוצות)</b><small>מעסה מקצועי מגיע ומפנק את חברי הקבוצה. לא מחייב, נחזור אליכם עם הצעה.</small></span>
+        </label>
         <div class="fld">
           <label for="fLocation">מיקום / אזור משוער</label>
           <input type="text" id="fLocation" placeholder="עיר / אזור / כתובת">
@@ -592,7 +636,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
       <p>BBQ · חגיגת ברבקיו משחררת (דודי) מכבדים את הפרטיות שלכם. כאן מוסבר איזה מידע נאסף באתר, למה, ומה הזכויות שלכם.</p>
       <h4>איזה מידע נאסף</h4>
       <ul>
-        <li>רק מה שממלאים בטופס הזמנת האירוע: שם, טלפון, מייל (לא חובה), תאריך ושעת נטילת ידיים, מספר הגברים והנשים, רמת התפריט, מיקום (לא חובה) והערות (לא חובה).</li>
+        <li>רק מה שממלאים בטופס הזמנת האירוע: שם, טלפון, מייל (לא חובה), תאריך ושעת נטילת ידיים, מספר הגברים והנשים, רמת התפריט, האם אתם מעוניינים גם בספא ומסאז' (לא חובה), מיקום (לא חובה) והערות (לא חובה).</li>
         <li>האתר לא משתמש בעוגיות מעקב, בפרסום או בכלי ניתוח תנועה.</li>
         <li>הגדרות הנגישות שבחרתם ועותק של רשימת התמונות נשמרים רק בדפדפן שלכם, ולא נשלחים אלינו.</li>
         <li>ספקי האחסון של האתר עשויים לשמור רישומים טכניים (כמו כתובת IP) לצורכי אבטחה ותפעול.</li>
@@ -602,7 +646,8 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
       <h4>האם חובה למסור את הפרטים</h4>
       <p>אין חובה חוקית למסור אותם. בלי השדות המסומנים בכוכבית לא נוכל לטפל בבקשה.</p>
       <h4>איפה המידע נשמר ומי רואה אותו</h4>
-      <p>הבקשות נשמרות במסד נתונים של Google Firebase, בשרתים שעשויים להיות מחוץ לישראל. הגישה אליהן מוגבלת לחשבון הניהול של העסק בלבד, שמוגן בסיסמה. אנחנו לא מוכרים ולא מעבירים את המידע לאחרים, חוץ מספקי השירות שנחוצים להפעלת האתר (Google, ו-Vercel שמארחת את האתר), או אם החוק מחייב.</p>
+      <p>הבקשות נשמרות במסד נתונים של Google Firebase, בשרתים שעשויים להיות מחוץ לישראל. הגישה אליהן מוגבלת לחשבונות הניהול של העסק בלבד, שמוגנים בכניסה עם חשבון Google. אנחנו לא מוכרים ולא מעבירים את המידע לאחרים, חוץ מספקי השירות שנחוצים להפעלת האתר (Google, ו-Vercel שמארחת את האתר), או אם החוק מחייב.</p>
+      <p>אם ביקשתם ספא ומסאז', נעביר למעסה שעובד איתנו רק את מה שנחוץ כדי לתאם אותו: תאריך, שעה, מיקום וגודל הקבוצה, ואת השם והטלפון רק אם הם נחוצים לתיאום.</p>
       <h4>כמה זמן נשמר המידע</h4>
       <p>כל עוד הוא נחוץ לטיפול באירוע, לרישום החשבונות ולעמידה בדרישות החוק. אחר כך אפשר לבקש שנמחק אותו.</p>
       <h4>הזכויות שלכם</h4>
@@ -832,7 +877,7 @@ function renderMenus(){
 function setMenuTab(id){activeMenuTab=id;renderMenus();document.querySelector('#menuTabs .menu-tab.on').focus();}
 
 /* ===== windows: gallery / menus / booking ===== */
-const DIALOGS=['galleryModalBg','menusModalBg','bookModalBg','statementBg','privacyBg'];
+const DIALOGS=['galleryModalBg','menusModalBg','massageModalBg','bookModalBg','statementBg','privacyBg'];
 const dialogOpeners={};
 function openDialog(id){
   dialogOpeners[id]=document.activeElement;
@@ -857,6 +902,13 @@ function closeGalleryModal(){ closeDialog('galleryModalBg'); }
 function openMenusModal(){ openDialog('menusModalBg'); }
 function closeMenusModal(){ closeDialog('menusModalBg'); }
 function openBookModal(){ openDialog('bookModalBg'); }
+function openMassageModal(){ openDialog('massageModalBg'); }
+// from the massage window: open the booking form with the massage box already checked
+function bookWithMassage(){
+  closeDialog('massageModalBg');
+  document.getElementById('fMassage').checked=true;
+  openBookModal();
+}
 function closeBookModal(){ closeDialog('bookModalBg'); }
 document.addEventListener('keydown',(e)=>{
   if(lightboxIndex>=0 && !e.altKey && !e.ctrlKey && !e.metaKey){
@@ -945,14 +997,20 @@ document.getElementById('bookForm').addEventListener('submit', async (e)=>{
     const {db,collection,addDoc,serverTimestamp}=await fbInit();
     const base={name,phone,email:email||null,date,guests,level:selectedLevel,location:location||null,
       status:'pending', totalPrice:0, paidAmount:0, createdAt:serverTimestamp(), createdAtMs:Date.now()};
+    const massage=document.getElementById('fMassage').checked;
+    const withNotes=(extra)=>{ const n=[extra,notes].filter(Boolean).join('\n'); return n||null; };
+    const massageNote=massage?"💆 מעוניינים גם בספא ומסאז'":'';
+    // security rules from before the newer fields existed reject them; then keep the request
+    // by moving those fields into the notes (newest rules first, oldest last)
+    const attempts=[
+      {...base,men,women,washTime,...(massage?{massage:true}:{}),notes:notes||null},
+      ...(massage?[{...base,men,women,washTime,notes:withNotes(massageNote)}]:[]),
+      {...base,notes:withNotes([`גברים: ${men} · נשים: ${women} · נטילת ידיים: ${washTime}`,massageNote].filter(Boolean).join('\n'))},
+    ];
     let ref;
-    try{
-      ref=await addDoc(collection(db,'mangalBookings'),{...base,men,women,washTime,notes:notes||null});
-    }catch(e){
-      // security rules from before these fields existed reject them; keep the request by moving them into the notes
-      if(e.code!=='permission-denied') throw e;
-      const extra=`גברים: ${men} · נשים: ${women} · נטילת ידיים: ${washTime}`;
-      ref=await addDoc(collection(db,'mangalBookings'),{...base,notes:notes?`${extra}\n${notes}`:extra});
+    for(const [k,data] of attempts.entries()){
+      try{ ref=await addDoc(collection(db,'mangalBookings'),data); break; }
+      catch(e){ if(e.code!=='permission-denied' || k===attempts.length-1) throw e; }
     }
     // push notification to the owner's phone; the request is already saved, so a failure here is ignored
     fetch('/api/push',{method:'POST',headers:{'content-type':'application/json'},keepalive:true,
@@ -978,7 +1036,7 @@ applyMediaNav();
 
 renderGallery();renderLevels();renderMenus();loadGallery();applyA11y();
 // direct links, e.g. the poster's QR code opens .../#book
-({'#book':openBookModal,'#gallery':openGalleryModal,'#menus':openMenusModal,'#privacy':openPrivacy,'#accessibility':openStatement}[location.hash]||(()=>{}))();
+({'#book':openBookModal,'#gallery':openGalleryModal,'#menus':openMenusModal,'#massage':openMassageModal,'#privacy':openPrivacy,'#accessibility':openStatement}[location.hash]||(()=>{}))();
 
 /* החלקה ימינה בכל מקום באתר -> כניסה ללוח הניהול (מושבת כשחלון/לייטבוקס פתוח) */
 (function(){

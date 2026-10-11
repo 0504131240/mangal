@@ -95,6 +95,9 @@ button{font-family:var(--font)}
 .card-mid{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .chip{font-size:11px;font-weight:700;padding:4px 9px;border-radius:20px;background:var(--surface2);color:var(--text2)}
 .chip.lvl{background:var(--flame-bg);color:var(--flame-dark)}
+.chip.massage{background:#EDE3F6;color:#5B3A86}
+.mcheck{display:flex;align-items:center;gap:10px;margin:10px 0 4px;font-size:14px;font-weight:600;cursor:pointer}
+.mcheck input{width:20px;height:20px;accent-color:#F2662B}
 .chip.paid-ok{background:var(--ok-bg);color:var(--ok)}
 .chip.paid-part{background:var(--warn-bg);color:var(--warn)}
 .chip.paid-no{background:var(--bad-bg);color:var(--bad)}
@@ -778,7 +781,7 @@ function openDayEvents(dateStr){
         <div class="modal-top"><h3>${fmtDate(dateStr)}</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
         ${evs.map(b=>`<div class="card" onclick="openDetails('${b.id}')">
           <div class="card-top"><div class="card-name">${esc(b.name)}</div></div>
-          <div class="card-mid"><span class="chip lvl">${LEVEL_ICON[b.level]||''} ${esc(b.level)}</span><span class="chip">👥 ${guestsText(b)}</span>${washChip(b)}${paidChip(b)}</div>
+          <div class="card-mid"><span class="chip lvl">${LEVEL_ICON[b.level]||''} ${esc(b.level)}</span><span class="chip">👥 ${guestsText(b)}</span>${washChip(b)}${massageChip(b)}${paidChip(b)}</div>
         </div>`).join('')}
       </div>
     </div>`;
@@ -796,6 +799,8 @@ function prepTime(t){
   return `${String(Math.floor(mins/60)).padStart(2,'0')}:${String(mins%60).padStart(2,'0')}`;
 }
 const washChip=(b)=>b.washTime?`<span class="chip">🕖 נט"י ${esc(b.washTime)}</span>`:'';
+// the customer asked for a massage offer as well (arranged through us)
+const massageChip=(b)=>b.massage?`<span class="chip massage">💆 ספא ומסאז'</span>`:'';
 function fmtDate(d){
   if(!d)return '';
   try{ return new Date(d+'T00:00:00').toLocaleDateString('he-IL',{day:'numeric',month:'short',year:'numeric',weekday:'short'}); }
@@ -837,7 +842,7 @@ function renderPending(){
         <div class="card-mid">
           <span class="chip lvl">${LEVEL_ICON[b.level]||''} ${esc(b.level)}</span>
           <span class="chip">👥 ${guestsText(b)}</span>
-          ${washChip(b)}
+          ${washChip(b)}${massageChip(b)}
           ${b.location?`<span class="chip">📍 ${esc(b.location)}</span>`:''}
         </div>
         ${b.notes?`<div class="card-notes">"${esc(b.notes)}"</div>`:''}
@@ -889,7 +894,7 @@ function renderBoard(){
       <div class="card-mid">
         <span class="chip lvl">${LEVEL_ICON[b.level]||''} ${esc(b.level)}</span>
         <span class="chip">👥 ${guestsText(b)}</span>
-        ${washChip(b)}
+        ${washChip(b)}${massageChip(b)}
         ${b.location?`<span class="chip">📍 ${esc(b.location)}</span>`:''}
         ${paidChip(b)}
       </div>
@@ -950,6 +955,7 @@ function openDetails(id){
           ${row('📍 מיקום', b.location?esc(b.location):'—')}
           ${row('🕖 נטילת ידיים', b.washTime?`${esc(b.washTime)} <span class="drow-sub">(המקום פנוי מ-${prepTime(b.washTime)})</span>`:'—')}
           ${row('👥 משתתפים', guestsText(b))}
+          ${b.massage?row("💆 ספא ומסאז'", 'ביקשו הצעה'):''}
           ${row('💰 מחיר כולל', total>0?`₪${total.toLocaleString()}`:'טרם נקבע')}
           ${row('✓ שולם', `₪${paid.toLocaleString()}`)}
           ${total>0?row('⏳ יתרה לתשלום', `₪${Math.max(total-paid,0).toLocaleString()}`):''}
@@ -983,6 +989,7 @@ function openModal(id){
         ${b.notes?`<div class="minfo">📝 ${esc(b.notes)}</div>`:''}
 
         <div class="mfld"><label>שעת נטילת ידיים</label><input type="time" id="mWash" step="300" value="${esc(b.washTime||'')}"></div>
+        <label class="mcheck"><input type="checkbox" id="mMassage" ${b.massage?'checked':''}> 💆 גם ספא ומסאז'</label>
         <div class="mrow3">
           <div class="mfld"><label>גברים</label><input type="number" id="mMen" min="0" value="${b.men!=null?esc(b.men):''}" oninput="syncGuestTotal('m')"></div>
           <div class="mfld"><label>נשים</label><input type="number" id="mWomen" min="0" value="${b.women!=null?esc(b.women):''}" oninput="syncGuestTotal('m')"></div>
@@ -1077,12 +1084,13 @@ async function saveModal(id){
   const {men,women}=readMenWomen('m');
   const guests=men!=null ? men+women : (parseInt(document.getElementById('mGuests').value,10)||0);
   const washTime=document.getElementById('mWash').value||null;
+  const massage=document.getElementById('mMassage').checked;
   const location=document.getElementById('mLocation').value.trim();
   const totalPrice=parseFloat(document.getElementById('mTotal').value)||0;
   const paidAmount=parseFloat(document.getElementById('mPaid').value)||0;
   const status=document.getElementById('modalRoot').dataset.status||'approved';
   const {db,doc,updateDoc}=await fbInit();
-  await updateDoc(doc(db,'mangalBookings',id),{guests,men,women,washTime,location:location||null,totalPrice,paidAmount,status});
+  await updateDoc(doc(db,'mangalBookings',id),{guests,men,women,washTime,massage,location:location||null,totalPrice,paidAmount,status});
   closeModal();
   showToast('נשמר ✓');
 }
@@ -1116,6 +1124,7 @@ function openNewEventModal(){
           <div class="mfld"><label>שעת נטילת ידיים</label><input type="time" id="nWash" step="300"></div>
           <div class="mfld"><label>מיקום</label><input type="text" id="nLocation" placeholder="כתובת / אולם / חצר"></div>
         </div>
+        <label class="mcheck"><input type="checkbox" id="nMassage"> 💆 גם ספא ומסאז'</label>
         <div class="mrow3">
           <div class="mfld"><label>גברים</label><input type="number" id="nMen" min="0" oninput="syncGuestTotal('n')"></div>
           <div class="mfld"><label>נשים</label><input type="number" id="nWomen" min="0" oninput="syncGuestTotal('n')"></div>
@@ -1153,6 +1162,7 @@ async function saveNewEvent(){
   const {men,women}=readMenWomen('n');
   const guests=men!=null ? Math.max(men+women,1) : (parseInt(document.getElementById('nGuests').value,10)||1);
   const washTime=document.getElementById('nWash').value||null;
+  const massage=document.getElementById('nMassage').checked;
   const location=document.getElementById('nLocation').value.trim();
   const notes=document.getElementById('nNotes').value.trim();
   const totalPrice=parseFloat(document.getElementById('nTotal').value)||0;
@@ -1160,7 +1170,7 @@ async function saveNewEvent(){
   const level=document.getElementById('modalRoot').dataset.nlevel||LEVELS[0];
   const {db,collection,addDoc}=await fbInit();
   await addDoc(collection(db,'mangalBookings'),{
-    name, phone:phone||null, date, washTime, guests, men, women, level, location:location||null, notes:notes||null,
+    name, phone:phone||null, date, washTime, guests, men, women, level, massage, location:location||null, notes:notes||null,
     status:'approved', totalPrice, paidAmount,
     createdAtMs:Date.now(), source:'admin'
   });

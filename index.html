@@ -441,7 +441,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
   <div class="big-cards">
     <button type="button" class="big-card" onclick="openGalleryModal()"><div class="ico" aria-hidden="true">📷</div><div class="txt"><b>תמונות מאירועים</b><span>הצצה לאירועים קודמים</span></div><div class="arrow" aria-hidden="true">‹</div></button>
     <button type="button" class="big-card" onclick="openMenusModal()"><div class="ico" aria-hidden="true">📋</div><div class="txt"><b>תפריטים</b><span>CLASIC · SPECIAL · CRAZY</span></div><div class="arrow" aria-hidden="true">‹</div></button>
-    <button type="button" class="big-card" onclick="openMassageModal()"><div class="ico" aria-hidden="true">🧖</div><div class="txt"><b>הצעה מיוחדת לימי גיבוש</b><span>מתחם ספא · מעסה שמגיע אליכם</span></div><div class="arrow" aria-hidden="true">‹</div></button>
+    <button type="button" class="big-card" onclick="openMassageModal()"><div class="ico" aria-hidden="true">🧖</div><div class="txt"><b>הצעה מיוחדת לימי גיבוש</b><span>חדר ספא · מעסה שמגיע אליכם</span></div><div class="arrow" aria-hidden="true">‹</div></button>
     <button type="button" class="big-card" onclick="openBookModal()"><div class="ico" aria-hidden="true">📅</div><div class="txt"><b>הזמנת אירוע</b><span>בוחרים תאריך ורמה</span></div><div class="arrow" aria-hidden="true">‹</div></button>
   </div>
 </div>
@@ -500,18 +500,18 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="massageTitle">
     <div class="modal-top"><h3 id="massageTitle">הצעה מיוחדת לימי גיבוש</h3><button type="button" class="modal-close" aria-label="סגירה" onclick="closeDialog('massageModalBg')">✕</button></div>
     <div class="massage">
-      <p class="massage-lead">עושים יום גיבוש, ערב חברה או אירוע צוות? חוץ מהמנגל אפשר להזמין דרכנו <b>רק ספא, רק מסאז', או את שניהם יחד</b>:</p>
+      <p class="massage-lead">עושים יום גיבוש, ערב חברה או אירוע צוות? יש אפשרות להזמין דרכנו גם <b>חדר ספא ו/או מעסה</b>.</p>
       <section class="offer" aria-labelledby="offerSpa">
         <div class="offer-ico" aria-hidden="true">🧖</div>
-        <h4 id="offerSpa"><span class="offer-num">1</span>מתחם ספא לקבוצה</h4>
+        <h4 id="offerSpa"><span class="offer-num">1</span>חדר ספא לקבוצה</h4>
         <p>מקום עם <b>ג'קוזי וסאונה</b> שאפשר להזמין לקבוצה, ולעשות בו את יום הגיבוש עם המנגל.</p>
         <button type="button" class="offer-btn" onclick="bookWithExtra()">לקבלת פרטים על ספא</button>
       </section>
-      <div class="offer-plus" aria-hidden="true">ו/או</div>
+      <div class="offer-plus" aria-hidden="true">+</div>
       <section class="offer" aria-labelledby="offerMassage">
         <div class="offer-ico" aria-hidden="true">💆</div>
         <h4 id="offerMassage"><span class="offer-num">2</span>מעסה מקצועי</h4>
-        <p>מעסה שמגיע ונותן מסאז' לחברי הקבוצה: <b>במתחם הספא, או בכל מקום אחר</b> שבו עושים את האירוע.</p>
+        <p>מעסה שמגיע ונותן מסאז' לחברי הקבוצה: <b>בחדר הספא, או בכל מקום אחר</b> שבו עושים את האירוע.</p>
         <button type="button" class="offer-btn" onclick="bookWithExtra()">לקבלת פרטים על מסאז'</button>
       </section>
       <div class="massage-how">
@@ -575,7 +575,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
           <span class="fld-label">לימי גיבוש וקבוצות (לא חובה)</span>
           <label class="massage-check" for="fMassage">
             <input type="checkbox" id="fMassage">
-            <span><b>🧖 אשמח לפרטים על ספא / מסאז'</b><small>מתחם ספא עם ג'קוזי וסאונה, ו/או מעסה שמגיע אליכם. לא מחייב, נחזור אליכם עם פרטים.</small></span>
+            <span><b>🧖 אשמח לפרטים על ספא / מסאז'</b><small>חדר ספא עם ג'קוזי וסאונה, ו/או מעסה שמגיע אליכם. לא מחייב, נחזור אליכם עם פרטים.</small></span>
           </label>
         </div>
         <div class="fld">
@@ -665,7 +665,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
       <p>אין חובה חוקית למסור אותם. בלי השדות המסומנים בכוכבית לא נוכל לטפל בבקשה.</p>
       <h4>איפה המידע נשמר ומי רואה אותו</h4>
       <p>הבקשות נשמרות במסד נתונים של Google Firebase, בשרתים שעשויים להיות מחוץ לישראל. הגישה אליהן מוגבלת לחשבונות הניהול של העסק בלבד, שמוגנים בכניסה עם חשבון Google. אנחנו לא מוכרים ולא מעבירים את המידע לאחרים, חוץ מספקי השירות שנחוצים להפעלת האתר (Google, ו-Vercel שמארחת את האתר), או אם החוק מחייב.</p>
-      <p>אם ביקשתם מתחם ספא או מעסה, נעביר למתחם או למעסה שעובדים איתנו רק את מה שנחוץ כדי לתאם: תאריך, שעה, מיקום וגודל הקבוצה, ואת השם והטלפון רק אם הם נחוצים לתיאום.</p>
+      <p>אם ביקשתם פרטים על ספא או מסאז', נעביר לחדר הספא או למעסה שעובדים איתנו רק את מה שנחוץ כדי לתאם: תאריך, שעה, מיקום וגודל הקבוצה, ואת השם והטלפון רק אם הם נחוצים לתיאום.</p>
       <h4>כמה זמן נשמר המידע</h4>
       <p>כל עוד הוא נחוץ לטיפול באירוע, לרישום החשבונות ולעמידה בדרישות החוק. אחר כך אפשר לבקש שנמחק אותו.</p>
       <h4>הזכויות שלכם</h4>

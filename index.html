@@ -238,16 +238,12 @@ html.a11y-contrast .mh-embers{display:none!important}
   border:1.5px solid rgba(232,178,82,.55);background:linear-gradient(160deg,#5E3B24,#4A2E1C);box-shadow:0 10px 26px rgba(0,0,0,.4),0 0 20px rgba(232,178,82,.1)}
 .offer-ico{position:absolute;top:14px;left:16px;font-size:30px}
 .offer h4{display:flex;align-items:center;gap:9px;font-family:var(--font-head);font-size:19px;color:#F4C766}
-.offer-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;flex:none;
-  background:linear-gradient(180deg,#F6CF7A,#D9962F);color:#1C1007;font-size:14px;font-family:var(--font)}
 .offer p{font-size:14.5px;line-height:1.6;color:#F3E5D7}
 .offer p b{color:#FBF3EA}
 .offer-btn{display:inline-block;text-decoration:none;align-self:flex-start;margin-top:4px;padding:10px 16px;border-radius:999px;border:none;cursor:pointer;font-family:var(--font);font-weight:700;font-size:14px;
   color:#fff;background:linear-gradient(180deg,#F2662B,#B83C14);box-shadow:0 0 14px rgba(242,102,43,.45)}
-.offer-plus{align-self:center;margin:-8px 0;font-size:22px;font-weight:800;color:#F4C766}
 .massage-how{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border-radius:var(--r2);border:1.5px solid rgba(242,102,43,.45);background:var(--flame-bg);font-size:14px;line-height:1.55;color:var(--text2)}
 .massage-how b{font-family:var(--font-head);font-size:16px;color:var(--flame-dark)}
-.massage-wa{display:block;text-align:center;padding:12px;border-radius:var(--r2);border:1.5px solid rgba(232,178,82,.5);color:#F4C766;font-weight:700;text-decoration:none}
 .extras{display:flex;flex-direction:column;gap:10px;margin-top:14px}
 .extras .fld-label{font-size:12.5px;font-weight:700;color:var(--text2)}
 .massage-check{display:flex;align-items:flex-start;gap:12px;padding:14px;border-radius:var(--r2);cursor:pointer;
@@ -464,7 +460,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
   <div class="big-cards">
     <button type="button" class="big-card" onclick="openGalleryModal()"><div class="ico" aria-hidden="true">📷</div><div class="txt"><b>תמונות מאירועים</b><span>הצצה לאירועים קודמים</span></div><div class="arrow" aria-hidden="true">‹</div></button>
     <button type="button" class="big-card" onclick="openMenusModal()"><div class="ico" aria-hidden="true">📋</div><div class="txt"><b>תפריטים</b><span>CLASIC · SPECIAL · CRAZY</span></div><div class="arrow" aria-hidden="true">‹</div></button>
-    <button type="button" class="big-card" onclick="openMassageModal()"><div class="ico" aria-hidden="true">🧖</div><div class="txt"><b>הצעה מיוחדת לימי גיבוש</b><span>ספא · מעסה שמגיע אליכם</span></div><div class="arrow" aria-hidden="true">‹</div></button>
+    <button type="button" class="big-card" onclick="openMassageModal()"><div class="ico" aria-hidden="true">🧖</div><div class="txt"><b>הצעה מיוחדת לימי גיבוש</b><span>ספא לקבוצה, עם אפשרות למסאז'יסט</span></div><div class="arrow" aria-hidden="true">‹</div></button>
     <button type="button" class="big-card" onclick="openBookModal()"><div class="ico" aria-hidden="true">📅</div><div class="txt"><b>הזמנת אירוע</b><span>בוחרים תאריך ורמה</span></div><div class="arrow" aria-hidden="true">‹</div></button>
   </div>
 </div>
@@ -523,25 +519,17 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="massageTitle">
     <div class="modal-top"><h3 id="massageTitle">הצעה מיוחדת לימי גיבוש</h3><button type="button" class="modal-close" aria-label="סגירה" onclick="closeDialog('massageModalBg')">✕</button></div>
     <div class="massage">
-      <p class="massage-lead">עושים יום גיבוש, ערב חברה או אירוע צוות? יש אפשרות להזמין דרכנו גם <b>ספא ו/או מעסה</b>.</p>
+      <p class="massage-lead">עושים יום גיבוש, ערב חברה או אירוע צוות? יש אפשרות להזמין דרכנו <b>ספא לקבוצה, עם אפשרות למסאז'יסט</b>.</p>
       <section class="offer" aria-labelledby="offerSpa">
         <div class="offer-ico" aria-hidden="true">🧖</div>
-        <h4 id="offerSpa"><span class="offer-num">1</span>ספא לקבוצה</h4>
-        <p>מקום עם <b>ג'קוזי וסאונה</b> שאפשר להזמין לקבוצה, ולעשות בו את יום הגיבוש עם המנגל.</p>
-        <a class="offer-btn" href="https://wa.me/972527626562?text=%D7%94%D7%99%D7%99%20%D7%93%D7%95%D7%93%D7%99%21%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A7%D7%91%D7%9C%20%D7%A4%D7%A8%D7%98%D7%99%D7%9D%20%D7%A2%D7%9C%20%D7%A1%D7%A4%D7%90%20%D7%9C%D7%99%D7%95%D7%9D%20%D7%92%D7%99%D7%91%D7%95%D7%A9%20%F0%9F%A7%96" target="_blank" rel="noopener">💬 לקבלת פרטים על ספא<span class="sr-only"> (בוואטסאפ, נפתח בחלון חדש)</span></a>
-      </section>
-      <div class="offer-plus" aria-hidden="true">+</div>
-      <section class="offer" aria-labelledby="offerMassage">
-        <div class="offer-ico" aria-hidden="true">💆</div>
-        <h4 id="offerMassage"><span class="offer-num">2</span>מעסה מקצועי</h4>
-        <p>מעסה שמגיע ונותן מסאז' לחברי הקבוצה: <b>בספא, או בכל מקום אחר</b> שבו עושים את האירוע.</p>
-        <a class="offer-btn" href="https://wa.me/972527626562?text=%D7%94%D7%99%D7%99%20%D7%93%D7%95%D7%93%D7%99%21%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A7%D7%91%D7%9C%20%D7%A4%D7%A8%D7%98%D7%99%D7%9D%20%D7%A2%D7%9C%20%D7%9E%D7%A2%D7%A1%D7%94%20%D7%9C%D7%99%D7%95%D7%9D%20%D7%92%D7%99%D7%91%D7%95%D7%A9%20%F0%9F%92%86" target="_blank" rel="noopener">💬 לקבלת פרטים על מסאז'<span class="sr-only"> (בוואטסאפ, נפתח בחלון חדש)</span></a>
+        <h4 id="offerSpa">ספא לקבוצה</h4>
+        <p>יום גיבוש מפנק בספא, יחד עם המנגל, ואפשר להוסיף <b>מסאז'יסט</b> שמפנק את חברי הקבוצה.</p>
+        <a class="offer-btn" href="https://wa.me/972527626562?text=%D7%94%D7%99%D7%99%20%D7%93%D7%95%D7%93%D7%99%21%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A7%D7%91%D7%9C%20%D7%A4%D7%A8%D7%98%D7%99%D7%9D%20%D7%A2%D7%9C%20%D7%A1%D7%A4%D7%90%20%D7%9C%D7%99%D7%95%D7%9D%20%D7%92%D7%99%D7%91%D7%95%D7%A9%2C%20%D7%A2%D7%9D%20%D7%90%D7%A4%D7%A9%D7%A8%D7%95%D7%AA%20%D7%9C%D7%9E%D7%A1%D7%90%D7%96%27%D7%99%D7%A1%D7%98%20%F0%9F%A7%96" target="_blank" rel="noopener">💬 לקבלת פרטים בוואטסאפ<span class="sr-only"> (נפתח בחלון חדש)</span></a>
       </section>
       <div class="massage-how">
         <b>דברו איתנו</b>
-        <span>לוחצים על אחד הכפתורים וממשיכים איתנו בוואטסאפ, או מסמנים בטופס ההזמנה "פרטים על ספא / מסאז'", ונחזור אליכם עם הצעה מותאמת לגודל הקבוצה. הכל מתואם דרכנו, מול איש קשר אחד.</span>
+        <span>לוחצים על הכפתור וממשיכים איתנו בוואטסאפ, או מסמנים בטופס ההזמנה "פרטים על ספא / מסאז'", ונחזור אליכם עם הצעה מותאמת לגודל הקבוצה. הכל מתואם דרכנו, מול איש קשר אחד.</span>
       </div>
-      <a class="massage-wa" href="https://wa.me/972527626562?text=%D7%94%D7%99%D7%99%20%D7%93%D7%95%D7%93%D7%99%21%20%D7%9E%D7%AA%D7%A2%D7%A0%D7%99%D7%99%D7%A0%D7%99%D7%9D%20%D7%91%D7%99%D7%95%D7%9D%20%D7%92%D7%99%D7%91%D7%95%D7%A9%20%D7%A2%D7%9D%20%D7%9E%D7%A0%D7%92%D7%9C%2C%20%D7%9E%D7%AA%D7%97%D7%9D%20%D7%A1%D7%A4%D7%90%20%D7%95%D7%9E%D7%A2%D7%A1%D7%94%20%F0%9F%94%A5%F0%9F%A7%96" target="_blank" rel="noopener">💬 לשאלות בוואטסאפ<span class="sr-only"> (נפתח בחלון חדש)</span></a>
     </div>
   </div>
 </div>
@@ -598,7 +586,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
           <span class="fld-label">לימי גיבוש וקבוצות (לא חובה)</span>
           <label class="massage-check" for="fMassage">
             <input type="checkbox" id="fMassage">
-            <span><b>🧖 אשמח לפרטים על ספא / מסאז'</b><small>ספא עם ג'קוזי וסאונה, ו/או מעסה שמגיע אליכם. לא מחייב, נחזור אליכם עם פרטים.</small></span>
+            <span><b>🧖 אשמח לפרטים על ספא / מסאז'</b><small>ספא לקבוצה, עם אפשרות למסאז'יסט. לא מחייב, נחזור אליכם עם פרטים.</small></span>
           </label>
         </div>
         <div class="fld">
@@ -688,7 +676,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
       <p>אין חובה חוקית למסור אותם. בלי השדות המסומנים בכוכבית לא נוכל לטפל בבקשה.</p>
       <h4>איפה המידע נשמר ומי רואה אותו</h4>
       <p>הבקשות נשמרות במסד נתונים של Google Firebase, בשרתים שעשויים להיות מחוץ לישראל. הגישה אליהן מוגבלת לחשבונות הניהול של העסק בלבד, שמוגנים בכניסה עם חשבון Google. אנחנו לא מוכרים ולא מעבירים את המידע לאחרים, חוץ מספקי השירות שנחוצים להפעלת האתר (Google, ו-Vercel שמארחת את האתר), או אם החוק מחייב.</p>
-      <p>אם ביקשתם פרטים על ספא או מסאז', נעביר לספא או למעסה שעובדים איתנו רק את מה שנחוץ כדי לתאם: תאריך, שעה, מיקום וגודל הקבוצה, ואת השם והטלפון רק אם הם נחוצים לתיאום.</p>
+      <p>אם ביקשתם פרטים על ספא או מסאז', נעביר לספא או למסאז'יסט שעובדים איתנו רק את מה שנחוץ כדי לתאם: תאריך, שעה, מיקום וגודל הקבוצה, ואת השם והטלפון רק אם הם נחוצים לתיאום.</p>
       <h4>כמה זמן נשמר המידע</h4>
       <p>כל עוד הוא נחוץ לטיפול באירוע, לרישום החשבונות ולעמידה בדרישות החוק. אחר כך אפשר לבקש שנמחק אותו.</p>
       <h4>הזכויות שלכם</h4>

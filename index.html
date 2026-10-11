@@ -215,6 +215,22 @@ html.menu-fire .menu-terms li+li{border-top-color:var(--m-line)}
 html.a11y-still .mh-embers{animation:none!important}
 html.a11y-contrast .mh-embers{display:none!important}
 
+/* the menus window opens on a chooser: one big card per menu */
+.menu-chooser{display:flex;flex-direction:column;gap:12px;margin-bottom:6px}
+.mc-title{text-align:center;font-family:var(--font-head);font-size:24px;font-weight:700;color:#FFB07A}
+.mc-sub{text-align:center;font-size:14.5px;line-height:1.5;color:var(--text2);margin:-6px 0 4px}
+.mc-card{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:128px;padding:16px;
+  border-radius:var(--r);border:1.5px solid rgba(242,102,43,.55);cursor:pointer;font-family:var(--font);color:#fff;overflow:hidden;
+  background:linear-gradient(180deg,rgba(10,6,4,.35),rgba(10,6,4,.78)),var(--img) center/cover;
+  box-shadow:0 10px 26px rgba(0,0,0,.45);transition:transform .15s,border-color .15s}
+.mc-card:hover{border-color:#FF8A4C}
+.mc-card:active{transform:scale(.98)}
+.mc-card.premium{border-color:rgba(232,178,82,.8);box-shadow:0 10px 26px rgba(0,0,0,.45),0 0 22px rgba(232,178,82,.25)}
+.mc-name{font-family:var(--font-head);font-size:26px;font-weight:700;letter-spacing:.5px;text-shadow:0 2px 0 rgba(0,0,0,.6),0 0 18px rgba(242,102,43,.7)}
+.mc-price{font-size:13px;font-weight:700;padding:5px 13px;border-radius:999px;background:linear-gradient(180deg,#F6CF7A,#D9962F);color:#1C1007}
+.mc-go{font-size:13.5px;font-weight:700;color:#FFD9B8}
+.menu-back{flex-basis:100%;background:none;border:none;color:#FFB07A;font-family:var(--font);font-weight:700;font-size:14px;cursor:pointer;padding:2px 4px 6px}
+
 /* team-building extras (a spa venue, a massage therapist): their window and the checkboxes in the booking form */
 .massage{display:flex;flex-direction:column;gap:16px}
 .massage-lead{font-size:16px;line-height:1.6;color:var(--text)}
@@ -879,11 +895,26 @@ function selectLevel(id){
   });
 }
 
-let activeMenuTab=LEVELS[0].id;
+// null: the window opens on a chooser with the three menus, so it's clear there are three
+let activeMenuTab=null;
 function renderMenus(){
   const tabs=document.getElementById('menuTabs');
-  tabs.innerHTML=LEVELS.map(l=>`<button type="button" class="menu-tab ${l.id===activeMenuTab?'on':''}" aria-pressed="${l.id===activeMenuTab}" onclick="setMenuTab('${l.id}')">${l.label}</button>`).join('');
   const cards=document.getElementById('menuCards');
+  tabs.hidden=!activeMenuTab;
+  if(!activeMenuTab){
+    tabs.innerHTML='';
+    cards.innerHTML=`<div class="menu-chooser">
+      <p class="mc-title">בחרו תפריט</p>
+      <p class="mc-sub">יש לנו 3 תפריטים. לחצו על תפריט כדי להתרשם ממה שיש בו</p>
+      ${LEVELS.map(l=>`<button type="button" class="mc-card ${MENUS[l.id].premium?'premium':''}" onclick="setMenuTab('${l.id}')" style="--img:url(images/menu-${l.id.toLowerCase()}.jpg)">
+        <span class="mc-name">${l.label}</span>
+        <span class="mc-price">${MENUS[l.id].badge}</span>
+        <span class="mc-go">לצפייה בתפריט ←</span>
+      </button>`).join('')}
+    </div>`;
+    return;
+  }
+  tabs.innerHTML=`<button type="button" class="menu-back" onclick="setMenuTab(null)">→ לכל התפריטים</button>`+LEVELS.map(l=>`<button type="button" class="menu-tab ${l.id===activeMenuTab?'on':''}" aria-pressed="${l.id===activeMenuTab}" onclick="setMenuTab('${l.id}')">${l.label}</button>`).join('');
   cards.innerHTML=LEVELS.map(l=>{
     const m=MENUS[l.id];
     return `<div class="menu-card ${m.premium?'premium':''} ${l.id===activeMenuTab?'on':''}" data-lvl="${l.id}">
@@ -899,7 +930,11 @@ function renderMenus(){
     </div>`;
   }).join('');
 }
-function setMenuTab(id){activeMenuTab=id;renderMenus();document.querySelector('#menuTabs .menu-tab.on').focus();}
+function setMenuTab(id){
+  activeMenuTab=id; renderMenus();
+  document.querySelector('#menusModalBg .modal').scrollTop=0;
+  (id ? document.querySelector('#menuTabs .menu-tab.on') : document.querySelector('.mc-card')).focus();
+}
 
 /* ===== windows: gallery / menus / booking ===== */
 const DIALOGS=['galleryModalBg','menusModalBg','massageModalBg','bookModalBg','statementBg','privacyBg'];
@@ -924,7 +959,7 @@ function topDialog(){
 function isOverlayOpen(){ return !!topDialog(); }
 function openGalleryModal(){ openDialog('galleryModalBg'); }
 function closeGalleryModal(){ closeDialog('galleryModalBg'); }
-function openMenusModal(){ openDialog('menusModalBg'); }
+function openMenusModal(){ activeMenuTab=null; renderMenus(); openDialog('menusModalBg'); }
 function closeMenusModal(){ closeDialog('menusModalBg'); }
 function openBookModal(){ openDialog('bookModalBg'); }
 function openMassageModal(){ openDialog('massageModalBg'); }

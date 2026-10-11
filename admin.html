@@ -774,6 +774,7 @@ function renderCalendar(){
 function openDayEvents(dateStr){
   const evs=bookings.filter(b=>b.status==='approved' && b.date===dateStr);
   if(evs.length===1){ openDetails(evs[0].id); return; }
+  viewOpened(()=>openDayEvents(dateStr));
   const root=document.getElementById('modalRoot');
   root.innerHTML=`
     <div class="modal-bg" onclick="if(event.target===this)closeModal()">
@@ -935,6 +936,7 @@ const STATUS_LABEL={pending:'ממתין לאישור',approved:'מאושר',decl
 function openDetails(id){
   const b=bookings.find(x=>x.id===id);
   if(!b)return;
+  viewOpened(()=>openDetails(id));
   const total=Number(b.totalPrice||0), paid=Number(b.paidAmount||0);
   const row=(label,value)=>`<div class="drow"><span>${label}</span><b>${value}</b></div>`;
   document.getElementById('modalRoot').innerHTML=`
@@ -973,6 +975,7 @@ function openDetails(id){
 function openModal(id){
   const b=bookings.find(x=>x.id===id);
   if(!b)return;
+  viewOpened(()=>openModal(id));
   const root=document.getElementById('modalRoot');
   root.innerHTML=`
     <div class="modal-bg" onclick="if(event.target===this)closeModal()">
@@ -1034,12 +1037,49 @@ function setModalStatus(el,status){
   el.classList.add('on');
   document.getElementById('modalRoot').dataset.status=status;
 }
-function closeModal(){document.getElementById('modalRoot').innerHTML='';}
+function closeModal(){
+  document.getElementById('modalRoot').innerHTML='';
+  viewStack.length=0;
+  syncBackHistory();
+}
+
+/* ===== the phone's back button: one step back through the windows =====
+   The windows in #modalRoot replace each other (calendar day → event details → edit), so every step is
+   kept: back shows the previous window, and from the first one returns to the board. The caption editor
+   opens over the settings as its own step. Each open step has one history entry; closing windows with
+   ✕ / saving / tapping outside removes their entries, so back never gets stuck on a closed window. */
+const viewStack=[];
+let restoringView=false, backDepth=0, skipPops=0;
+function viewOpened(redo){
+  if(restoringView) return;
+  if(!document.getElementById('modalRoot').innerHTML.trim()) viewStack.length=0;
+  viewStack.push(redo);
+  history.pushState({bbqAdmin:true},''); backDepth++;
+}
+function captionEditorOpen(){ const r=document.getElementById('capEditRoot'); return !!(r && r.innerHTML.trim()); }
+function openSteps(){ return (document.getElementById('modalRoot').innerHTML.trim()?viewStack.length:0)+(captionEditorOpen()?1:0); }
+function syncBackHistory(){
+  // after the current click is handled, so a window opened right after this one keeps its entry
+  setTimeout(()=>{
+    const extra=backDepth-openSteps();
+    if(extra>0){ backDepth-=extra; skipPops++; history.go(-extra); }
+  },0);
+}
+addEventListener('popstate',()=>{
+  if(skipPops){ skipPops--; return; }
+  if(backDepth<=0) return;
+  backDepth--;
+  if(captionEditorOpen()){ closeCaptionEditor(); return; }
+  viewStack.pop();
+  if(viewStack.length){ restoringView=true; try{ viewStack[viewStack.length-1](); } finally{ restoringView=false; } }
+  else closeModal();
+});
 
 /* ===== share the public site (not the admin) ===== */
 const SHARE_TEXT='BBQ · חגיגת ברבקיו משחררת 🔥 מנגל לאירועים עם דודי: תמונות, תפריטים והזמנת אירוע';
 const publicSiteUrl=()=>location.origin+'/';
 function openShare(){
+  viewOpened(openShare);
   const url=publicSiteUrl();
   const msg=`${SHARE_TEXT}\n${url}`;
   document.getElementById('modalRoot').innerHTML=`
@@ -1104,6 +1144,7 @@ async function deleteBooking(id){
 
 /* ===== manual event creation ===== */
 function openNewEventModal(){
+  viewOpened(openNewEventModal);
   const today=new Date().toISOString().slice(0,10);
   const root=document.getElementById('modalRoot');
   root.innerHTML=`
@@ -1187,6 +1228,7 @@ let galleryItems=null;
 let storageReady=false;
 let storageMode=null;
 function openSettings(){
+  viewOpened(openSettings);
   document.getElementById('modalRoot').innerHTML=`
     <div class="modal-bg" onclick="if(event.target===this)closeModal()">
       <div class="modal">
@@ -1383,6 +1425,7 @@ function openCaptionEditor(i){
       </div>
     </div>`;
   root.dataset.url=item.url;
+  history.pushState({bbqAdmin:true},''); backDepth++;
   const inp=document.getElementById('capInput');
   inp.focus();
   inp.setSelectionRange(inp.value.length,inp.value.length);
@@ -1390,6 +1433,7 @@ function openCaptionEditor(i){
 function closeCaptionEditor(){
   const root=document.getElementById('capEditRoot');
   if(root) root.innerHTML='';
+  syncBackHistory();
 }
 async function saveCaption(){
   const root=document.getElementById('capEditRoot');

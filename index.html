@@ -963,28 +963,33 @@ function topDialog(){
 }
 function isOverlayOpen(){ return !!topDialog(); }
 
-/* The phone's back button closes the open windows and returns to the main page, instead of leaving
-   the site: opening a window adds one history entry, and going back from it closes everything.
-   Closing the windows some other way (✕, Esc, tapping outside) removes that entry again. */
-let overlayInHistory=false, skipNextPop=false;
+/* The phone's back button goes back one window at a time (a big photo → the gallery → the main page)
+   instead of leaving the site: every open window has one history entry, and back closes the top one.
+   Closing windows some other way (✕, Esc, tapping outside) removes their entries again. */
+let backDepth=0, skipPops=0;
+function openLayers(){
+  return (lightboxIndex>=0?1:0)+(document.getElementById('a11yPanel').hidden?0:1)
+    +DIALOGS.filter(id=>!document.getElementById(id).hidden).length;
+}
 function overlayOpened(){
-  if(overlayInHistory) return;
-  history.pushState({bbqOverlay:true},'');
-  overlayInHistory=true;
+  history.pushState({bbqOverlay:true},''); backDepth++;
 }
 function overlayClosed(){
-  // after the current click is handled, so a window opened right after this one keeps the entry
+  // after the current click is handled, so a window opened right after this one keeps its entry
   setTimeout(()=>{
-    if(overlayInHistory && !isOverlayOpen()){ overlayInHistory=false; skipNextPop=true; history.back(); }
+    const extra=backDepth-openLayers();
+    if(extra>0){ backDepth-=extra; skipPops++; history.go(-extra); }
   },0);
 }
 addEventListener('popstate',()=>{
-  if(skipNextPop){ skipNextPop=false; return; }
-  if(!overlayInHistory) return;
-  overlayInHistory=false;
+  if(skipPops){ skipPops--; return; }
+  if(backDepth<=0) return;
+  backDepth--;
+  const top=topDialog();
+  if(!top) return;
   if(lightboxIndex>=0) closeLightbox();
-  if(!document.getElementById('a11yPanel').hidden) closeA11y();
-  DIALOGS.forEach(id=>{ if(!document.getElementById(id).hidden) closeDialog(id); });
+  else if(!document.getElementById('a11yPanel').hidden) closeA11y();
+  else closeDialog(top.closest('.modal-bg').id);
 });
 function openGalleryModal(){ openDialog('galleryModalBg'); }
 function closeGalleryModal(){ closeDialog('galleryModalBg'); }

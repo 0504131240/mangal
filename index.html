@@ -64,11 +64,15 @@ a{color:inherit}
 .brand img{position:relative;display:block;height:100%;width:100%;object-fit:cover;border-radius:50%;background:#F9F4E8;
   box-shadow:0 0 0 2px rgba(255,140,60,.7),0 0 26px rgba(255,100,30,.7),0 6px 22px rgba(0,0,0,.55)}
 .nav-in{padding-top:14px;padding-bottom:12px;flex-direction:row;justify-content:space-between;gap:12px}
-/* "ברוכים הבאים" on the right, the logo in the left corner */
-.nav-welcome{font-family:var(--font-head);font-weight:700;font-size:clamp(24px,7.4vw,36px);line-height:1.15;color:#FFB07A;
-  filter:drop-shadow(0 0 14px rgba(242,102,43,.45)) drop-shadow(0 2px 2px rgba(0,0,0,.6))}
+/* the greeting on the right, the logo in the left corner; both lines in fire colors */
+.nav-welcome{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;
+  filter:drop-shadow(0 0 12px rgba(242,102,43,.4)) drop-shadow(0 2px 2px rgba(0,0,0,.6))}
+.nw-title{font-family:var(--font-head);font-weight:700;font-size:clamp(21px,6.2vw,34px);line-height:1.15;color:#FFB07A}
+.nw-sub{font-weight:600;font-size:clamp(13px,3.6vw,17px);line-height:1.4;color:#FFA04D}
 @supports (-webkit-background-clip:text){
-  .nav-welcome{background:linear-gradient(180deg,#FFE7A8,#FFB25A 45%,#F2662B);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .nw-title,.nw-sub{-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .nw-title{background-image:linear-gradient(180deg,#FFE7A8,#FFB25A 45%,#F2662B)}
+  .nw-sub{background-image:linear-gradient(180deg,#FFD58A,#FF8A3C)}
 }
 .brand{position:relative;z-index:1}
 /* the header logo: a pulsing fire glow behind it and sparks rising around it */
@@ -402,7 +406,10 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
 
 <nav class="nav" aria-label="ניווט ראשי">
   <div class="nav-in">
-    <p class="nav-welcome" id="navWelcome">ברוכים הבאים</p>
+    <div class="nav-welcome" id="navWelcome">
+      <p class="nw-title">איזה כיף שהגעת!</p>
+      <p class="nw-sub">גרילמן מקצועי, בשרים מעולים ואווירה בלתי נשכחת.</p>
+    </div>
     <div class="nav-links" style="display:none" id="navLinksWide">
       <a href="#gallery" onclick="openGalleryModal();return false">גלריה</a>
       <a href="#menus" onclick="openMenusModal();return false">תפריטים</a>
@@ -418,7 +425,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
 </nav>
 <script>
 // on opening the site the logo starts at the right and rolls to its place in the left corner
-// (turning exactly as far as a wheel of its size would roll), and "ברוכים הבאים" fades in behind it
+// (turning exactly as far as a wheel of its size would roll), and the greeting fades in behind it
 (function(){
   const html=document.documentElement;
   if(html.classList.contains('a11y-still') || matchMedia('(prefers-reduced-motion: reduce)').matches) return;

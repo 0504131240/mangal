@@ -13,8 +13,7 @@ function bookingText(f) {
   if (d) parts.push(`${d}/${m}/${y}`);
   if (f.washTime?.stringValue) parts.push(`נט"י ${f.washTime.stringValue}`);
   if (f.level?.stringValue) parts.push(f.level.stringValue);
-  if (f.spa?.booleanValue) parts.push('🧖 + מתחם ספא');
-  if (f.massage?.booleanValue) parts.push('💆 + מעסה');
+  if (f.massage?.booleanValue) parts.push("🧖 + ספא / מסאז'");
   return parts.join(' · ');
 }
 

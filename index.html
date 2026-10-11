@@ -500,23 +500,23 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="massageTitle">
     <div class="modal-top"><h3 id="massageTitle">הצעה מיוחדת לימי גיבוש</h3><button type="button" class="modal-close" aria-label="סגירה" onclick="closeDialog('massageModalBg')">✕</button></div>
     <div class="massage">
-      <p class="massage-lead">עושים יום גיבוש, ערב חברה או אירוע צוות? חוץ מהמנגל אפשר להזמין דרכנו עוד <b>שני דברים נפרדים</b>, כל אחד לבד או את שניהם יחד:</p>
+      <p class="massage-lead">עושים יום גיבוש, ערב חברה או אירוע צוות? חוץ מהמנגל אפשר להזמין דרכנו <b>רק ספא, רק מסאז', או את שניהם יחד</b>:</p>
       <section class="offer" aria-labelledby="offerSpa">
         <div class="offer-ico" aria-hidden="true">🧖</div>
         <h4 id="offerSpa"><span class="offer-num">1</span>מתחם ספא לקבוצה</h4>
         <p>מקום עם <b>ג'קוזי וסאונה</b> שאפשר להזמין לקבוצה, ולעשות בו את יום הגיבוש עם המנגל.</p>
-        <button type="button" class="offer-btn" onclick="bookWithExtra('fSpa')">להזמנה עם מתחם ספא</button>
+        <button type="button" class="offer-btn" onclick="bookWithExtra()">לקבלת פרטים על ספא</button>
       </section>
-      <div class="offer-plus" aria-hidden="true">+</div>
+      <div class="offer-plus" aria-hidden="true">ו/או</div>
       <section class="offer" aria-labelledby="offerMassage">
         <div class="offer-ico" aria-hidden="true">💆</div>
         <h4 id="offerMassage"><span class="offer-num">2</span>מעסה מקצועי</h4>
         <p>מעסה שמגיע ונותן מסאז' לחברי הקבוצה: <b>במתחם הספא, או בכל מקום אחר</b> שבו עושים את האירוע.</p>
-        <button type="button" class="offer-btn" onclick="bookWithExtra('fMassage')">להזמנה עם מעסה</button>
+        <button type="button" class="offer-btn" onclick="bookWithExtra()">לקבלת פרטים על מסאז'</button>
       </section>
       <div class="massage-how">
         <b>דברו איתנו</b>
-        <span>מסמנים בטופס ההזמנה מה מעניין אתכם, או כותבים לנו בוואטסאפ, ונחזור אליכם עם הצעה מותאמת לגודל הקבוצה. הכל מתואם דרכנו, מול איש קשר אחד.</span>
+        <span>מסמנים בטופס ההזמנה "פרטים על ספא / מסאז'" ומפרטים בהערות מה מעניין אתכם, או כותבים לנו בוואטסאפ, ונחזור אליכם עם הצעה מותאמת לגודל הקבוצה. הכל מתואם דרכנו, מול איש קשר אחד.</span>
       </div>
       <a class="massage-wa" href="https://wa.me/972527626562?text=%D7%94%D7%99%D7%99%20%D7%93%D7%95%D7%93%D7%99%21%20%D7%9E%D7%AA%D7%A2%D7%A0%D7%99%D7%99%D7%A0%D7%99%D7%9D%20%D7%91%D7%99%D7%95%D7%9D%20%D7%92%D7%99%D7%91%D7%95%D7%A9%20%D7%A2%D7%9D%20%D7%9E%D7%A0%D7%92%D7%9C%2C%20%D7%9E%D7%AA%D7%97%D7%9D%20%D7%A1%D7%A4%D7%90%20%D7%95%D7%9E%D7%A2%D7%A1%D7%94%20%F0%9F%94%A5%F0%9F%A7%96" target="_blank" rel="noopener">💬 לשאלות בוואטסאפ<span class="sr-only"> (נפתח בחלון חדש)</span></a>
     </div>
@@ -573,13 +573,9 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
         </div>
         <div class="extras">
           <span class="fld-label">לימי גיבוש וקבוצות (לא חובה)</span>
-          <label class="massage-check" for="fSpa">
-            <input type="checkbox" id="fSpa">
-            <span><b>🧖 מעוניינים במתחם ספא</b><small>מקום עם ג'קוזי וסאונה לקבוצה. לא מחייב, נחזור אליכם עם הצעה.</small></span>
-          </label>
           <label class="massage-check" for="fMassage">
             <input type="checkbox" id="fMassage">
-            <span><b>💆 מעוניינים במעסה</b><small>מעסה מקצועי שמגיע לאירוע, לספא או לכל מקום אחר. לא מחייב.</small></span>
+            <span><b>🧖 אשמח לפרטים על ספא / מסאז'</b><small>מתחם ספא עם ג'קוזי וסאונה, ו/או מעסה שמגיע אליכם. לא מחייב, נחזור אליכם עם פרטים.</small></span>
           </label>
         </div>
         <div class="fld">
@@ -658,7 +654,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
       <p>BBQ · חגיגת ברבקיו משחררת (דודי) מכבדים את הפרטיות שלכם. כאן מוסבר איזה מידע נאסף באתר, למה, ומה הזכויות שלכם.</p>
       <h4>איזה מידע נאסף</h4>
       <ul>
-        <li>רק מה שממלאים בטופס הזמנת האירוע: שם, טלפון, מייל (לא חובה), תאריך ושעת נטילת ידיים, מספר הגברים והנשים, רמת התפריט, האם אתם מעוניינים במתחם ספא או במעסה (לא חובה), מיקום (לא חובה) והערות (לא חובה).</li>
+        <li>רק מה שממלאים בטופס הזמנת האירוע: שם, טלפון, מייל (לא חובה), תאריך ושעת נטילת ידיים, מספר הגברים והנשים, רמת התפריט, האם ביקשתם פרטים על ספא / מסאז' (לא חובה), מיקום (לא חובה) והערות (לא חובה).</li>
         <li>האתר לא משתמש בעוגיות מעקב, בפרסום או בכלי ניתוח תנועה.</li>
         <li>הגדרות הנגישות שבחרתם ועותק של רשימת התמונות נשמרים רק בדפדפן שלכם, ולא נשלחים אלינו.</li>
         <li>ספקי האחסון של האתר עשויים לשמור רישומים טכניים (כמו כתובת IP) לצורכי אבטחה ותפעול.</li>
@@ -925,10 +921,10 @@ function openMenusModal(){ openDialog('menusModalBg'); }
 function closeMenusModal(){ closeDialog('menusModalBg'); }
 function openBookModal(){ openDialog('bookModalBg'); }
 function openMassageModal(){ openDialog('massageModalBg'); }
-// from the team-building window: open the booking form with that extra already checked
-function bookWithExtra(boxId){
+// from the team-building window: open the booking form with the spa / massage box already checked
+function bookWithExtra(){
   closeDialog('massageModalBg');
-  document.getElementById(boxId).checked=true;
+  document.getElementById('fMassage').checked=true;
   openBookModal();
 }
 function closeBookModal(){ closeDialog('bookModalBg'); }
@@ -1019,16 +1015,16 @@ document.getElementById('bookForm').addEventListener('submit', async (e)=>{
     const {db,collection,addDoc,serverTimestamp}=await fbInit();
     const base={name,phone,email:email||null,date,guests,level:selectedLevel,location:location||null,
       status:'pending', totalPrice:0, paidAmount:0, createdAt:serverTimestamp(), createdAtMs:Date.now()};
-    const spa=document.getElementById('fSpa').checked, massage=document.getElementById('fMassage').checked;
+    // "details about spa / massage" (one box, saved as massage)
+    const massage=document.getElementById('fMassage').checked;
     const withNotes=(...extra)=>{ const n=[...extra,notes].filter(Boolean).join('\n'); return n||null; };
-    const spaNote=spa?'🧖 מעוניינים במתחם ספא':'', massageNote=massage?'💆 מעוניינים במעסה':'';
+    const massageNote=massage?"🧖 מבקשים פרטים על ספא / מסאז'":'';
     // security rules from before the newer fields existed reject them; then keep the request
     // by moving those fields into the notes (newest rules first, oldest last)
     const attempts=[
-      {...base,men,women,washTime,...(spa?{spa:true}:{}),...(massage?{massage:true}:{}),notes:notes||null},
-      ...(spa?[{...base,men,women,washTime,...(massage?{massage:true}:{}),notes:withNotes(spaNote)}]:[]),
-      ...(spa||massage?[{...base,men,women,washTime,notes:withNotes(spaNote,massageNote)}]:[]),
-      {...base,notes:withNotes(`גברים: ${men} · נשים: ${women} · נטילת ידיים: ${washTime}`,spaNote,massageNote)},
+      {...base,men,women,washTime,...(massage?{massage:true}:{}),notes:notes||null},
+      ...(massage?[{...base,men,women,washTime,notes:withNotes(massageNote)}]:[]),
+      {...base,notes:withNotes(`גברים: ${men} · נשים: ${women} · נטילת ידיים: ${washTime}`,massageNote)},
     ];
     let ref;
     for(const [k,data] of attempts.entries()){

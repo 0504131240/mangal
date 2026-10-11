@@ -799,8 +799,8 @@ function prepTime(t){
   return `${String(Math.floor(mins/60)).padStart(2,'0')}:${String(mins%60).padStart(2,'0')}`;
 }
 const washChip=(b)=>b.washTime?`<span class="chip">🕖 נט"י ${esc(b.washTime)}</span>`:'';
-// the customer asked for a massage offer as well (arranged through us)
-const massageChip=(b)=>b.massage?`<span class="chip massage">💆 ספא ומסאז'</span>`:'';
+// team-building extras the customer asked about (arranged through us): a spa venue, a massage therapist
+const massageChip=(b)=>(b.spa?`<span class="chip massage">🧖 מתחם ספא</span>`:'')+(b.massage?`<span class="chip massage">💆 מעסה</span>`:'');
 function fmtDate(d){
   if(!d)return '';
   try{ return new Date(d+'T00:00:00').toLocaleDateString('he-IL',{day:'numeric',month:'short',year:'numeric',weekday:'short'}); }
@@ -955,7 +955,8 @@ function openDetails(id){
           ${row('📍 מיקום', b.location?esc(b.location):'—')}
           ${row('🕖 נטילת ידיים', b.washTime?`${esc(b.washTime)} <span class="drow-sub">(המקום פנוי מ-${prepTime(b.washTime)})</span>`:'—')}
           ${row('👥 משתתפים', guestsText(b))}
-          ${b.massage?row("💆 ספא ומסאז'", 'ביקשו הצעה'):''}
+          ${b.spa?row('🧖 מתחם ספא', 'ביקשו הצעה'):''}
+          ${b.massage?row('💆 מעסה', 'ביקשו הצעה'):''}
           ${row('💰 מחיר כולל', total>0?`₪${total.toLocaleString()}`:'טרם נקבע')}
           ${row('✓ שולם', `₪${paid.toLocaleString()}`)}
           ${total>0?row('⏳ יתרה לתשלום', `₪${Math.max(total-paid,0).toLocaleString()}`):''}
@@ -989,7 +990,8 @@ function openModal(id){
         ${b.notes?`<div class="minfo">📝 ${esc(b.notes)}</div>`:''}
 
         <div class="mfld"><label>שעת נטילת ידיים</label><input type="time" id="mWash" step="300" value="${esc(b.washTime||'')}"></div>
-        <label class="mcheck"><input type="checkbox" id="mMassage" ${b.massage?'checked':''}> 💆 גם ספא ומסאז'</label>
+        <label class="mcheck"><input type="checkbox" id="mSpa" ${b.spa?'checked':''}> 🧖 מתחם ספא</label>
+        <label class="mcheck"><input type="checkbox" id="mMassage" ${b.massage?'checked':''}> 💆 מעסה</label>
         <div class="mrow3">
           <div class="mfld"><label>גברים</label><input type="number" id="mMen" min="0" value="${b.men!=null?esc(b.men):''}" oninput="syncGuestTotal('m')"></div>
           <div class="mfld"><label>נשים</label><input type="number" id="mWomen" min="0" value="${b.women!=null?esc(b.women):''}" oninput="syncGuestTotal('m')"></div>
@@ -1084,13 +1086,13 @@ async function saveModal(id){
   const {men,women}=readMenWomen('m');
   const guests=men!=null ? men+women : (parseInt(document.getElementById('mGuests').value,10)||0);
   const washTime=document.getElementById('mWash').value||null;
-  const massage=document.getElementById('mMassage').checked;
+  const spa=document.getElementById('mSpa').checked, massage=document.getElementById('mMassage').checked;
   const location=document.getElementById('mLocation').value.trim();
   const totalPrice=parseFloat(document.getElementById('mTotal').value)||0;
   const paidAmount=parseFloat(document.getElementById('mPaid').value)||0;
   const status=document.getElementById('modalRoot').dataset.status||'approved';
   const {db,doc,updateDoc}=await fbInit();
-  await updateDoc(doc(db,'mangalBookings',id),{guests,men,women,washTime,massage,location:location||null,totalPrice,paidAmount,status});
+  await updateDoc(doc(db,'mangalBookings',id),{guests,men,women,washTime,spa,massage,location:location||null,totalPrice,paidAmount,status});
   closeModal();
   showToast('נשמר ✓');
 }
@@ -1124,7 +1126,8 @@ function openNewEventModal(){
           <div class="mfld"><label>שעת נטילת ידיים</label><input type="time" id="nWash" step="300"></div>
           <div class="mfld"><label>מיקום</label><input type="text" id="nLocation" placeholder="כתובת / אולם / חצר"></div>
         </div>
-        <label class="mcheck"><input type="checkbox" id="nMassage"> 💆 גם ספא ומסאז'</label>
+        <label class="mcheck"><input type="checkbox" id="nSpa"> 🧖 מתחם ספא</label>
+        <label class="mcheck"><input type="checkbox" id="nMassage"> 💆 מעסה</label>
         <div class="mrow3">
           <div class="mfld"><label>גברים</label><input type="number" id="nMen" min="0" oninput="syncGuestTotal('n')"></div>
           <div class="mfld"><label>נשים</label><input type="number" id="nWomen" min="0" oninput="syncGuestTotal('n')"></div>
@@ -1162,7 +1165,7 @@ async function saveNewEvent(){
   const {men,women}=readMenWomen('n');
   const guests=men!=null ? Math.max(men+women,1) : (parseInt(document.getElementById('nGuests').value,10)||1);
   const washTime=document.getElementById('nWash').value||null;
-  const massage=document.getElementById('nMassage').checked;
+  const spa=document.getElementById('nSpa').checked, massage=document.getElementById('nMassage').checked;
   const location=document.getElementById('nLocation').value.trim();
   const notes=document.getElementById('nNotes').value.trim();
   const totalPrice=parseFloat(document.getElementById('nTotal').value)||0;
@@ -1170,7 +1173,7 @@ async function saveNewEvent(){
   const level=document.getElementById('modalRoot').dataset.nlevel||LEVELS[0];
   const {db,collection,addDoc}=await fbInit();
   await addDoc(collection(db,'mangalBookings'),{
-    name, phone:phone||null, date, washTime, guests, men, women, level, massage, location:location||null, notes:notes||null,
+    name, phone:phone||null, date, washTime, guests, men, women, level, spa, massage, location:location||null, notes:notes||null,
     status:'approved', totalPrice, paidAmount,
     createdAtMs:Date.now(), source:'admin'
   });

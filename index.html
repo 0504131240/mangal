@@ -801,11 +801,13 @@ function a11yZoom(d){ a11y.zoom=Math.max(0,Math.min(A11Y_ZOOMS.length-1,(a11y.zo
 function a11yReset(){ a11y={}; applyA11y(); }
 function toggleA11y(){ document.getElementById('a11yPanel').hidden ? openA11y() : closeA11y(); }
 function openA11y(){
+  overlayOpened();
   document.getElementById('a11yPanel').hidden=false;
   document.getElementById('a11yBtn').setAttribute('aria-expanded','true');
   document.querySelector('#a11yPanel .a11y-close').focus();
 }
 function closeA11y(){
+  overlayClosed();
   document.getElementById('a11yPanel').hidden=true;
   const btn=document.getElementById('a11yBtn');
   btn.setAttribute('aria-expanded','false');
@@ -820,6 +822,7 @@ function mediaLabel(g,i){
 }
 let lightboxIndex=-1, lightboxOpener=null;
 function openLightbox(i){
+  overlayOpened();
   lightboxOpener=document.activeElement;
   lightboxIndex=i;
   buildLightbox();
@@ -875,6 +878,7 @@ function lightboxShift(dir){
   renderLightbox();
 }
 function closeLightbox(){
+  overlayClosed();
   lightboxIndex=-1;
   document.getElementById('lightboxRoot').innerHTML='';
   if(lightboxOpener && lightboxOpener.focus) lightboxOpener.focus();
@@ -939,12 +943,14 @@ function setMenuTab(id){
 const DIALOGS=['galleryModalBg','menusModalBg','massageModalBg','bookModalBg','statementBg','privacyBg'];
 const dialogOpeners={};
 function openDialog(id){
+  overlayOpened();
   dialogOpeners[id]=document.activeElement;
   const bg=document.getElementById(id);
   bg.hidden=false;
   bg.querySelector('.modal-close').focus();
 }
 function closeDialog(id){
+  overlayClosed();
   document.getElementById(id).hidden=true;
   const back=dialogOpeners[id];
   if(back && back.focus) back.focus();
@@ -956,6 +962,30 @@ function topDialog(){
   return open.length ? open[open.length-1].querySelector('.modal') : null;
 }
 function isOverlayOpen(){ return !!topDialog(); }
+
+/* The phone's back button closes the open windows and returns to the main page, instead of leaving
+   the site: opening a window adds one history entry, and going back from it closes everything.
+   Closing the windows some other way (✕, Esc, tapping outside) removes that entry again. */
+let overlayInHistory=false, skipNextPop=false;
+function overlayOpened(){
+  if(overlayInHistory) return;
+  history.pushState({bbqOverlay:true},'');
+  overlayInHistory=true;
+}
+function overlayClosed(){
+  // after the current click is handled, so a window opened right after this one keeps the entry
+  setTimeout(()=>{
+    if(overlayInHistory && !isOverlayOpen()){ overlayInHistory=false; skipNextPop=true; history.back(); }
+  },0);
+}
+addEventListener('popstate',()=>{
+  if(skipNextPop){ skipNextPop=false; return; }
+  if(!overlayInHistory) return;
+  overlayInHistory=false;
+  if(lightboxIndex>=0) closeLightbox();
+  if(!document.getElementById('a11yPanel').hidden) closeA11y();
+  DIALOGS.forEach(id=>{ if(!document.getElementById(id).hidden) closeDialog(id); });
+});
 function openGalleryModal(){ openDialog('galleryModalBg'); }
 function closeGalleryModal(){ closeDialog('galleryModalBg'); }
 function openMenusModal(){ activeMenuTab=null; renderMenus(); openDialog('menusModalBg'); }

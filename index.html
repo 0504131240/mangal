@@ -298,7 +298,7 @@ footer{position:relative;isolation:isolate;overflow:hidden;color:rgba(255,236,22
 footer::before{content:'';position:absolute;inset:0;z-index:-2;background:url(images/flames-strip.jpg) center bottom/cover no-repeat;transform-origin:50% 100%;animation:fx-flames 1.7s ease-in-out infinite alternate}
 footer::after{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(to bottom,var(--bg) 0%,rgba(14,9,7,.6) 55%,rgba(14,9,7,.15))}
 footer a{color:#F3C08A;text-decoration:none;font-weight:600}
-/* site credit (instead of the admin link; the admin is still at /admin.html and by swiping right) */
+/* site credit (instead of the admin link; the admin is only at /admin.html) */
 .ys-sig { margin: 0; padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px)); text-align: center; font: 400 13px/1.4 Arial, "Arial Hebrew", sans-serif; direction: rtl; }
 .ys-sig a { color: inherit; opacity: .6; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: opacity .2s ease, color .2s ease; }
 .ys-sig a:hover, .ys-sig a:focus-visible { opacity: 1; color: #25d366; }
@@ -1146,22 +1146,6 @@ renderGallery();renderLevels();renderMenus();loadGallery();applyA11y();
 // direct links, e.g. the poster's QR code opens .../#book
 ({'#book':openBookModal,'#gallery':openGalleryModal,'#menus':openMenusModal,'#massage':openMassageModal,'#spa':openMassageModal,'#privacy':openPrivacy,'#accessibility':openStatement}[location.hash]||(()=>{}))();
 
-/* החלקה ימינה בכל מקום באתר -> כניסה ללוח הניהול (מושבת כשחלון/לייטבוקס פתוח) */
-(function(){
-  let sx=0, sy=0, tracking=false;
-  document.addEventListener('touchstart', (e)=>{
-    if(e.touches.length!==1 || isOverlayOpen()) return;
-    sx=e.touches[0].clientX; sy=e.touches[0].clientY; tracking=true;
-  }, {passive:true});
-  document.addEventListener('touchend', (e)=>{
-    if(!tracking) return;
-    tracking=false;
-    if(isOverlayOpen()) return;
-    const t=e.changedTouches[0];
-    const dx=t.clientX-sx, dy=t.clientY-sy;
-    if(dx>90 && Math.abs(dy)<60){ location.href='admin.html'; }
-  }, {passive:true});
-})();
 </script>
 </body>
 </html>

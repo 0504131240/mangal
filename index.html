@@ -1,29 +1,1594 @@
 <!--
-  BBQ - אתר עסק המנגלים, חלק ציבורי.
-   - תמונות וסרטונים בגלריה: מנוהלים מ"הגדרות" בניהול (נשמר ב-mangalSettings/gallery);
-     עד השינוי הראשון מוצגת רשימת ברירת המחדל שב-gallery-default.js.
-   - תפריטים ומחירים: מערך MENUS למטה (מקור: תפריט הלקוח).
-   - הכניסה לניהול (admin.html) היא עם חשבון Google; חוקי האבטחה ב-firestore.rules.
+  לוח ניהול פרטי לעסק המנגלים - לא מקושר מהאתר הציבורי חוץ מקישור קטן בפוטר.
+  הכניסה היא עם חשבון Google. מי מורשה נקבע בחוקי האבטחה (firestore.rules): הבעלים שכתובים
+  בחוקים, ומיילים שהם מוסיפים בהגדרות (mangalSettings/admins). ראו README.md.
 -->
 <!DOCTYPE html>
-<html dir="rtl" lang="he" class="menu-fire">
+<html dir="rtl" lang="he">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0E0907">
-<title>BBQ · חגיגת ברבקיו משחררת</title>
-<meta name="description" content="חוויית מנגל יוקרתית שמגיעה עד אליכם. תפריטים, גלריה ובדיקת זמינות לאירוע באתר.">
-<!-- link preview (WhatsApp, Facebook...): without these, apps pick the transparent logo and show it cropped on black -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://mangal-belahavot.vercel.app/">
-<meta property="og:site_name" content="BBQ · חגיגת ברבקיו משחררת">
-<meta property="og:title" content="BBQ · חגיגת ברבקיו משחררת">
-<meta property="og:description" content="חוויית מנגל יוקרתית שמגיעה עד אליכם. תפריטים, גלריה ובדיקת זמינות לאירוע באתר.">
-<meta property="og:image" content="https://mangal-belahavot.vercel.app/images/share-card.jpg">
-<meta property="og:image:type" content="image/jpeg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="הלוגו של BBQ חגיגת ברבקיו משחררת על רקע אש, מנגל לאירועים">
-<meta property="og:locale" content="he_IL">
-<meta name="twitter:card" content="summary_large_image">
-<script>try{const a=JSON.parse(localStorage.getItem('mangalA11y')||'{}');const c=document.documentElement.classList;
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>ניהול · BBQ</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="manifest" href="manifest-admin.json">
+<meta name="theme-color" content="#20140E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ניהול BBQ">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="images/app-icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=Varela+Round&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%A5%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#FBF3EC;--surface:#fff;--surface2:#F3E7DA;--border:#EDE0D4;
+  --text:#241712;--text2:#7A6A5E;--text3:#B0A296;
+  --flame:#D8481B;--flame-dark:#9C2E0E;--flame-bg:#FCE9DF;
+  --gold:#B9832A;--gold-bg:#FBF1DE;--char:#20140E;
+  --ok:#1D9E75;--ok-bg:#E1F5EE;--bad:#A32D2D;--bad-bg:#FCEBEB;--warn:#B9832A;--warn-bg:#FBF1DE;
+  --r:16px;--r2:11px;
+  --font:'Rubik',-apple-system,'Segoe UI',Arial,sans-serif;
+  --font-head:'Varela Round','Rubik',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{overflow-x:hidden;max-width:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--text);direction:rtl;min-height:100vh;padding-bottom:40px}
+.wrap{max-width:760px;margin:0 auto;padding:0 14px}
+button{font-family:var(--font)}
+
+/* lock screen */
+.lock-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.lock-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:30px 24px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 50px rgba(32,20,14,.1)}
+.lock-ico{font-size:38px}
+.lock-card h2{font-family:var(--font-head);margin-top:8px;font-size:18px}
+.lock-card p{color:var(--text2);font-size:12.5px;margin-top:6px;margin-bottom:16px}
+.lock-card input{width:100%;border:1.5px solid var(--border);border-radius:var(--r2);padding:12px;font-size:15px;font-family:var(--font);background:var(--bg);color:var(--text);text-align:center;direction:ltr;margin-bottom:8px}
+.lock-card button.main{width:100%;padding:13px;border-radius:var(--r2);border:none;background:var(--flame);color:#fff;font-weight:700;font-size:14.5px;cursor:pointer;margin-top:4px}
+.install-btn{width:100%;padding:11px;border-radius:var(--r2);border:1.5px dashed var(--border);background:transparent;color:var(--text2);font-weight:700;font-size:12.5px;cursor:pointer;margin-top:14px;font-family:var(--font)}
+.install-btn:hover{border-color:var(--flame);color:var(--flame-dark)}
+.lock-err{color:var(--bad);font-size:12.5px;margin-top:8px;display:none}
+.google-btn{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff!important;color:#1f1f1f!important;border:1.5px solid #dadce0!important;margin-top:6px}
+.google-btn:disabled{opacity:.6}
+.link-btn{display:block;margin:10px auto 0;background:none;border:none;color:var(--text2);font-size:12.5px;font-weight:600;text-decoration:underline;cursor:pointer;font-family:var(--font)}
+.admin-me{font-size:12px;color:var(--text2);margin-bottom:8px}
+.admin-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;margin-bottom:6px;font-size:13px}
+.admin-row span{min-width:0;overflow-wrap:anywhere}
+.admin-del{flex-shrink:0;width:28px;height:28px;border-radius:50%;border:none;background:var(--bad-bg);color:var(--bad);cursor:pointer}
+.admin-empty{font-size:12.5px;color:var(--text3);margin-bottom:6px}
+.admin-add{display:flex;gap:8px;margin-top:4px}
+.admin-add input{flex:1;min-width:0;border:1.5px solid var(--border);border-radius:10px;padding:9px 11px;font-size:14px;font-family:var(--font);background:var(--bg);color:var(--text)}
+.admin-hint{display:block;font-size:11.5px;color:var(--text3);margin-top:6px;line-height:1.5}
+.sec-status{font-size:13px;font-weight:700;padding:11px 13px;border-radius:var(--r2);margin-bottom:8px}
+.sec-status.ok{background:var(--ok-bg);color:var(--ok)}
+.sec-status.bad{background:var(--bad-bg);color:var(--bad)}
+.sec-status.wait{background:var(--surface2);color:var(--text2)}
+
+/* header */
+.hdr{background:linear-gradient(135deg,var(--char),#3A2113);color:#fff;padding:20px 16px 22px;border-radius:0 0 20px 20px}
+.hdr-in{max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.hdr-title{font-family:var(--font-head);font-size:18px;display:flex;align-items:center;gap:8px}
+.hdr-btn{background:rgba(255,255,255,.12);border:none;color:#fff;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer}
+.hdr-actions{display:flex;gap:8px;flex-shrink:0}
+.share-opts{display:flex;flex-direction:column;gap:8px}
+.share-opt{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;border-radius:var(--r2);border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;font-weight:700;text-decoration:none;cursor:pointer;font-family:var(--font);text-align:right}
+.share-opt .ico{font-size:20px;width:26px;text-align:center}
+.share-url{width:100%;margin-top:12px;border:1.5px solid var(--border);border-radius:10px;padding:10px 11px;font-size:13px;font-family:var(--font);background:var(--bg);color:var(--text2);direction:ltr;text-align:left}
+
+/* tabs */
+.tabs{display:flex;gap:8px;margin:16px 0;overflow-x:auto;padding-bottom:2px}
+.tab{position:relative;flex:1;min-width:100px;text-align:center;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);padding:11px 8px;border-radius:14px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
+.tab.on{background:var(--char);color:#fff;border-color:var(--char)}
+.tab .badge{position:absolute;top:-7px;left:-6px;background:var(--flame);color:#fff;font-size:10.5px;font-weight:800;border-radius:12px;min-width:19px;height:19px;display:flex;align-items:center;justify-content:center;padding:0 4px;box-shadow:0 2px 8px rgba(216,72,27,.4)}
+
+.panel{display:none}
+.panel.on{display:block}
+.empty{text-align:center;color:var(--text3);font-size:13.5px;padding:40px 10px}
+
+/* cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:14px 15px;margin-bottom:10px;cursor:pointer;position:relative}
+.card.new::before{content:'חדש';position:absolute;top:-8px;right:12px;background:var(--flame);color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px}
+.card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card-name{font-weight:700;font-size:14.5px}
+.card-date{font-size:12px;color:var(--text2);font-weight:600}
+.card-mid{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chip{font-size:11px;font-weight:700;padding:4px 9px;border-radius:20px;background:var(--surface2);color:var(--text2)}
+.chip.lvl{background:var(--flame-bg);color:var(--flame-dark)}
+.chip.massage{background:#EDE3F6;color:#5B3A86}
+.mcheck{display:flex;align-items:center;gap:10px;margin:10px 0 4px;font-size:14px;font-weight:600;cursor:pointer}
+.mcheck input{width:20px;height:20px;accent-color:#F2662B}
+.chip.paid-ok{background:var(--ok-bg);color:var(--ok)}
+.chip.paid-part{background:var(--warn-bg);color:var(--warn)}
+.chip.paid-no{background:var(--bad-bg);color:var(--bad)}
+.card-notes{margin-top:8px;font-size:12.5px;color:var(--text3);line-height:1.5}
+.card-actions{display:flex;gap:8px;margin-top:12px}
+.card-actions button{flex:1;padding:9px;border-radius:9px;border:none;font-weight:700;font-size:12.5px;cursor:pointer}
+.btn-approve{background:var(--ok);color:#fff}
+.btn-decline{background:var(--bad-bg);color:var(--bad)}
+
+.section-note{font-size:12px;color:var(--text3);margin:6px 2px 12px;text-align:center}
+.toggle-row{display:flex;gap:8px;margin-bottom:12px}
+.toggle-row button{flex:1;padding:9px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);font-weight:700;font-size:12.5px;cursor:pointer}
+.toggle-row button.on{background:var(--flame-bg);border-color:var(--flame);color:var(--flame-dark)}
+
+.debt-total{background:var(--bad-bg);color:var(--bad);border-radius:var(--r2);padding:14px 16px;text-align:center;margin-bottom:14px}
+.debt-total b{display:block;font-size:22px;font-family:var(--font-head)}
+.debt-total span{font-size:12px;font-weight:600}
+
+/* modal */
+.modal-bg{position:fixed;inset:0;background:rgba(32,20,14,.55);z-index:100;display:flex;align-items:flex-end;justify-content:center}
+@media(min-width:640px){.modal-bg{align-items:center}}
+.modal{background:var(--surface);border-radius:20px 20px 0 0;max-width:480px;width:100%;max-height:92vh;overflow-y:auto;padding:20px 18px 26px}
+@media(min-width:640px){.modal{border-radius:20px}}
+.modal-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.modal-top h3{font-family:var(--font-head);font-size:17px}
+.modal-close{background:var(--surface2);border:none;width:32px;height:32px;border-radius:50%;font-size:15px;cursor:pointer;color:var(--text2)}
+.mfld{margin-top:12px}
+.mfld label{display:block;font-size:11.5px;font-weight:700;color:var(--text2);margin-bottom:5px}
+.mfld input,.mfld textarea{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:10px 11px;font-size:14px;font-family:var(--font);background:var(--bg);color:var(--text);direction:rtl}
+.mrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mrow3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.drow-sub{font-weight:500;color:var(--text2);font-size:12px}
+.minfo{font-size:13px;color:var(--text2);background:var(--surface2);border-radius:10px;padding:10px 12px;margin-top:10px}
+.minfo a{color:var(--flame-dark);font-weight:700;text-decoration:none}
+.quickpay{display:flex;gap:8px;margin-top:8px}
+.quickpay button{flex:1;padding:9px;border-radius:9px;border:1.5px solid var(--border);background:var(--surface);font-size:12px;font-weight:700;cursor:pointer;color:var(--text2)}
+.modal-actions{display:flex;gap:8px;margin-top:18px}
+.dlist{margin-top:12px;border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+.drow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 13px;font-size:13px;border-bottom:1px solid var(--border)}
+.drow:last-child{border-bottom:none}
+.drow span{color:var(--text2);flex-shrink:0}
+.drow b{font-weight:700;text-align:left;min-width:0;overflow-wrap:anywhere}
+.drow a{color:var(--flame-dark);text-decoration:none}
+.modal-actions button{flex:1;padding:12px;border-radius:11px;border:none;font-weight:700;font-size:13px;cursor:pointer}
+.btn-save{background:var(--flame);color:#fff}
+.btn-danger{background:var(--bad-bg);color:var(--bad)}
+.status-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.status-pill{font-size:11.5px;font-weight:700;padding:6px 11px;border-radius:16px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer}
+.status-pill.on{border-color:var(--char);background:var(--char);color:#fff}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--char);color:#fff;padding:11px 20px;border-radius:24px;font-size:13px;font-weight:600;z-index:200;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+
+.btn-add-event{width:100%;padding:12px;border-radius:12px;border:none;background:var(--flame);color:#fff;font-weight:700;font-size:13.5px;cursor:pointer;margin-bottom:14px;box-shadow:0 8px 18px rgba(216,72,27,.28)}
+
+/* calendar */
+.cal-mode-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.cal-mode-toggle{display:flex;background:var(--surface2);border-radius:10px;padding:3px;gap:2px}
+.cal-mode-toggle button{border:none;background:transparent;color:var(--text2);font-size:12px;font-weight:700;padding:6px 12px;border-radius:8px;cursor:pointer}
+.cal-mode-toggle button.on{background:var(--char);color:#fff}
+.cal-today-btn{background:var(--surface2);border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;color:var(--text2);cursor:pointer;flex-shrink:0;white-space:nowrap}
+.cal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.cal-hdr>div{text-align:center;min-width:0}
+.cal-title{font-weight:700;font-family:var(--font-head);font-size:15px}
+.cal-subtitle{font-size:10.5px;color:var(--text3);margin-top:1px}
+.cal-nav{background:var(--surface2);border:none;border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;color:var(--text2);cursor:pointer;flex-shrink:0}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;width:100%}
+.cal-weekdays{margin-bottom:4px;font-size:11px;color:var(--text3);font-weight:700;text-align:center}
+.cal-cell{aspect-ratio:1/1;min-width:0;border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;position:relative;background:var(--surface);overflow:hidden}
+.cal-he-day{font-size:12px;font-weight:700;white-space:nowrap}
+.cal-greg-day{font-size:8.5px;color:var(--text3);margin-top:1px}
+.cal-cell.has-events .cal-greg-day{color:var(--flame-dark);opacity:.75}
+.cal-cell.cal-blank{border:none;background:transparent}
+.cal-cell.has-events{cursor:pointer;border-color:var(--flame);background:var(--flame-bg);font-weight:700}
+.cal-cell.today{box-shadow:inset 0 0 0 2px var(--char)}
+/* settings */
+.set-sec{margin-top:16px}
+.set-title{font-size:11.5px;font-weight:800;color:var(--text3);letter-spacing:.3px;margin-bottom:8px}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r2);margin-bottom:8px}
+.set-txt{min-width:0}
+.set-txt b{display:block;font-size:13.5px}
+.set-txt small{display:block;font-size:11.5px;color:var(--text3);margin-top:2px}
+.set-btn{flex-shrink:0;border:1.5px solid var(--flame);background:var(--surface);color:var(--flame-dark);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer}
+.set-btn.on{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.set-test{width:100%;margin:-2px 0 8px;padding:10px;border-radius:var(--r2);border:1.5px dashed var(--border);background:transparent;color:var(--text2);font-weight:700;font-size:12.5px;cursor:pointer}
+.set-upload{display:block;text-align:center;padding:13px;border-radius:var(--r2);border:1.5px dashed var(--flame);background:var(--flame-bg);color:var(--flame-dark);font-weight:700;font-size:13.5px;cursor:pointer;margin-top:8px}
+.set-restore{display:block;width:100%;margin-top:12px;padding:11px;border-radius:var(--r2);border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-family:var(--font);font-weight:700;font-size:13.5px;cursor:pointer}
+.set-upload.disabled{opacity:.45;pointer-events:none}
+.upload-status{font-size:12px;color:var(--text2);text-align:center;margin-top:8px;font-weight:600;white-space:pre-line;overflow-wrap:anywhere}
+.media-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:12px}
+.media-grid .empty{grid-column:1/-1;padding:24px 10px}
+.media-video{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:22px;color:#fff;background:radial-gradient(circle at 50% 40%,#4A2E1C,#1A100A)}
+.media-video small{font-size:11px;font-weight:700}
+.media-tile{position:relative;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:var(--surface2)}
+.media-tile img,.media-tile video{width:100%;height:100%;object-fit:cover;display:block}
+.media-tile{cursor:pointer}
+.media-badge{position:absolute;top:5px;right:5px;font-size:13px;background:rgba(0,0,0,.5);border-radius:6px;padding:1px 5px}
+.media-cap{position:absolute;inset-inline:0;bottom:0;padding:14px 6px 5px;background:linear-gradient(0deg,rgba(0,0,0,.7),transparent);color:#fff;font-size:10.5px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.media-cap.none{color:rgba(255,255,255,.75);font-weight:500}
+.media-hint{font-size:11.5px;color:var(--text3);text-align:center;margin-top:10px}
+.cap-edit-bg{z-index:110}
+.cap-edit-preview{width:100%;max-height:42vh;object-fit:contain;border-radius:12px;background:var(--surface2);display:block}
+.cap-count{font-size:11px;color:var(--text3);text-align:left;margin-top:4px;direction:ltr}
+.media-del{position:absolute;top:5px;left:5px;width:26px;height:26px;border-radius:50%;border:none;background:rgba(32,20,14,.75);color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+.cal-dot{position:absolute;bottom:3px;font-size:9px;background:var(--flame);color:#fff;border-radius:8px;min-width:14px;height:14px;display:flex;align-items:center;justify-content:center;padding:0 3px}
+</style>
+</head>
+<body>
+
+<div id="lockScreen" class="lock-screen">
+  <div class="lock-card">
+    <div class="lock-ico">🔒</div>
+    <h2 id="lockTitle">ניהול BBQ</h2>
+    <p id="lockSub">טוען...</p>
+    <div id="lockBody"></div>
+    <div class="lock-err" id="lockErr">סיסמה שגויה</div>
+    <button id="installBtn" class="install-btn" hidden onclick="handleInstallClick()">📲 התקן כאפליקציה</button>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="hdr">
+    <div class="hdr-in">
+      <div class="hdr-title"><img src="images/logo-v2.png" alt="BBQ" style="height:28px;width:28px;border-radius:50%;object-fit:cover">לוח ניהול</div>
+      <div class="hdr-actions">
+        <button class="hdr-btn" onclick="openShare()">📤 שיתוף</button>
+        <button class="hdr-btn" onclick="openSettings()">⚙️ הגדרות</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="tabs">
+      <div class="tab on" data-tab="board" onclick="setTab('board')">לוח אירועים</div>
+      <div class="tab" data-tab="pending" onclick="setTab('pending')">בקשות חדשות<span class="badge" id="badgePending" style="display:none">0</span></div>
+      <div class="tab" data-tab="debts" onclick="setTab('debts')">חובות<span class="badge" id="badgeDebts" style="display:none">0</span></div>
+    </div>
+
+    <div class="panel" id="panel-pending">
+      <div id="pendingList"></div>
+      <div id="declinedWrap" style="margin-top:22px"></div>
+    </div>
+
+    <div class="panel on" id="panel-board">
+      <button class="btn-add-event" onclick="openNewEventModal()">+ הוספת אירוע חדש</button>
+      <div class="toggle-row">
+        <button class="on" id="viewList" onclick="setBoardView('list')">📋 רשימה</button>
+        <button id="viewCalendar" onclick="setBoardView('calendar')">📅 לוח שנה</button>
+      </div>
+      <div id="boardListWrap">
+        <div class="toggle-row">
+          <button class="on" id="btnUpcoming" onclick="setBoardFilter('upcoming')">אירועים קרובים</button>
+          <button id="btnPast" onclick="setBoardFilter('past')">אירועים שעברו</button>
+        </div>
+        <div id="boardList"></div>
+      </div>
+      <div id="boardCalendarWrap" style="display:none"></div>
+    </div>
+
+    <div class="panel" id="panel-debts">
+      <div id="debtsTotal"></div>
+      <div id="debtsList"></div>
+    </div>
+  </div>
+</div>
+
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+
+<script src="gallery-default.js"></script>
+<script>
+/* ===== Firebase ===== */
+const firebaseConfig = {
+  apiKey: "AIzaSyA5Qp3W1dcpd4ncnTyB68nMueXtHbAoLAk",
+  authDomain: "mangal-b11fe.firebaseapp.com",
+  projectId: "mangal-b11fe",
+  storageBucket: "mangal-b11fe.firebasestorage.app",
+  messagingSenderId: "523754634162",
+  appId: "1:523754634162:web:aea58a2857650fadf082ab"
+};
+let _fb=null;
+async function fbInit(){
+  if(_fb)return _fb;
+  const appMod=await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js");
+  const fsMod=await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js");
+  const authMod=await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js");
+  const app=appMod.initializeApp(firebaseConfig);
+  const db=fsMod.getFirestore(app);
+  const auth=authMod.getAuth(app);
+  _fb={db,doc:fsMod.doc,getDoc:fsMod.getDoc,setDoc:fsMod.setDoc,updateDoc:fsMod.updateDoc,deleteDoc:fsMod.deleteDoc,addDoc:fsMod.addDoc,
+    onSnapshot:fsMod.onSnapshot,collection:fsMod.collection,query:fsMod.query,orderBy:fsMod.orderBy,deleteField:fsMod.deleteField,
+    auth,onAuthStateChanged:authMod.onAuthStateChanged,signOut:authMod.signOut,
+    googleSignIn:()=>authMod.signInWithPopup(auth,new authMod.GoogleAuthProvider())};
+  return _fb;
+}
+const LEVELS = ['CLASIC','SPECIAL','CRAZY'];
+const LEVEL_ICON = {'CLASIC':'🔥','SPECIAL':'🔥🔥','CRAZY':'👑'};
+const LEVEL_PRICE = {'CLASIC':170,'SPECIAL':220,'CRAZY':300};
+
+/* ===== auth: Google sign-in; the Firestore rules decide who is an admin ===== */
+async function sha256(str){
+  const buf=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+let adminEmails=[];   // added admins (mangalSettings/admins); the owners are written in the rules
+let currentEmail='';
+const lockErr=(msg)=>{ const e=document.getElementById('lockErr'); e.textContent=msg; e.style.display=msg?'block':'none'; };
+async function initLock(){
+  try{
+    const {auth,onAuthStateChanged}=await fbInit();
+    const user=await new Promise(res=>{ const off=onAuthStateChanged(auth,u=>{ off(); res(u); }); });
+    if(!user){ renderLoginForm(); return; }
+    if(!(await checkAccess(user))) return;
+    if(localStorage.getItem('mangalBiometricCredId') && window.PublicKeyCredential) renderBiometricLock();
+    else unlockApp();
+  }catch(err){
+    console.error(err);
+    renderLoadError(err);
+  }
+}
+// the admins list is readable only by admins, so reading it is the access check
+async function checkAccess(user){
+  const {db,doc,getDoc,auth,signOut}=await fbInit();
+  try{
+    const snap=await getDoc(doc(db,'mangalSettings','admins'));
+    adminEmails=snap.exists() ? (snap.data().emails||[]) : [];
+    currentEmail=(user.email||'').toLowerCase();
+    // leftover from the old shared-password login (held the password hash)
+    const {deleteDoc}=await fbInit();
+    deleteDoc(doc(db,'mangalSettings','admin')).catch(()=>{});
+    return true;
+  }catch(e){
+    if(e.code!=='permission-denied') throw e;
+    await signOut(auth);
+    renderLoginForm();
+    lockErr(`החשבון ${user.email||''} לא מורשה לניהול. אפשר לבקש מבעלי העסק להוסיף אותו בהגדרות.`);
+    return false;
+  }
+}
+function renderLoadError(err){
+  document.getElementById('lockTitle').textContent='לא הצליח להתחבר';
+  document.getElementById('lockSub').textContent='נכשל החיבור למסד הנתונים. בדקו את החיבור לאינטרנט ונסו שוב.';
+  document.getElementById('lockBody').innerHTML=`
+    <div style="font-size:11px;color:var(--text3);direction:ltr;text-align:left;background:var(--bg);border-radius:8px;padding:8px;margin-bottom:10px;word-break:break-all">${esc(err&&err.message||String(err))}</div>
+    <button class="main" onclick="location.reload()">ניסיון חדש</button>`;
+}
+const SITE_DOMAIN=location.hostname;
+function authErrorText(err){
+  const code=err&&err.code||'';
+  if(code==='auth/operation-not-allowed') return 'צריך להפעיל ב-Firebase כניסה עם Google: Authentication ← Sign-in method ← Google ← Enable, ואז לנסות שוב.';
+  if(code==='auth/unauthorized-domain') return `צריך לאשר את כתובת האתר ב-Firebase: Authentication ← Settings ← Authorized domains ← Add domain ← ${SITE_DOMAIN}`;
+  if(code==='auth/popup-blocked') return 'הדפדפן חסם את חלון הכניסה. אפשרו חלונות קופצים לאתר ונסו שוב';
+  if(code==='auth/popup-closed-by-user'||code==='auth/cancelled-popup-request') return 'חלון הכניסה נסגר לפני שהכניסה הסתיימה';
+  if(code==='auth/network-request-failed') return 'אין חיבור לאינטרנט';
+  return 'הכניסה נכשלה: '+(err&&err.message||err);
+}
+const GOOGLE_ICON='<svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>';
+const googleBtn=(id,label,onclick)=>`<button class="main google-btn" id="${id}" onclick="${onclick}">${GOOGLE_ICON}<span>${label}</span></button>`;
+function renderLoginForm(){
+  document.getElementById('lockTitle').textContent='ניהול BBQ';
+  document.getElementById('lockSub').textContent='כניסה עם חשבון Google מורשה';
+  document.getElementById('lockBody').innerHTML=googleBtn('liBtn','כניסה עם Google','doLogin()');
+}
+async function doLogin(){
+  lockErr('');
+  const btn=document.getElementById('liBtn'); btn.disabled=true;
+  try{
+    const {googleSignIn}=await fbInit();
+    const cred=await googleSignIn();
+    if(await checkAccess(cred.user)) unlockApp();
+  }catch(e){
+    console.error(e); lockErr(authErrorText(e));
+    const b=document.getElementById('liBtn'); if(b) b.disabled=false;
+  }
+}
+function renderBiometricLock(){
+  document.getElementById('lockTitle').textContent='ניהול BBQ';
+  document.getElementById('lockSub').textContent='הניהול נעול';
+  document.getElementById('lockBody').innerHTML=`
+    <button id="biometricBtn" class="main" style="background:var(--char);margin-bottom:10px" onclick="doBiometricUnlock()">👆 פתיחה עם טביעת אצבע</button>
+    <button class="link-btn" onclick="renderLoginForm()">כניסה עם Google</button>`;
+  setTimeout(()=>doBiometricUnlock(),300);
+}
+async function idToken(){
+  const {auth}=await fbInit();
+  return auth.currentUser ? auth.currentUser.getIdToken() : '';
+}
+
+/* ===== biometric (WebAuthn) ===== */
+function _ab2b64(buf){return btoa(String.fromCharCode(...new Uint8Array(buf)));}
+function _b642ab(b64){const bin=atob(b64);const arr=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);return arr.buffer;}
+async function registerBiometric(){
+  try{
+    const cred=await navigator.credentials.create({publicKey:{
+      challenge:crypto.getRandomValues(new Uint8Array(32)),
+      rp:{name:'BBQ',id:location.hostname},
+      user:{id:crypto.getRandomValues(new Uint8Array(16)),name:'admin',displayName:'מנהל'},
+      pubKeyCredParams:[{alg:-7,type:'public-key'},{alg:-257,type:'public-key'}],
+      authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},
+      timeout:60000
+    }});
+    localStorage.setItem('mangalBiometricCredId',_ab2b64(cred.rawId));
+    return true;
+  }catch(e){ console.error(e); return false; }
+}
+async function tryBiometric(){
+  const b64=localStorage.getItem('mangalBiometricCredId');
+  if(!b64||!window.PublicKeyCredential) return false;
+  try{
+    await navigator.credentials.get({publicKey:{
+      challenge:crypto.getRandomValues(new Uint8Array(32)),
+      allowCredentials:[{id:_b642ab(b64),type:'public-key'}],
+      userVerification:'required',
+      timeout:60000
+    }});
+    return true;
+  }catch(e){ return false; }
+}
+async function doBiometricUnlock(){
+  const btn=document.getElementById('biometricBtn');
+  if(btn){btn.disabled=true;btn.textContent='⏳ מאמת...';}
+  const ok=await tryBiometric();
+  if(ok){ unlockApp(); }
+  else if(btn){btn.disabled=false;btn.textContent='👆 כניסה עם טביעת אצבע';}
+}
+async function toggleBiometricSetting(){
+  const has=!!localStorage.getItem('mangalBiometricCredId');
+  if(has){
+    if(!confirm('לבטל כניסה עם טביעת אצבע?')) return;
+    localStorage.removeItem('mangalBiometricCredId');
+    showToast('טביעת אצבע בוטלה');
+  } else {
+    if(!window.PublicKeyCredential){ showToast('הדפדפן לא תומך בטביעת אצבע'); return; }
+    const ok=await registerBiometric();
+    showToast(ok?'טביעת אצבע הופעלה ✓':'ההפעלה נכשלה או בוטלה');
+  }
+  updateBioBtn();
+}
+function updateBioBtn(){
+  const btn=document.getElementById('bioBtn');
+  if(!btn) return;
+  const has=!!localStorage.getItem('mangalBiometricCredId');
+  btn.textContent = has ? 'פעיל ✓' : 'הפעלה';
+  btn.classList.toggle('on', has);
+}
+function unlockApp(){
+  document.getElementById('lockScreen').style.display='none';
+  document.getElementById('app').style.display='block';
+  if(location.hash==='#pending') setTab('pending');
+  startListening();
+  syncPushSubscription();
+}
+
+/* ===== data ===== */
+let bookings=[];
+let knownPendingIds=new Set();
+let firstLoad=true;
+
+async function startListening(){
+  const {db,collection,query,orderBy,onSnapshot}=await fbInit();
+  const q=query(collection(db,'mangalBookings'), orderBy('date','asc'));
+  onSnapshot(q, (snap)=>{
+    bookings=snap.docs.map(d=>({id:d.id,...d.data()}));
+    checkNewPending();
+    renderAll();
+    syncReminders();
+  }, (err)=>{
+    console.error(err);
+  });
+}
+// The day-before reminder push (api/reminders.js) reads mangalSettings/reminders, which is readable
+// without signing in, so it holds only the approved upcoming events' date, time, size and level.
+let lastReminders=null;
+async function syncReminders(){
+  const d=new Date(), today=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const events=bookings.filter(b=>b.status==='approved' && b.date>=today)
+    .map(b=>({date:b.date, washTime:b.washTime||null, guests:Number(b.guests||0), level:b.level||null}));
+  const json=JSON.stringify(events);
+  if(json===lastReminders) return;
+  lastReminders=json;
+  try{
+    const {db,doc,setDoc}=await fbInit();
+    await setDoc(doc(db,'mangalSettings','reminders'),{events});
+  }catch(e){ lastReminders=null; console.error('reminders sync',e); }
+}
+function checkNewPending(){
+  const currentPending=bookings.filter(b=>b.status==='pending').map(b=>b.id);
+  if(!firstLoad){
+    const newOnes=currentPending.filter(id=>!knownPendingIds.has(id));
+    if(newOnes.length){
+      beep();
+      // with push on, the service worker already shows a notification for this request
+      if(!pushActive && typeof Notification!=='undefined' && Notification.permission==='granted'){
+        const b=bookings.find(x=>x.id===newOnes[0]);
+        try{ new Notification('בקשת אירוע חדשה! 🔥', {body: b ? `${b.name} · ${b.guests} אנשים · ${b.date}` : 'בקשה חדשה התקבלה'}); }catch(e){}
+      }
+      showToast(newOnes.length===1?'התקבלה בקשת אירוע חדשה 🔥':`התקבלו ${newOnes.length} בקשות חדשות 🔥`);
+    }
+  }
+  knownPendingIds=new Set(currentPending);
+  firstLoad=false;
+}
+function beep(){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.type='sine'; o.frequency.value=880;
+    g.gain.setValueAtTime(0.001,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.15,ctx.currentTime+0.02);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.35);
+    o.connect(g);g.connect(ctx.destination);
+    o.start();o.stop(ctx.currentTime+0.4);
+  }catch(e){}
+}
+function showToast(msg){
+  const root=document.getElementById('toastRoot');
+  const el=document.createElement('div');
+  el.className='toast';el.textContent=msg;
+  root.appendChild(el);
+  setTimeout(()=>el.remove(),3800);
+}
+/* ===== push notifications (reach the phone even when the app is closed) ===== */
+const VAPID_PUBLIC_KEY='BB5gbFkt0YrnB7jAywT5CWmMntuj8S0mt5oe3khYuHitM5YRzGOtYTAOD0KLkVJvUT08_c5fCfQUgWcJcIVgfSQ';
+let pushActive=false;
+const pushSupported=()=>'serviceWorker' in navigator && 'PushManager' in window && typeof Notification!=='undefined';
+async function currentPushSub(){
+  if(!pushSupported()) return null;
+  const reg=await navigator.serviceWorker.getRegistration();
+  return reg ? reg.pushManager.getSubscription() : null;
+}
+async function pushSubId(endpoint){ return 's'+(await sha256(endpoint)).slice(0,24); }
+function urlB64ToUint8Array(b64){
+  const pad='='.repeat((4-b64.length%4)%4);
+  const raw=atob((b64+pad).replace(/-/g,'+').replace(/_/g,'/'));
+  return Uint8Array.from(raw,c=>c.charCodeAt(0));
+}
+function deviceLabel(){
+  const ua=navigator.userAgent;
+  return /iPhone|iPad/.test(ua)?'iPhone':/Android/.test(ua)?'Android':'מחשב';
+}
+async function savePushSub(sub){
+  const j=sub.toJSON();
+  const {db,doc,setDoc}=await fbInit();
+  await setDoc(doc(db,'mangalSettings','push'),
+    {subs:{[await pushSubId(j.endpoint)]:{endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth,device:deviceLabel(),savedAtMs:Date.now()}}},
+    {merge:true});
+}
+// re-save on every open, so a device the server dropped (or a renewed subscription) is registered again
+async function syncPushSubscription(){
+  try{
+    const sub=await currentPushSub();
+    pushActive=!!sub && Notification.permission==='granted';
+    if(pushActive) await savePushSub(sub);
+  }catch(e){ console.error(e); }
+  updateNotifBtn();
+}
+async function toggleNotifications(){
+  if(pushActive){
+    if(!confirm('לכבות התראות במכשיר הזה?')) return;
+    try{
+      const sub=await currentPushSub();
+      if(sub){
+        const id=await pushSubId(sub.endpoint);
+        const {db,doc,updateDoc,deleteField}=await fbInit();
+        await updateDoc(doc(db,'mangalSettings','push'),{[`subs.${id}`]:deleteField()}).catch(()=>{});
+        await sub.unsubscribe();
+      }
+    }catch(e){ console.error(e); }
+    pushActive=false; updateNotifBtn(); showToast('ההתראות כובו במכשיר הזה');
+    return;
+  }
+  if(_isIOS && !_isStandalone){
+    alert('באייפון התראות עובדות רק מהאפליקציה המותקנת:\n1. בספארי: כפתור השיתוף ← "הוספה למסך הבית"\n2. לפתוח את "ניהול BBQ" ממסך הבית\n3. להיכנס להגדרות וללחוץ כאן שוב');
+    return;
+  }
+  if(!pushSupported()){ showToast('הדפדפן הזה לא תומך בהתראות'); return; }
+  const perm=await Notification.requestPermission();
+  if(perm!=='granted'){ showToast('ההתראות לא אושרו. אפשר לאשר אותן בהגדרות הדפדפן'); return; }
+  try{
+    const reg=await navigator.serviceWorker.register('sw-admin.js');
+    await navigator.serviceWorker.ready;
+    const sub=await reg.pushManager.getSubscription()
+      || await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:urlB64ToUint8Array(VAPID_PUBLIC_KEY)});
+    await savePushSub(sub);
+    pushActive=true; updateNotifBtn();
+    showToast('התראות הופעלו ✓ אפשר לשלוח התראת בדיקה');
+  }catch(e){
+    console.error(e); showToast('הפעלת ההתראות נכשלה: '+(e.message||e));
+  }
+}
+function updateNotifBtn(){
+  const btn=document.getElementById('notifBtn');
+  if(!btn) return;
+  btn.textContent = pushActive ? 'פעיל ✓' : 'הפעלה';
+  btn.classList.toggle('on', pushActive);
+  const test=document.getElementById('pushTestRow');
+  if(test) test.hidden=!pushActive;
+}
+async function checkPushServer(){
+  let ok=false;
+  try{ const r=await fetch('/api/push',{cache:'no-store'}); ok=r.ok && (await r.json()).configured===true; }catch(e){}
+  const note=document.getElementById('pushNote');
+  if(note) note.innerHTML = ok ? '' :
+    `<div class="minfo" style="margin:0 0 8px">כדי שההתראות יגיעו גם כשהאפליקציה סגורה, צריך להוסיף ב-Vercel את המפתח VAPID_PRIVATE_KEY ולעשות Redeploy.</div>`;
+}
+async function sendTestPush(){
+  const btn=document.getElementById('pushTestBtn');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ שולח...'; }
+  try{
+    const r=await fetch('/api/push',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'test',idToken:await idToken()})});
+    const j=await r.json().catch(()=>({}));
+    if(r.status===503) showToast('חסר המפתח VAPID_PRIVATE_KEY ב-Vercel');
+    else if(!r.ok) showToast('השליחה נכשלה: '+(j.error||r.status));
+    else if(!j.sent) showToast('לא נמצאו מכשירים פעילים'+(j.errors&&j.errors.length?': '+j.errors[0]:''));
+    else showToast(`נשלחה התראה ל-${j.sent} ${j.sent===1?'מכשיר':'מכשירים'} ✓`);
+  }catch(e){ showToast('השליחה נכשלה: '+(e.message||e)); }
+  if(btn){ btn.disabled=false; btn.textContent='📨 שליחת התראת בדיקה'; }
+}
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.addEventListener('message',(e)=>{
+    if(e.data && e.data.type==='open-tab' && e.data.tab) setTab(e.data.tab);
+  });
+}
+
+/* ===== tabs ===== */
+let currentTab='board';
+function setTab(t){
+  currentTab=t;
+  document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('on',el.dataset.tab===t));
+  document.querySelectorAll('.panel').forEach(el=>el.classList.toggle('on',el.id==='panel-'+t));
+}
+let boardFilter='upcoming';
+function setBoardFilter(f){
+  boardFilter=f;
+  document.getElementById('btnUpcoming').classList.toggle('on',f==='upcoming');
+  document.getElementById('btnPast').classList.toggle('on',f==='past');
+  renderBoard();
+}
+let boardView='list';
+function setBoardView(v){
+  boardView=v;
+  document.getElementById('viewList').classList.toggle('on',v==='list');
+  document.getElementById('viewCalendar').classList.toggle('on',v==='calendar');
+  document.getElementById('boardListWrap').style.display = v==='list' ? 'block':'none';
+  document.getElementById('boardCalendarWrap').style.display = v==='calendar' ? 'block':'none';
+  if(v==='calendar') renderCalendar();
+}
+let calMode=(function(){ try{ return localStorage.getItem('mangalCalMode')||'hebrew'; }catch(e){ return 'hebrew'; } })();
+let calMonth=new Date(); calMonth.setDate(1); // anchor for gregorian mode (first-of-month)
+let calHebrewAnchor=new Date(); // any date inside the currently shown hebrew month
+
+const _heDayFmt=new Intl.DateTimeFormat('he-u-ca-hebrew',{day:'numeric'});
+const _heMonthFmt=new Intl.DateTimeFormat('he-u-ca-hebrew',{month:'long'});
+const _heYearFmt=new Intl.DateTimeFormat('he-u-ca-hebrew',{year:'numeric'});
+/* Hebrew numeral (gematria) letters for a plain number, e.g. 17 -> י״ז, 5787 -> תשפ״ז
+   (thousands dropped per the usual year-writing convention; 15/16 use ט״ו/ט״ז to
+   avoid spelling the letter-combinations that resemble God's name) */
+function hebrewNumeral(num){
+  const map=[[400,'ת'],[300,'ש'],[200,'ר'],[100,'ק'],[90,'צ'],[80,'פ'],[70,'ע'],[60,'ס'],[50,'נ'],[40,'מ'],[30,'ל'],[20,'כ'],[10,'י'],[9,'ט'],[8,'ח'],[7,'ז'],[6,'ו'],[5,'ה'],[4,'ד'],[3,'ג'],[2,'ב'],[1,'א']];
+  let rem=num%1000;
+  if(rem===0) rem=num;
+  let letters='';
+  while(rem>0){
+    if(rem===15){ letters+='טו'; break; }
+    if(rem===16){ letters+='טז'; break; }
+    const hit=map.find(([val])=>rem>=val);
+    if(!hit) break;
+    letters+=hit[1]; rem-=hit[0];
+  }
+  if(!letters) return String(num);
+  return letters.length>1 ? letters.slice(0,-1)+'״'+letters.slice(-1) : letters+'׳';
+}
+function heMonthKey(date){ return _heMonthFmt.format(date)+' '+_heYearFmt.format(date); }
+/* scans day-by-day (a hebrew month is at most 30 days) to find the Gregorian
+   start/end dates of the hebrew month containing `anchor` - Intl only converts
+   gregorian->hebrew, not the other way, so this is the simple robust way to
+   find hebrew month boundaries */
+function hebrewMonthBounds(anchor){
+  const key=heMonthKey(anchor);
+  let start=new Date(anchor);
+  while(true){
+    const prev=new Date(start); prev.setDate(prev.getDate()-1);
+    if(heMonthKey(prev)!==key) break;
+    start=prev;
+  }
+  let end=new Date(anchor);
+  while(true){
+    const next=new Date(end); next.setDate(next.getDate()+1);
+    if(heMonthKey(next)!==key) break;
+    end=next;
+  }
+  return {start,end};
+}
+function setCalMode(mode){
+  calMode=mode;
+  try{ localStorage.setItem('mangalCalMode',mode); }catch(e){}
+  renderCalendar();
+}
+function calToday(){
+  if(calMode==='hebrew') calHebrewAnchor=new Date();
+  else { calMonth=new Date(); calMonth.setDate(1); }
+  renderCalendar();
+}
+function calShift(dir){
+  if(calMode==='hebrew'){
+    const {start,end}=hebrewMonthBounds(calHebrewAnchor);
+    const next=new Date(dir>0?end:start);
+    next.setDate(next.getDate()+dir);
+    calHebrewAnchor=next;
+  } else {
+    calMonth.setMonth(calMonth.getMonth()+dir);
+  }
+  renderCalendar();
+}
+function renderCalendar(){
+  const el=document.getElementById('boardCalendarWrap');
+  const todayStr=new Date().toISOString().slice(0,10);
+  const byDay={};
+  bookings.filter(b=>b.status==='approved' && b.date).forEach(b=>{
+    (byDay[b.date]=byDay[b.date]||[]).push(b);
+  });
+
+  let title, subtitle, startWeekday, daysCount, cellDate;
+  if(calMode==='hebrew'){
+    const {start,end}=hebrewMonthBounds(calHebrewAnchor);
+    daysCount=Math.round((end-start)/86400000)+1;
+    startWeekday=start.getDay();
+    title=`${_heMonthFmt.format(start)} ${hebrewNumeral(parseInt(_heYearFmt.format(start),10))}`;
+    const sameGregMonth = start.getMonth()===end.getMonth() && start.getFullYear()===end.getFullYear();
+    subtitle = sameGregMonth
+      ? start.toLocaleDateString('he-IL',{month:'long',year:'numeric'})
+      : `${start.toLocaleDateString('he-IL',{day:'numeric',month:'short'})} – ${end.toLocaleDateString('he-IL',{day:'numeric',month:'short',year:'numeric'})}`;
+    cellDate=(i)=>{ const d=new Date(start); d.setDate(d.getDate()+i); return d; };
+  } else {
+    const y=calMonth.getFullYear(), m=calMonth.getMonth();
+    daysCount=new Date(y,m+1,0).getDate();
+    startWeekday=new Date(y,m,1).getDay();
+    title=calMonth.toLocaleDateString('he-IL',{month:'long',year:'numeric'});
+    subtitle='';
+    cellDate=(i)=>new Date(y,m,i+1);
+  }
+
+  let cells='';
+  for(let i=0;i<startWeekday;i++) cells+=`<div class="cal-cell cal-blank"></div>`;
+  for(let i=0;i<daysCount;i++){
+    const d=cellDate(i);
+    const dateStr=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const evs=byDay[dateStr]||[];
+    const mainLabel = calMode==='hebrew' ? hebrewNumeral(i+1) : String(d.getDate());
+    const subLabel = calMode==='hebrew' ? String(d.getDate()) : '';
+    cells+=`<div class="cal-cell ${evs.length?'has-events':''} ${dateStr===todayStr?'today':''}" ${evs.length?`onclick="openDayEvents('${dateStr}')"`:''}>
+      <span class="cal-he-day">${mainLabel}</span>
+      ${subLabel?`<span class="cal-greg-day">${subLabel}</span>`:''}
+      ${evs.length?`<span class="cal-dot">${evs.length}</span>`:''}
+    </div>`;
+  }
+
+  el.innerHTML=`
+    <div class="cal-mode-row">
+      <div class="cal-mode-toggle">
+        <button class="${calMode==='hebrew'?'on':''}" onclick="setCalMode('hebrew')">עברי</button>
+        <button class="${calMode==='gregorian'?'on':''}" onclick="setCalMode('gregorian')">לועזי</button>
+      </div>
+      <button class="cal-today-btn" onclick="calToday()">📍 היום</button>
+    </div>
+    <div class="cal-hdr">
+      <button class="cal-nav" onclick="calShift(-1)">‹ הקודם</button>
+      <div>
+        <div class="cal-title">${title}</div>
+        ${subtitle?`<div class="cal-subtitle">${subtitle}</div>`:''}
+      </div>
+      <button class="cal-nav" onclick="calShift(1)">הבא ›</button>
+    </div>
+    <div class="cal-grid cal-weekdays">${['א','ב','ג','ד','ה','ו','ש'].map(d=>`<div>${d}</div>`).join('')}</div>
+    <div class="cal-grid">${cells}</div>`;
+}
+function openDayEvents(dateStr){
+  const evs=bookings.filter(b=>b.status==='approved' && b.date===dateStr);
+  if(evs.length===1){ openDetails(evs[0].id); return; }
+  viewOpened(()=>openDayEvents(dateStr));
+  const root=document.getElementById('modalRoot');
+  root.innerHTML=`
+    <div class="modal-bg" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div class="modal-top"><h3>${fmtDate(dateStr)}</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+        ${evs.map(b=>`<div class="card" onclick="openDetails('${b.id}')">
+          <div class="card-top"><div class="card-name">${esc(b.name)}</div></div>
+          <div class="card-mid"><span class="chip lvl">${LEVEL_ICON[b.level]||''} ${esc(b.level)}</span><span class="chip">👥 ${guestsText(b)}</span>${washChip(b)}${massageChip(b)}${paidChip(b)}</div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+// "30 · 18 גברים · 12 נשים"; older bookings only have the total
+function guestsText(b){
+  const g=Number(b.guests||0);
+  return (b.men!=null && b.women!=null) ? `${g} · ${esc(b.men)} גברים · ${esc(b.women)} נשים` : `${g} אנשים`;
+}
+// the venue has to be ready an hour before handwashing
+function prepTime(t){
+  if(!/^\d{2}:\d{2}$/.test(t||'')) return '';
+  const [h,m]=t.split(':').map(Number), mins=(h*60+m-60+1440)%1440;
+  return `${String(Math.floor(mins/60)).padStart(2,'0')}:${String(mins%60).padStart(2,'0')}`;
+}
+const washChip=(b)=>b.washTime?`<span class="chip">🕖 נט"י ${esc(b.washTime)}</span>`:'';
+// the customer asked for details about the team-building extras, a spa venue and/or a massage (arranged through us)
+const massageChip=(b)=>b.massage?`<span class="chip massage">🧖 ספא / מסאז'</span>`:'';
+function fmtDate(d){
+  if(!d)return '';
+  try{ return new Date(d+'T00:00:00').toLocaleDateString('he-IL',{day:'numeric',month:'short',year:'numeric',weekday:'short'}); }
+  catch(e){ return d; }
+}
+function paidChip(b){
+  const total=Number(b.totalPrice||0), paid=Number(b.paidAmount||0);
+  if(total<=0) return `<span class="chip">מחיר טרם נקבע</span>`;
+  if(paid>=total) return `<span class="chip paid-ok">✓ שולם במלואו</span>`;
+  if(paid>0) return `<span class="chip paid-part">שולם חלקית (${paid}/${total}₪)</span>`;
+  return `<span class="chip paid-no">לא שולם (${total}₪)</span>`;
+}
+
+function renderAll(){
+  renderPending();
+  renderBoard();
+  if(boardView==='calendar') renderCalendar();
+  renderDebts();
+}
+
+/* ===== pending tab ===== */
+function renderPending(){
+  const pending=bookings.filter(b=>b.status==='pending');
+  const badge=document.getElementById('badgePending');
+  if(pending.length){badge.style.display='flex';badge.textContent=pending.length;}
+  else badge.style.display='none';
+  document.title = pending.length ? `(${pending.length}) לוח ניהול · מנגל בלהבות` : 'ניהול · מנגל בלהבות';
+
+  const list=document.getElementById('pendingList');
+  if(!pending.length){
+    list.innerHTML=`<div class="empty">אין בקשות חדשות כרגע 🌿</div>`;
+  } else {
+    list.innerHTML=pending.map(b=>`
+      <div class="card new">
+        <div class="card-top">
+          <div class="card-name">${esc(b.name)}</div>
+          <div class="card-date">📅 ${fmtDate(b.date)}</div>
+        </div>
+        <div class="card-mid">
+          <span class="chip lvl">${LEVEL_ICON[b.level]||''} ${esc(b.level)}</span>
+          <span class="chip">👥 ${guestsText(b)}</span>
+          ${washChip(b)}${massageChip(b)}
+          ${b.location?`<span class="chip">📍 ${esc(b.location)}</span>`:''}
+        </div>
+        ${b.notes?`<div class="card-notes">"${esc(b.notes)}"</div>`:''}
+        <div class="minfo">📞 <a href="tel:${esc(b.phone)}">${esc(b.phone)}</a>${b.email?` · ✉️ ${esc(b.email)}`:''}</div>
+        <div class="card-actions">
+          <button class="btn-approve" onclick="event.stopPropagation();approveBooking('${b.id}')">✅ אישור</button>
+          <button class="btn-decline" onclick="event.stopPropagation();declineBooking('${b.id}')">❌ דחייה</button>
+        </div>
+      </div>`).join('');
+  }
+
+  const declined=bookings.filter(b=>b.status==='declined');
+  const dWrap=document.getElementById('declinedWrap');
+  if(!declined.length){ dWrap.innerHTML=''; return; }
+  dWrap.innerHTML=`<div class="section-note">בקשות שנדחו (${declined.length})</div>` +
+    declined.map(b=>`<div class="card" style="opacity:.6" onclick="openDetails('${b.id}')">
+      <div class="card-top"><div class="card-name">${esc(b.name)}</div><div class="card-date">📅 ${fmtDate(b.date)}</div></div>
+    </div>`).join('');
+}
+async function approveBooking(id){
+  const {db,doc,updateDoc}=await fbInit();
+  const b=bookings.find(x=>x.id===id);
+  const patch={status:'approved'};
+  if(b && !b.totalPrice) patch.totalPrice=Number(b.guests||0)*(LEVEL_PRICE[b.level]||0);
+  await updateDoc(doc(db,'mangalBookings',id),patch);
+  showToast('האירוע אושר ונכנס ללוח ✓');
+}
+async function declineBooking(id){
+  if(!confirm('לדחות את הבקשה הזו?'))return;
+  const {db,doc,updateDoc}=await fbInit();
+  await updateDoc(doc(db,'mangalBookings',id),{status:'declined'});
+  showToast('הבקשה נדחתה');
+}
+
+/* ===== board tab ===== */
+function renderBoard(){
+  const today=new Date().toISOString().slice(0,10);
+  let list=bookings.filter(b=>b.status==='approved');
+  list = boardFilter==='upcoming' ? list.filter(b=>b.date>=today) : list.filter(b=>b.date<today);
+  if(boardFilter==='past') list=list.slice().reverse();
+  const el=document.getElementById('boardList');
+  if(!list.length){ el.innerHTML=`<div class="empty">אין אירועים ${boardFilter==='upcoming'?'קרובים':'מהעבר'} בלוח</div>`; return; }
+  el.innerHTML=list.map(b=>`
+    <div class="card" onclick="openDetails('${b.id}')">
+      <div class="card-top">
+        <div class="card-name">${esc(b.name)}</div>
+        <div class="card-date">📅 ${fmtDate(b.date)}</div>
+      </div>
+      <div class="card-mid">
+        <span class="chip lvl">${LEVEL_ICON[b.level]||''} ${esc(b.level)}</span>
+        <span class="chip">👥 ${guestsText(b)}</span>
+        ${washChip(b)}${massageChip(b)}
+        ${b.location?`<span class="chip">📍 ${esc(b.location)}</span>`:''}
+        ${paidChip(b)}
+      </div>
+    </div>`).join('');
+}
+
+/* ===== debts tab ===== */
+function renderDebts(){
+  const debts=bookings.filter(b=>b.status==='approved' && Number(b.totalPrice||0)>0 && Number(b.paidAmount||0)<Number(b.totalPrice||0));
+  debts.sort((a,b)=>a.date<b.date?-1:1);
+  const badge=document.getElementById('badgeDebts');
+  if(debts.length){badge.style.display='flex';badge.textContent=debts.length;} else badge.style.display='none';
+
+  const totalOwed=debts.reduce((s,b)=>s+(Number(b.totalPrice||0)-Number(b.paidAmount||0)),0);
+  const totalEl=document.getElementById('debtsTotal');
+  totalEl.innerHTML = debts.length ? `<div class="debt-total"><b>${totalOwed.toLocaleString()}₪</b><span>סה"כ חוב פתוח מ-${debts.length} אירועים</span></div>` : '';
+
+  const el=document.getElementById('debtsList');
+  if(!debts.length){ el.innerHTML=`<div class="empty">אין חובות פתוחים 🎉</div>`; return; }
+  el.innerHTML=debts.map(b=>{
+    const owe=Number(b.totalPrice||0)-Number(b.paidAmount||0);
+    return `<div class="card" onclick="openDetails('${b.id}')">
+      <div class="card-top">
+        <div class="card-name">${esc(b.name)}</div>
+        <div class="card-date">📅 ${fmtDate(b.date)}</div>
+      </div>
+      <div class="card-mid">
+        <span class="chip lvl">${LEVEL_ICON[b.level]||''} ${esc(b.level)}</span>
+        ${paidChip(b)}
+        <span class="chip" style="background:var(--bad-bg);color:var(--bad)">חסר ${owe.toLocaleString()}₪</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ===== read-only event details ===== */
+const STATUS_LABEL={pending:'ממתין לאישור',approved:'מאושר',declined:'נדחה/בוטל'};
+function openDetails(id){
+  const b=bookings.find(x=>x.id===id);
+  if(!b)return;
+  viewOpened(()=>openDetails(id));
+  const total=Number(b.totalPrice||0), paid=Number(b.paidAmount||0);
+  const row=(label,value)=>`<div class="drow"><span>${label}</span><b>${value}</b></div>`;
+  document.getElementById('modalRoot').innerHTML=`
+    <div class="modal-bg" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div class="modal-top">
+          <h3>${esc(b.name)}</h3>
+          <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="card-mid">
+          <span class="chip lvl">${LEVEL_ICON[b.level]||''} ${esc(b.level)}</span>
+          <span class="chip">📅 ${fmtDate(b.date)}</span>
+          ${paidChip(b)}
+        </div>
+        <div class="dlist">
+          ${row('📞 טלפון', b.phone?`<a href="tel:${esc(b.phone)}">${esc(b.phone)}</a>`:'—')}
+          ${b.email?row('✉️ אימייל', esc(b.email)):''}
+          ${row('📍 מיקום', b.location?esc(b.location):'—')}
+          ${row('🕖 נטילת ידיים', b.washTime?`${esc(b.washTime)} <span class="drow-sub">(המקום פנוי מ-${prepTime(b.washTime)})</span>`:'—')}
+          ${row('👥 משתתפים', guestsText(b))}
+          ${b.massage?row("🧖 ספא / מסאז'", 'ביקשו פרטים'):''}
+          ${row('💰 מחיר כולל', total>0?`₪${total.toLocaleString()}`:'טרם נקבע')}
+          ${row('✓ שולם', `₪${paid.toLocaleString()}`)}
+          ${total>0?row('⏳ יתרה לתשלום', `₪${Math.max(total-paid,0).toLocaleString()}`):''}
+          ${row('סטטוס', STATUS_LABEL[b.status]||esc(b.status))}
+        </div>
+        ${b.notes?`<div class="minfo">📝 ${esc(b.notes)}</div>`:''}
+        <div class="modal-actions">
+          <button class="btn-save" onclick="openModal('${b.id}')">✏️ עריכה</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ===== modal ===== */
+function openModal(id){
+  const b=bookings.find(x=>x.id===id);
+  if(!b)return;
+  viewOpened(()=>openModal(id));
+  const root=document.getElementById('modalRoot');
+  root.innerHTML=`
+    <div class="modal-bg" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div class="modal-top">
+          <h3>${esc(b.name)}</h3>
+          <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="card-mid">
+          <span class="chip lvl">${LEVEL_ICON[b.level]||''} ${esc(b.level)}</span>
+          <span class="chip">📅 ${fmtDate(b.date)}</span>
+        </div>
+        <div class="minfo">📞 <a href="tel:${esc(b.phone)}">${esc(b.phone)}</a>${b.email?` · ✉️ ${esc(b.email)}`:''}</div>
+        ${b.notes?`<div class="minfo">📝 ${esc(b.notes)}</div>`:''}
+
+        <div class="mfld"><label>שעת נטילת ידיים</label><input type="time" id="mWash" step="300" value="${esc(b.washTime||'')}"></div>
+        <label class="mcheck"><input type="checkbox" id="mMassage" ${b.massage?'checked':''}> 🧖 פרטים על ספא / מסאז'</label>
+        <div class="mrow3">
+          <div class="mfld"><label>גברים</label><input type="number" id="mMen" min="0" value="${b.men!=null?esc(b.men):''}" oninput="syncGuestTotal('m')"></div>
+          <div class="mfld"><label>נשים</label><input type="number" id="mWomen" min="0" value="${b.women!=null?esc(b.women):''}" oninput="syncGuestTotal('m')"></div>
+          <div class="mfld"><label>סה"כ</label><input type="number" id="mGuests" value="${b.guests||0}" min="1"></div>
+        </div>
+        <div class="mfld"><label>מיקום האירוע</label><input type="text" id="mLocation" value="${b.location?esc(b.location):''}" placeholder="כתובת / אולם / חצר"></div>
+
+        <div class="mrow">
+          <div class="mfld"><label>מחיר כולל (₪)</label><input type="number" id="mTotal" value="${b.totalPrice||(Number(b.guests||0)*(LEVEL_PRICE[b.level]||0))}" min="0"></div>
+          <div class="mfld"><label>שולם עד כה (₪)</label><input type="number" id="mPaid" value="${b.paidAmount||0}" min="0"></div>
+        </div>
+        <div class="quickpay">
+          <button onclick="calcModalPrice('${b.level}')">📊 חשב לפי תפריט (₪${LEVEL_PRICE[b.level]||0} × משתתפים)</button>
+        </div>
+        <div class="quickpay">
+          <button onclick="document.getElementById('mPaid').value=document.getElementById('mTotal').value">✓ סמן ששולם במלואו</button>
+          <button onclick="document.getElementById('mPaid').value=0">↺ אפס תשלום</button>
+        </div>
+
+        <div class="mfld"><label>סטטוס אירוע</label>
+          <div class="status-row">
+            <div class="status-pill ${b.status==='pending'?'on':''}" onclick="setModalStatus(this,'pending')">ממתין לאישור</div>
+            <div class="status-pill ${b.status==='approved'?'on':''}" onclick="setModalStatus(this,'approved')">מאושר</div>
+            <div class="status-pill ${b.status==='declined'?'on':''}" onclick="setModalStatus(this,'declined')">נדחה/בוטל</div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-danger" onclick="deleteBooking('${b.id}')">🗑️ מחיקה</button>
+          <button class="btn-save" onclick="saveModal('${b.id}')">💾 שמירה</button>
+        </div>
+      </div>
+    </div>`;
+  root.dataset.status=b.status;
+}
+function calcModalPrice(level){
+  const guests=parseInt(document.getElementById('mGuests').value,10)||0;
+  document.getElementById('mTotal').value=guests*(LEVEL_PRICE[level]||0);
+}
+function setModalStatus(el,status){
+  document.querySelectorAll('.status-pill').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('modalRoot').dataset.status=status;
+}
+function closeModal(){
+  document.getElementById('modalRoot').innerHTML='';
+  viewStack.length=0;
+  syncBackHistory();
+}
+
+/* ===== the phone's back button: one step back through the windows =====
+   The windows in #modalRoot replace each other (calendar day → event details → edit), so every step is
+   kept: back shows the previous window, and from the first one returns to the board. The caption editor
+   opens over the settings as its own step. Each open step has one history entry; closing windows with
+   ✕ / saving / tapping outside removes their entries, so back never gets stuck on a closed window. */
+const viewStack=[];
+let restoringView=false, backDepth=0, skipPops=0;
+function viewOpened(redo){
+  if(restoringView) return;
+  if(!document.getElementById('modalRoot').innerHTML.trim()) viewStack.length=0;
+  viewStack.push(redo);
+  history.pushState({bbqAdmin:true},''); backDepth++;
+}
+function captionEditorOpen(){ const r=document.getElementById('capEditRoot'); return !!(r && r.innerHTML.trim()); }
+function openSteps(){ return (document.getElementById('modalRoot').innerHTML.trim()?viewStack.length:0)+(captionEditorOpen()?1:0); }
+function syncBackHistory(){
+  // after the current click is handled, so a window opened right after this one keeps its entry
+  setTimeout(()=>{
+    const extra=backDepth-openSteps();
+    if(extra>0){ backDepth-=extra; skipPops++; history.go(-extra); }
+  },0);
+}
+addEventListener('popstate',()=>{
+  if(skipPops){ skipPops--; return; }
+  if(backDepth<=0) return;
+  backDepth--;
+  if(captionEditorOpen()){ closeCaptionEditor(); return; }
+  viewStack.pop();
+  if(viewStack.length){ restoringView=true; try{ viewStack[viewStack.length-1](); } finally{ restoringView=false; } }
+  else closeModal();
+});
+
+/* ===== share the public site (not the admin) ===== */
+// WhatsApp and other apps show the site's own preview (title, description, image), so they get only the link
+// (WhatsApp then shows just the preview). The text goes only into email, which shows no preview.
+const SHARE_TEXT='BBQ · חגיגת ברבקיו משחררת 🔥 מנגל לאירועים עם דודי: תמונות, תפריטים ובדיקת זמינות לאירוע';
+const publicSiteUrl=()=>location.origin+'/';
+function openShare(){
+  viewOpened(openShare);
+  const url=publicSiteUrl();
+  const msg=`${SHARE_TEXT}\n${url}`;
+  document.getElementById('modalRoot').innerHTML=`
+    <div class="modal-bg" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div class="modal-top"><h3>📤 שיתוף האתר</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+        <div class="share-opts">
+          <a class="share-opt" href="https://wa.me/?text=${encodeURIComponent(url)}" target="_blank" rel="noopener" onclick="setTimeout(closeModal,300)"><span class="ico">💬</span>וואטסאפ</a>
+          <a class="share-opt" href="mailto:?subject=${encodeURIComponent('BBQ · מנגל לאירועים')}&body=${encodeURIComponent(msg)}" onclick="setTimeout(closeModal,300)"><span class="ico">✉️</span>מייל</a>
+          <button class="share-opt" onclick="copySiteLink()"><span class="ico">🔗</span>העתקת קישור</button>
+          ${navigator.share?`<button class="share-opt" onclick="nativeShare()"><span class="ico">⋯</span>אפליקציה אחרת</button>`:''}
+        </div>
+        <input class="share-url" id="shareUrl" readonly value="${esc(url)}" onclick="this.select()">
+      </div>
+    </div>`;
+}
+async function copySiteLink(){
+  const url=publicSiteUrl();
+  try{ await navigator.clipboard.writeText(url); }
+  catch(e){
+    const inp=document.getElementById('shareUrl');
+    if(inp){ inp.select(); try{ document.execCommand('copy'); }catch(err){} }
+  }
+  showToast('הקישור הועתק ✓');
+}
+async function nativeShare(){
+  try{ await navigator.share({url:publicSiteUrl()}); closeModal(); }
+  catch(e){ /* the person closed the share sheet */ }
+}
+// men + women fill in the total; the total stays editable for bookings that only have a total
+function syncGuestTotal(prefix){
+  const men=parseInt(document.getElementById(prefix+'Men').value,10), women=parseInt(document.getElementById(prefix+'Women').value,10);
+  if(isNaN(men) && isNaN(women)) return;
+  document.getElementById(prefix+'Guests').value=(men||0)+(women||0);
+  if(prefix==='n') recalcNewEventPrice();
+}
+function readMenWomen(prefix){
+  const men=parseInt(document.getElementById(prefix+'Men').value,10), women=parseInt(document.getElementById(prefix+'Women').value,10);
+  return (isNaN(men) && isNaN(women)) ? {men:null,women:null} : {men:men||0,women:women||0};
+}
+async function saveModal(id){
+  const {men,women}=readMenWomen('m');
+  const guests=men!=null ? men+women : (parseInt(document.getElementById('mGuests').value,10)||0);
+  const washTime=document.getElementById('mWash').value||null;
+  const massage=document.getElementById('mMassage').checked;
+  const location=document.getElementById('mLocation').value.trim();
+  const totalPrice=parseFloat(document.getElementById('mTotal').value)||0;
+  const paidAmount=parseFloat(document.getElementById('mPaid').value)||0;
+  const status=document.getElementById('modalRoot').dataset.status||'approved';
+  const {db,doc,updateDoc}=await fbInit();
+  await updateDoc(doc(db,'mangalBookings',id),{guests,men,women,washTime,massage,location:location||null,totalPrice,paidAmount,status});
+  closeModal();
+  showToast('נשמר ✓');
+}
+async function deleteBooking(id){
+  if(!confirm('למחוק את האירוע הזה לצמיתות?'))return;
+  const {db,doc,deleteDoc}=await fbInit();
+  await deleteDoc(doc(db,'mangalBookings',id));
+  closeModal();
+  showToast('נמחק');
+}
+
+/* ===== manual event creation ===== */
+function openNewEventModal(){
+  viewOpened(openNewEventModal);
+  const today=new Date().toISOString().slice(0,10);
+  const root=document.getElementById('modalRoot');
+  root.innerHTML=`
+    <div class="modal-bg" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div class="modal-top"><h3>הוספת אירוע חדש</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+        <div class="mfld"><label>שם הלקוח / אירוע *</label><input type="text" id="nName" placeholder="שם"></div>
+        <div class="mrow">
+          <div class="mfld"><label>טלפון</label><input type="tel" id="nPhone" placeholder="050-0000000"></div>
+          <div class="mfld"><label>תאריך *</label><input type="date" id="nDate" value="${today}"></div>
+        </div>
+        <div class="mfld"><label>רמת אירוע</label>
+          <div class="status-row" id="nLevelRow">
+            ${LEVELS.map((l,i)=>`<div class="status-pill ${i===0?'on':''}" onclick="setNLevel(this,'${l}')">${LEVEL_ICON[l]} ${l} · ₪${LEVEL_PRICE[l]}</div>`).join('')}
+          </div>
+        </div>
+        <div class="mrow">
+          <div class="mfld"><label>שעת נטילת ידיים</label><input type="time" id="nWash" step="300"></div>
+          <div class="mfld"><label>מיקום</label><input type="text" id="nLocation" placeholder="כתובת / אולם / חצר"></div>
+        </div>
+        <label class="mcheck"><input type="checkbox" id="nMassage"> 🧖 פרטים על ספא / מסאז'</label>
+        <div class="mrow3">
+          <div class="mfld"><label>גברים</label><input type="number" id="nMen" min="0" oninput="syncGuestTotal('n')"></div>
+          <div class="mfld"><label>נשים</label><input type="number" id="nWomen" min="0" oninput="syncGuestTotal('n')"></div>
+          <div class="mfld"><label>סה"כ</label><input type="number" id="nGuests" min="1" value="1" oninput="recalcNewEventPrice()"></div>
+        </div>
+        <div class="mfld"><label>הערות</label><textarea id="nNotes"></textarea></div>
+        <div class="mrow">
+          <div class="mfld"><label>מחיר כולל (₪) <span style="font-weight:400;color:var(--text3)">מחושב אוטומטית</span></label><input type="number" id="nTotal" min="0" value="${LEVEL_PRICE[LEVELS[0]]}"></div>
+          <div class="mfld"><label>שולם עד כה (₪)</label><input type="number" id="nPaid" min="0" value="0"></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-danger" onclick="closeModal()">ביטול</button>
+          <button class="btn-save" onclick="saveNewEvent()">💾 שמירה</button>
+        </div>
+      </div>
+    </div>`;
+  root.dataset.nlevel=LEVELS[0];
+}
+function setNLevel(el,lvl){
+  document.querySelectorAll('#nLevelRow .status-pill').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('modalRoot').dataset.nlevel=lvl;
+  recalcNewEventPrice();
+}
+function recalcNewEventPrice(){
+  const guests=parseInt(document.getElementById('nGuests').value,10)||0;
+  const level=document.getElementById('modalRoot').dataset.nlevel||LEVELS[0];
+  document.getElementById('nTotal').value=guests*(LEVEL_PRICE[level]||0);
+}
+async function saveNewEvent(){
+  const name=document.getElementById('nName').value.trim();
+  const date=document.getElementById('nDate').value;
+  if(!name||!date){ showToast('נא למלא שם ותאריך'); return; }
+  const phone=document.getElementById('nPhone').value.trim();
+  const {men,women}=readMenWomen('n');
+  const guests=men!=null ? Math.max(men+women,1) : (parseInt(document.getElementById('nGuests').value,10)||1);
+  const washTime=document.getElementById('nWash').value||null;
+  const massage=document.getElementById('nMassage').checked;
+  const location=document.getElementById('nLocation').value.trim();
+  const notes=document.getElementById('nNotes').value.trim();
+  const totalPrice=parseFloat(document.getElementById('nTotal').value)||0;
+  const paidAmount=parseFloat(document.getElementById('nPaid').value)||0;
+  const level=document.getElementById('modalRoot').dataset.nlevel||LEVELS[0];
+  const {db,collection,addDoc}=await fbInit();
+  await addDoc(collection(db,'mangalBookings'),{
+    name, phone:phone||null, date, washTime, guests, men, women, level, massage, location:location||null, notes:notes||null,
+    status:'approved', totalPrice, paidAmount,
+    createdAtMs:Date.now(), source:'admin'
+  });
+  closeModal();
+  showToast('האירוע נוסף ללוח ✓');
+}
+
+function esc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ===== settings: login, notifications, site gallery ===== */
+let galleryItems=null;
+let storageReady=false;
+let storageMode=null;
+function openSettings(){
+  viewOpened(openSettings);
+  document.getElementById('modalRoot').innerHTML=`
+    <div class="modal-bg" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div class="modal-top"><h3>⚙️ הגדרות</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+        <div class="set-sec">
+          <div class="set-title">כניסה והתראות</div>
+          <div class="set-row">
+            <div class="set-txt"><b>👆 טביעת אצבע</b><small>נעילת הניהול בטביעת אצבע בכל פתיחה</small></div>
+            <button class="set-btn" id="bioBtn" onclick="toggleBiometricSetting()"></button>
+          </div>
+          <div id="pushNote"></div>
+          <div class="set-row">
+            <div class="set-txt"><b>🔔 התראות</b><small>התראה לטלפון על כל בקשה חדשה, גם כשהאפליקציה סגורה</small></div>
+            <button class="set-btn" id="notifBtn" onclick="toggleNotifications()"></button>
+          </div>
+          <div id="pushTestRow" hidden>
+            <button class="set-test" id="pushTestBtn" onclick="sendTestPush()">📨 שליחת התראת בדיקה</button>
+          </div>
+        </div>
+        <div class="set-sec">
+          <div class="set-title">מורשים לניהול</div>
+          <div class="admin-me" id="adminMe"></div>
+          <div id="adminList"></div>
+          <div class="admin-add">
+            <input type="email" id="newAdmin" dir="ltr" placeholder="name@gmail.com" autocomplete="off" onkeydown="if(event.key==='Enter')addAdminEmail()">
+            <button class="set-btn" onclick="addAdminEmail()">הוספה</button>
+          </div>
+          <small class="admin-hint">צריך להיות מייל של חשבון Google. בעלי העסק שמוגדרים בחוקי האבטחה מורשים תמיד, ורק הם יכולים להוסיף ולהסיר.</small>
+        </div>
+        <div class="set-sec">
+          <div class="set-title">אבטחת נתונים</div>
+          <div class="sec-status wait" id="secStatus">בודק...</div>
+        </div>
+        <div class="set-sec">
+          <div class="set-title">תמונות וסרטונים באתר</div>
+          <div id="storageNote"></div>
+          <label class="set-upload disabled" id="uploadLabel">
+            ＋ הוספת תמונות / סרטונים
+            <input type="file" accept="image/*,video/*" multiple hidden onchange="handleMediaFiles(this.files);this.value=''">
+          </label>
+          <div class="upload-status" id="uploadStatus" hidden></div>
+          <div class="media-hint">סרטונים עד 50MB · לחיצה על תמונה לעריכת הכיתוב שלה</div>
+          <div class="media-grid" id="mediaGrid"><div class="empty">טוען...</div></div>
+          <button type="button" class="set-restore" id="restoreDefaults" hidden onclick="restoreDefaultMedia()"></button>
+        </div>
+      </div>
+    </div>`;
+  updateBioBtn();
+  updateNotifBtn();
+  syncPushSubscription();
+  checkPushServer();
+  checkDataLock();
+  renderAdminList();
+  loadGalleryItems();
+  checkStorage();
+}
+// asks Firestore, without signing in, for the bookings list: locked rules answer 403
+async function checkDataLock(){
+  let html, cls;
+  try{
+    const r=await fetch(`https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/mangalBookings?pageSize=1&key=${firebaseConfig.apiKey}`,{cache:'no-store'});
+    if(r.status===403){ cls='ok'; html='🔒 הנתונים נעולים. רק המורשים לניהול יכולים לראות את פרטי הלקוחות.'; }
+    else if(r.ok){ cls='bad'; html='⚠️ הנתונים עדיין פתוחים לכל אחד. צריך להדביק את חוקי האבטחה ב-Firebase.'; }
+    else { cls='wait'; html='לא הצלחתי לבדוק כרגע ('+r.status+')'; }
+  }catch(e){ cls='wait'; html='לא הצלחתי לבדוק כרגע'; }
+  const el=document.getElementById('secStatus');
+  if(el){ el.className='sec-status '+cls; el.textContent=html; }
+}
+function renderAdminList(){
+  const me=document.getElementById('adminMe');
+  if(me) me.textContent=currentEmail ? `מחובר: ${currentEmail}` : '';
+  const el=document.getElementById('adminList');
+  if(!el) return;
+  el.innerHTML = adminEmails.length
+    ? adminEmails.map((e,i)=>`<div class="admin-row"><span dir="ltr">${esc(e)}</span><button class="admin-del" aria-label="הסרת ${esc(e)}" onclick="removeAdminEmail(${i})">✕</button></div>`).join('')
+    : `<div class="admin-empty">עדיין לא נוספו מיילים</div>`;
+}
+async function saveAdminEmails(list){
+  const {db,doc,setDoc}=await fbInit();
+  try{
+    await setDoc(doc(db,'mangalSettings','admins'),{emails:list});
+    adminEmails=list; renderAdminList();
+    return true;
+  }catch(e){
+    console.error(e);
+    showToast(e.code==='permission-denied' ? 'רק בעלי העסק יכולים לשנות את הרשימה' : 'השמירה נכשלה');
+    return false;
+  }
+}
+async function addAdminEmail(){
+  const inp=document.getElementById('newAdmin');
+  const email=(inp.value||'').trim().toLowerCase();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ showToast('כתובת מייל לא תקינה'); return; }
+  if(adminEmails.includes(email)){ showToast('המייל כבר ברשימה'); return; }
+  if(await saveAdminEmails([...adminEmails,email])){ inp.value=''; showToast('נוסף ✓ עכשיו אפשר להיכנס איתו לניהול'); }
+}
+async function removeAdminEmail(i){
+  const email=adminEmails[i];
+  if(!email || !confirm(`להסיר את ${email} מהמורשים לניהול?`)) return;
+  if(await saveAdminEmails(adminEmails.filter(e=>e!==email))) showToast('הוסר ✓');
+}
+async function checkStorage(){
+  let reason='';
+  storageMode=null;
+  try{
+    const r=await fetch('/api/upload',{cache:'no-store'});
+    if(!r.ok) reason=`שרת ההעלאה לא זמין (קוד ${r.status}) - כנראה הפריסה האחרונה ב-Vercel לא הצליחה`;
+    else {
+      const j=await r.json();
+      storageMode=j.mode||null;
+      if(j.configured!==true){
+        const names=(j.env&&j.env.names||[]).join(', ')||'אין';
+        reason=`האחסון לא מחובר לפרויקט, או שלא נעשה Redeploy אחרי החיבור (משתני אחסון שהשרת רואה: ${names}; OIDC: ${j.env&&j.env.oidc?'כן':'לא'})`;
+      }
+    }
+  }catch(e){ reason='אין חיבור לשרת ההעלאה: '+(e.message||e); }
+  storageReady=!reason;
+  const note=document.getElementById('storageNote');
+  if(!note) return;
+  document.getElementById('uploadLabel').classList.toggle('disabled', !storageReady);
+  note.innerHTML = storageReady ? '' :
+    `<div class="minfo" style="margin:0 0 4px">אי אפשר להעלות כרגע: ${esc(reason)}. הסרת תמונות עובדת גם בלי זה.</div>`;
+}
+async function loadGalleryItems(){
+  try{
+    const {db,doc,getDoc}=await fbInit();
+    const snap=await getDoc(doc(db,'mangalSettings','gallery'));
+    galleryItems = snap.exists() && Array.isArray(snap.data().items)
+      ? snap.data().items.filter(g=>isSafeMediaUrl(g.url))
+      : DEFAULT_GALLERY.map(g=>({...g}));
+  }catch(e){ console.error(e); galleryItems=null; }
+  renderMediaGrid();
+}
+async function saveGalleryItems(items){
+  // update memory first so an upload finishing mid-save builds on the latest list
+  galleryItems=items;
+  renderMediaGrid();
+  const {db,doc,setDoc}=await fbInit();
+  await setDoc(doc(db,'mangalSettings','gallery'),{items, updatedAtMs:Date.now()});
+}
+// the starting photos that were removed from the site, so they can be brought back in one tap
+function missingDefaults(){
+  return galleryItems ? DEFAULT_GALLERY.filter(d=>!galleryItems.some(g=>g.url===d.url)) : [];
+}
+async function restoreDefaultMedia(){
+  const missing=missingDefaults();
+  if(!missing.length) return;
+  if(!confirm(`להחזיר לאתר ${missing.length} תמונות מקוריות?`)) return;
+  try{
+    await saveGalleryItems([...galleryItems, ...missing.map(g=>({...g}))]);
+    showToast('התמונות חזרו לאתר ✓');
+  }catch(e){ console.error(e); showToast('השחזור נכשל'); loadGalleryItems(); }
+}
+function renderMediaGrid(){
+  const el=document.getElementById('mediaGrid');
+  if(!el) return;
+  const restore=document.getElementById('restoreDefaults'), missing=missingDefaults().length;
+  if(restore){ restore.hidden=!missing; restore.textContent=`↺ החזרת התמונות המקוריות שהוסרו (${missing})`; }
+  if(galleryItems===null){ el.innerHTML=`<div class="empty">לא הצליח לטעון את הגלריה</div>`; return; }
+  if(!galleryItems.length){ el.innerHTML=`<div class="empty">אין כרגע תמונות באתר</div>`; return; }
+  el.innerHTML=galleryItems.map((g,i)=>`
+    <div class="media-tile" onclick="openCaptionEditor(${i})">
+      ${g.kind==='video'
+        ? `<div class="media-video" aria-hidden="true">▶<small>סרטון</small></div><span class="media-badge">🎬</span>`
+        : `<img src="${esc(g.url)}" alt="" loading="lazy">`}
+      <div class="media-cap ${g.cap?'':'none'}">${g.cap?esc(g.cap):'✏️ הוספת כיתוב'}</div>
+      <button class="media-del" onclick="event.stopPropagation();removeMediaItem(${i})" aria-label="הסרה">✕</button>
+    </div>`).join('');
+}
+const CAPTION_MAX=80;
+function openCaptionEditor(i){
+  const item=galleryItems && galleryItems[i];
+  if(!item) return;
+  let root=document.getElementById('capEditRoot');
+  if(!root){ root=document.createElement('div'); root.id='capEditRoot'; document.body.appendChild(root); }
+  root.innerHTML=`
+    <div class="modal-bg cap-edit-bg" onclick="if(event.target===this)closeCaptionEditor()">
+      <div class="modal">
+        <div class="modal-top"><h3>✏️ כיתוב</h3><button class="modal-close" onclick="closeCaptionEditor()">✕</button></div>
+        ${item.kind==='video'
+          ? `<video class="cap-edit-preview" src="${esc(item.url)}" controls playsinline preload="none"></video>`
+          : `<img class="cap-edit-preview" src="${esc(item.url)}" alt="">`}
+        <div class="mfld">
+          <label for="capInput">הכיתוב שיופיע על ${item.kind==='video'?'הסרטון':'התמונה'} באתר</label>
+          <input id="capInput" type="text" maxlength="${CAPTION_MAX}" value="${esc(item.cap||'')}" placeholder="למשל: אנטריקוט על האש באירוע בר מצווה"
+            oninput="document.getElementById('capCount').textContent=this.value.length+'/${CAPTION_MAX}'"
+            onkeydown="if(event.key==='Enter')saveCaption()">
+          <div class="cap-count" id="capCount">${(item.cap||'').length}/${CAPTION_MAX}</div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-save" onclick="saveCaption()">שמירה</button>
+          ${item.cap?`<button class="btn-danger" onclick="document.getElementById('capInput').value='';saveCaption()">מחיקת הכיתוב</button>`:''}
+        </div>
+      </div>
+    </div>`;
+  root.dataset.url=item.url;
+  history.pushState({bbqAdmin:true},''); backDepth++;
+  const inp=document.getElementById('capInput');
+  inp.focus();
+  inp.setSelectionRange(inp.value.length,inp.value.length);
+}
+function closeCaptionEditor(){
+  const root=document.getElementById('capEditRoot');
+  if(root) root.innerHTML='';
+  syncBackHistory();
+}
+async function saveCaption(){
+  const root=document.getElementById('capEditRoot');
+  const url=root && root.dataset.url;
+  const inp=document.getElementById('capInput');
+  if(!url || !inp || !galleryItems) return;
+  const cap=inp.value.trim().slice(0,CAPTION_MAX);
+  if(!galleryItems.some(g=>g.url===url)){ closeCaptionEditor(); return; }
+  closeCaptionEditor();
+  try{
+    await saveGalleryItems(galleryItems.map(g=>g.url===url?{...g,cap}:g));
+    showToast(cap?'הכיתוב נשמר ✓':'הכיתוב נמחק ✓');
+  }catch(e){
+    console.error(e); showToast('השמירה נכשלה'); loadGalleryItems();
+  }
+}
+async function removeMediaItem(i){
+  const item=galleryItems && galleryItems[i];
+  if(!item) return;
+  if(!confirm(item.kind==='video'?'להסיר את הסרטון מהאתר?':'להסיר את התמונה מהאתר?')) return;
+  try{
+    await saveGalleryItems(galleryItems.filter(g=>g.url!==item.url));
+    showToast('הוסר מהאתר ✓');
+  }catch(e){
+    console.error(e); showToast('ההסרה נכשלה'); loadGalleryItems(); return;
+  }
+  if(item.blob){
+    fetch('/api/media-delete',{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({url:item.url,idToken:await idToken()})}).catch(()=>{});
+  }
+}
+function setUploadStatus(text){
+  const el=document.getElementById('uploadStatus');
+  if(!el) return;
+  el.hidden=!text;
+  el.textContent=text;
+}
+async function shrinkImage(file){
+  let bmp;
+  try{ bmp=await createImageBitmap(file,{imageOrientation:'from-image'}); }catch(e){ return file; }
+  const scale=Math.min(1, 1800/Math.max(bmp.width,bmp.height));
+  const c=document.createElement('canvas');
+  c.width=Math.round(bmp.width*scale);
+  c.height=Math.round(bmp.height*scale);
+  c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+  if(bmp.close) bmp.close();
+  const out=await new Promise(r=>c.toBlob(r,'image/jpeg',0.85));
+  return out||file;
+}
+const MEDIA_EXT={'image/jpeg':'jpg','image/png':'png','image/webp':'webp','video/mp4':'mp4','video/quicktime':'mov','video/webm':'webm'};
+// videos are the heavy files in the storage's monthly data transfer, so they're kept small
+const MAX_VIDEO_BYTES=50*1024*1024;
+let _blobClient=null;
+async function handleMediaFiles(fileList){
+  const files=[...fileList];
+  if(!files.length) return;
+  if(!storageReady){ showToast('האחסון עוד לא מחובר'); return; }
+  if(galleryItems===null){ showToast('הגלריה לא נטענה, נסו לפתוח שוב'); return; }
+  let added=0;
+  const errors=[];
+  for(let i=0;i<files.length;i++){
+    const f=files[i];
+    const prefix=files.length>1?`(${i+1}/${files.length}) `:'';
+    // some phones hand over files with an empty type, so fall back to the extension
+    const fType=f.type||guessMediaType(f.name);
+    const isVideo=fType.startsWith('video/');
+    if(isVideo && f.size>MAX_VIDEO_BYTES){ errors.push(`${f.name}: הסרטון גדול מדי (${Math.round(f.size/1048576)}MB, אפשר עד 50MB). כדאי לשלוח אותו לעצמך בוואטסאפ, שמקטין אותו, ולהעלות את הגרסה משם`); continue; }
+    try{
+      setUploadStatus(prefix+'מכין קובץ...');
+      const body=fType.startsWith('image/') ? await shrinkImage(f) : f;
+      const type=body.type||fType;
+      const ext=MEDIA_EXT[type];
+      if(!ext){ errors.push(`${f.name}: סוג קובץ לא נתמך (${type||'לא ידוע'})`); continue; }
+      _blobClient=_blobClient||await import('./vendor/vercel-blob-upload-2.8.0.js');
+      const uploadFn = storageMode==='oidc' ? _blobClient.uploadPresigned : _blobClient.upload;
+      const name=`gallery/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+      let uploading=true; // the progress callback is throttled and can fire after the upload resolves
+      const res=await uploadFn(name, body, {
+        access:'public',
+        handleUploadUrl:'/api/upload',
+        clientPayload:JSON.stringify({idToken:await idToken()}),
+        contentType:type,
+        multipart:body.size>20*1024*1024,
+        onUploadProgress:({percentage})=>{ if(uploading) setUploadStatus(`${prefix}מעלה ${isVideo?'סרטון':'תמונה'}... ${Math.round(percentage)}%`); }
+      }).finally(()=>{ uploading=false; });
+      await saveGalleryItems([{kind:isVideo?'video':'image', url:res.url, cap:'', blob:true}, ...galleryItems]);
+      added++;
+    }catch(e){
+      console.error(e);
+      let msg=e&&e.message||String(e);
+      if(/client token|presigned URL/i.test(msg)) msg+=' | '+await uploadServerReason();
+      errors.push(`${f.name}: ההעלאה נכשלה - ${msg}`);
+    }
+  }
+  setUploadStatus(errors.length ? '⚠️ '+errors.join('\n⚠️ ') : '');
+  if(added) showToast(added===1?'נוסף לאתר ✓':`${added} קבצים נוספו לאתר ✓`);
+}
+// the blob client only says "Failed to retrieve the client token / presigned URL"; ask the server directly for its reason
+async function uploadServerReason(){
+  try{
+    const r=await fetch('/api/upload',{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({type:storageMode==='oidc'?'blob.generate-presigned-url':'blob.generate-client-token',payload:{pathname:'gallery/probe.jpg',multipart:false,clientPayload:JSON.stringify({idToken:await idToken()})}})});
+    const j=await r.json().catch(()=>({}));
+    return `שרת: ${r.status} ${j.error||''}`.trim();
+  }catch(e){ return 'שרת לא זמין'; }
+}
+function guessMediaType(name){
+  const ext=(String(name).split('.').pop()||'').toLowerCase();
+  return {jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',webp:'image/webp',heic:'image/heic',heif:'image/heif',
+    mp4:'video/mp4',m4v:'video/mp4',mov:'video/quicktime',webm:'video/webm'}[ext]||'';
+}
+
+/* ===== install as app (PWA) ===== */
+let _deferredInstallPrompt=null;
+const _isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const _isStandalone=window.matchMedia('(display-mode: standalone)').matches || navigator.standalone===true;
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw-admin.js').catch(()=>{}); });
+}
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  _deferredInstallPrompt=e;
+  showInstallBtn();
+});
+window.addEventListener('appinstalled', ()=>{
+  _deferredInstallPrompt=null;
+  const btn=document.getElementById('installBtn');
+  if(btn)btn.hidden=true;
+});
+function showInstallBtn(){
+  if(_isStandalone)return;
+  const btn=document.getElementById('installBtn');
+  if(btn)btn.hidden=false;
+}
+async function handleInstallClick(){
+  if(_deferredInstallPrompt){
+    _deferredInstallPrompt.prompt();
+    await _deferredInstallPrompt.userChoice;
+    _deferredInstallPrompt=null;
+    document.getElementById('installBtn').hidden=true;
+    return;
+  }
+  if(_isIOS){
+    alert('להתקנה ב-iPhone/iPad:\n1. לחצו על כפתור השיתוף ⬆️ בתחתית הדפדפן\n2. גללו ובחרו "הוסף למסך הבית" (Add to Home Screen)');
+    return;
+  }
+  alert('בדפדפן הזה ההתקנה מופיעה בתפריט הדפדפן (⋮) תחת "התקן אפליקציה" או "הוסף למסך הבית".');
+}
+if(_isIOS && !_isStandalone) showInstallBtn();
+
+initLock();
+</script>
+</body>
+</html>

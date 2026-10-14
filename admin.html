@@ -197,13 +197,29 @@ button{font-family:var(--font)}
 .media-tile{cursor:pointer}
 .media-badge{position:absolute;top:5px;left:36px;font-size:13px;background:rgba(0,0,0,.5);border-radius:6px;padding:1px 5px}
 .media-yt{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:31px;border-radius:9px;background:#C4302B;color:#fff;font-size:15px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.4)}
-.media-group{position:absolute;top:5px;right:5px;max-width:calc(100% - 44px);font-size:10.5px;font-weight:700;background:rgba(216,72,27,.92);color:#fff;border-radius:6px;padding:1px 6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .media-cap{position:absolute;inset-inline:0;bottom:0;padding:14px 6px 5px;background:linear-gradient(0deg,rgba(0,0,0,.7),transparent);color:#fff;font-size:10.5px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .media-cap.none{color:rgba(255,255,255,.75);font-weight:500}
 .media-hint{font-size:11.5px;color:var(--text3);text-align:center;margin-top:10px}
 .cap-edit-bg{z-index:110}
 .cap-edit-preview{width:100%;max-height:42vh;object-fit:contain;border-radius:12px;background:var(--surface2);display:block}
 .cap-count{font-size:11px;color:var(--text3);text-align:left;margin-top:4px;direction:ltr}
+.media-tools{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:14px}
+.media-tools .mt-note{font-size:11.5px;color:var(--text2);line-height:1.35}
+.sort-btn{flex:none;font-family:var(--font);font-size:12.5px;font-weight:700;padding:7px 12px;border-radius:16px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer}
+.sort-btn.on{border-color:var(--flame);background:var(--flame);color:#fff}
+.mg{margin-top:14px}
+.mg-head{display:flex;align-items:center;gap:6px;padding:0 2px 6px;border-bottom:1.5px solid var(--border)}
+.mg-name{font-weight:800;font-size:14px;color:var(--flame-dark);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mg-count{font-size:11.5px;color:var(--text2);flex:none}
+.mg-move{display:flex;gap:4px;margin-inline-start:auto;flex:none}
+.mg-move button,.mv-bar button{width:34px;height:30px;border-radius:8px;border:none;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:var(--font)}
+.mg-move button{background:var(--flame-bg);color:var(--flame-dark)}
+.mg-move button:disabled,.mv-bar button:disabled{opacity:.3;cursor:default}
+.mg .media-grid{margin-top:8px}
+.media-tile.sorting{cursor:default;outline:2px dashed var(--flame);outline-offset:-2px}
+.mv-bar{position:absolute;inset-inline:0;bottom:0;display:flex;justify-content:space-between;padding:5px;background:linear-gradient(0deg,rgba(0,0,0,.6),transparent)}
+.mv-bar button{background:rgba(255,255,255,.92);color:#20140E}
+.media-pos{position:absolute;top:5px;right:5px;min-width:22px;height:22px;border-radius:11px;background:var(--flame);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 6px}
 .media-del{position:absolute;top:5px;left:5px;width:26px;height:26px;border-radius:50%;border:none;background:rgba(32,20,14,.75);color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 
 /* gallery groups */
@@ -1284,6 +1300,7 @@ function withNewItem(items,item){
 }
 function openSettings(){
   viewOpened(openSettings);
+  mediaSortMode=false;
   document.getElementById('modalRoot').innerHTML=`
     <div class="modal-bg" onclick="if(event.target===this)closeModal()">
       <div class="modal">
@@ -1336,7 +1353,11 @@ function openSettings(){
           </div>
           <div class="upload-status" id="uploadStatus" hidden></div>
           <div class="media-hint">סרטונים: עדיף מיוטיוב (לא נגמר באחסון), או קובץ עד 50MB · לחיצה על פריט לעריכת הכיתוב והקבוצה</div>
-          <div class="media-grid" id="mediaGrid"><div class="empty">טוען...</div></div>
+          <div class="media-tools" id="mediaTools" hidden>
+            <div class="mt-note" id="sortNote"></div>
+            <button type="button" class="sort-btn" id="sortBtn" aria-pressed="false" onclick="toggleMediaSort()"></button>
+          </div>
+          <div id="mediaGrid"><div class="empty">טוען...</div></div>
           <button type="button" class="set-restore" id="restoreDefaults" hidden onclick="restoreDefaultMedia()"></button>
         </div>
       </div>
@@ -1447,25 +1468,97 @@ async function restoreDefaultMedia(){
     showToast('התמונות חזרו לאתר ✓');
   }catch(e){ console.error(e); showToast('השחזור נכשל'); loadGalleryItems(); }
 }
+// the gallery split into its groups, in the order they show on the site (a group's first photo decides its place)
+function mediaGroups(){
+  const out=[];
+  (galleryItems||[]).forEach((g,i)=>{
+    const n=itemGroup(g)||DEFAULT_GROUP;
+    let grp=out.find(x=>x.name===n);
+    if(!grp){ grp={name:n, idx:[]}; out.push(grp); }
+    grp.idx.push(i);
+  });
+  return out;
+}
+// sort mode: arrows move groups and photos instead of opening the caption editor
+let mediaSortMode=false;
+function toggleMediaSort(){ mediaSortMode=!mediaSortMode; renderMediaGrid(); }
+function mediaThumb(g){
+  return g.kind==='video'
+    ? `<div class="media-video" aria-hidden="true">▶<small>סרטון</small></div><span class="media-badge">🎬</span>`
+    : g.kind==='youtube'
+    ? `<img src="${esc(YT.thumb(g.url))}" alt="" loading="lazy"><span class="media-yt" aria-label="YouTube">▶</span>`
+    : `<img src="${esc(g.url)}" alt="" loading="lazy">`;
+}
 function renderMediaGrid(){
   const el=document.getElementById('mediaGrid');
   if(!el) return;
   const restore=document.getElementById('restoreDefaults'), missing=missingDefaults().length;
   if(restore){ restore.hidden=!missing; restore.textContent=`↺ החזרת התמונות המקוריות שהוסרו (${missing})`; }
   renderGroupLists();
-  if(galleryItems===null){ el.innerHTML=`<div class="empty">לא הצליח לטעון את הגלריה</div>`; return; }
-  if(!galleryItems.length){ el.innerHTML=`<div class="empty">אין כרגע תמונות באתר</div>`; return; }
-  el.innerHTML=galleryItems.map((g,i)=>`
-    <div class="media-tile" onclick="openCaptionEditor(${i})">
-      ${g.kind==='video'
-        ? `<div class="media-video" aria-hidden="true">▶<small>סרטון</small></div><span class="media-badge">🎬</span>`
-        : g.kind==='youtube'
-        ? `<img src="${esc(YT.thumb(g.url))}" alt="" loading="lazy"><span class="media-yt" aria-label="YouTube">▶</span>`
-        : `<img src="${esc(g.url)}" alt="" loading="lazy">`}
-      <span class="media-group">${esc(itemGroup(g)||DEFAULT_GROUP)}</span>
-      <div class="media-cap ${g.cap?'':'none'}">${g.cap?esc(g.cap):'✏️ הוספת כיתוב'}</div>
-      <button class="media-del" onclick="event.stopPropagation();removeMediaItem(${i})" aria-label="הסרה">✕</button>
+  const tools=document.getElementById('mediaTools');
+  if(galleryItems===null){ if(tools) tools.hidden=true; el.innerHTML=`<div class="empty">לא הצליח לטעון את הגלריה</div>`; return; }
+  if(!galleryItems.length){ if(tools) tools.hidden=true; mediaSortMode=false; el.innerHTML=`<div class="empty">אין כרגע תמונות באתר</div>`; return; }
+  if(tools){
+    tools.hidden=false;
+    const btn=document.getElementById('sortBtn');
+    btn.textContent=mediaSortMode?'✓ סיום':'↕ שינוי סדר';
+    btn.classList.toggle('on',mediaSortMode);
+    btn.setAttribute('aria-pressed',String(mediaSortMode));
+    document.getElementById('sortNote').textContent=mediaSortMode
+      ? 'החצים מזיזים קטגוריה או תמונה · נשמר מיד באתר'
+      : 'כך מסודרת הגלריה באתר';
+  }
+  const groups=mediaGroups();
+  el.innerHTML=groups.map((grp,k)=>`
+    <div class="mg">
+      <div class="mg-head">
+        <span class="mg-name">${esc(grp.name)}</span><span class="mg-count">(${grp.idx.length})</span>
+        ${mediaSortMode&&groups.length>1?`<span class="mg-move">
+          <button type="button" data-mv="g${k}u" onclick="moveMediaGroup(${k},-1)" ${k===0?'disabled':''} aria-label="להזיז את ${esc(grp.name)} למעלה">▲</button>
+          <button type="button" data-mv="g${k}d" onclick="moveMediaGroup(${k},1)" ${k===groups.length-1?'disabled':''} aria-label="להזיז את ${esc(grp.name)} למטה">▼</button>
+        </span>`:''}
+      </div>
+      <div class="media-grid">${grp.idx.map((i,p)=>{ const g=galleryItems[i]; return mediaSortMode ? `
+        <div class="media-tile sorting">
+          ${mediaThumb(g)}
+          <span class="media-pos">${p+1}</span>
+          <div class="mv-bar">
+            <button type="button" data-mv="${esc(g.url)}|-1" onclick="moveMediaItem(${i},-1)" ${p===0?'disabled':''} aria-label="להקדים (מקום ${p+1} מתוך ${grp.idx.length})">→</button>
+            <button type="button" data-mv="${esc(g.url)}|1" onclick="moveMediaItem(${i},1)" ${p===grp.idx.length-1?'disabled':''} aria-label="לאחר (מקום ${p+1} מתוך ${grp.idx.length})">←</button>
+          </div>
+        </div>` : `
+        <div class="media-tile" onclick="openCaptionEditor(${i})">
+          ${mediaThumb(g)}
+          <div class="media-cap ${g.cap?'':'none'}">${g.cap?esc(g.cap):'✏️ הוספת כיתוב'}</div>
+          <button class="media-del" onclick="event.stopPropagation();removeMediaItem(${i})" aria-label="הסרה">✕</button>
+        </div>`; }).join('')}</div>
     </div>`).join('');
+}
+// saves a new order; the list is stored group after group, which is the order the site shows
+async function saveMediaOrder(groups,focusKey){
+  try{
+    await saveGalleryItems(groups.flatMap(grp=>grp.idx.map(i=>galleryItems[i])));
+  }catch(e){ console.error(e); showToast('שמירת הסדר נכשלה'); loadGalleryItems(); return; }
+  // keep the keyboard on the arrow that was pressed (the grid was redrawn), or on its pair once it reached the end
+  const btns=focusKey ? [...document.querySelectorAll('#mediaGrid [data-mv]')] : [];
+  const pair=focusKey && focusKey.replace(/u$|d$|\|-?1$/,m=>({u:'d',d:'u','|-1':'|1','|1':'|-1'})[m]);
+  const btn=[focusKey,pair].map(key=>btns.find(b=>b.dataset.mv===key)).find(b=>b && !b.disabled);
+  if(btn) btn.focus();
+}
+function moveMediaGroup(k,dir){
+  const groups=mediaGroups(), j=k+dir;
+  if(!groups[k] || !groups[j]) return;
+  [groups[k],groups[j]]=[groups[j],groups[k]];
+  saveMediaOrder(groups,`g${j}${dir<0?'u':'d'}`);
+}
+function moveMediaItem(i,dir){
+  const groups=mediaGroups(), url=galleryItems[i]&&galleryItems[i].url;
+  const grp=groups.find(x=>x.idx.includes(i));
+  if(!grp) return;
+  const p=grp.idx.indexOf(i), q=p+dir;
+  if(q<0 || q>=grp.idx.length) return;
+  [grp.idx[p],grp.idx[q]]=[grp.idx[q],grp.idx[p]];
+  saveMediaOrder(groups,`${url}|${dir}`);
 }
 const CAPTION_MAX=80;
 function openCaptionEditor(i){

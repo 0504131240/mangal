@@ -75,7 +75,7 @@ npx serve .
 1. Authentication ← Sign-in method ← **Google** ← Enable ← Save.
 2. Authentication ← Settings ← **Authorized domains** ← Add domain ← `mangal-belahavot.vercel.app`.
 3. Firestore Database ← **Rules**: להדביק את `firestore.rules`, להחליף את `__OWNER_EMAILS__` במיילים של הבעלים (למשל `'a@gmail.com', 'b@gmail.com'`), ואז Publish.
-4. להיכנס לניהול עם Google. בהגדרות, תחת "אבטחת נתונים", אמור להופיע "🔒 הנתונים נעולים". בכניסה הראשונה של מנהל נמחק גם המסמך הישן `mangalSettings/admin`, שהחזיק את הסיסמה הקודמת.
+4. להיכנס לניהול עם Google. בכניסה הראשונה של מנהל נמחק גם המסמך הישן `mangalSettings/admin`, שהחזיק את הסיסמה הקודמת.
 
 החוקים נבדקו מול אמולטור Firestore (`@firebase/rules-unit-testing`): 30 בדיקות לבעלים, למורשה שנוסף, למורשה שהוסר, לזר וללקוח. בנוסף נבדק כל התהליך מקצה לקצה מול אמולטורי Auth ו-Firestore (22 בדיקות).
 

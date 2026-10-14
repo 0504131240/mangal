@@ -60,10 +60,6 @@ button{font-family:var(--font)}
 .admin-add{display:flex;gap:8px;margin-top:4px}
 .admin-add input{flex:1;min-width:0;border:1.5px solid var(--border);border-radius:10px;padding:9px 11px;font-size:14px;font-family:var(--font);background:var(--bg);color:var(--text)}
 .admin-hint{display:block;font-size:11.5px;color:var(--text3);margin-top:6px;line-height:1.5}
-.sec-status{font-size:13px;font-weight:700;padding:11px 13px;border-radius:var(--r2);margin-bottom:8px}
-.sec-status.ok{background:var(--ok-bg);color:var(--ok)}
-.sec-status.bad{background:var(--bad-bg);color:var(--bad)}
-.sec-status.wait{background:var(--surface2);color:var(--text2)}
 
 /* header */
 .hdr{background:linear-gradient(135deg,var(--char),#3A2113);color:#fff;padding:20px 16px 22px;border-radius:0 0 20px 20px}
@@ -1369,10 +1365,6 @@ function openSettings(){
           <small class="admin-hint">צריך להיות מייל של חשבון Google. בעלי העסק שמוגדרים בחוקי האבטחה מורשים תמיד, ורק הם יכולים להוסיף ולהסיר.</small>
         </div>
         <div class="set-sec">
-          <div class="set-title">אבטחת נתונים</div>
-          <div class="sec-status wait" id="secStatus">בודק...</div>
-        </div>
-        <div class="set-sec">
           <div class="set-title">תמונות וסרטונים באתר</div>
           <button type="button" class="gal-card" onclick="openGalleryManager()">
             <span class="gal-ico" aria-hidden="true">🖼️</span>
@@ -1386,22 +1378,9 @@ function openSettings(){
   updateNotifBtn();
   syncPushSubscription();
   checkPushServer();
-  checkDataLock();
   renderAdminList();
   loadGalleryItems();
   checkStorage();
-}
-// asks Firestore, without signing in, for the bookings list: locked rules answer 403
-async function checkDataLock(){
-  let html, cls;
-  try{
-    const r=await fetch(`https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/mangalBookings?pageSize=1&key=${firebaseConfig.apiKey}`,{cache:'no-store'});
-    if(r.status===403){ cls='ok'; html='🔒 הנתונים נעולים. רק המורשים לניהול יכולים לראות את פרטי הלקוחות.'; }
-    else if(r.ok){ cls='bad'; html='⚠️ הנתונים עדיין פתוחים לכל אחד. צריך להדביק את חוקי האבטחה ב-Firebase.'; }
-    else { cls='wait'; html='לא הצלחתי לבדוק כרגע ('+r.status+')'; }
-  }catch(e){ cls='wait'; html='לא הצלחתי לבדוק כרגע'; }
-  const el=document.getElementById('secStatus');
-  if(el){ el.className='sec-status '+cls; el.textContent=html; }
 }
 function renderAdminList(){
   const me=document.getElementById('adminMe');

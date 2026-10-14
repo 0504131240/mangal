@@ -1,7 +1,6 @@
 <!--
   BBQ - אתר עסק המנגלים, חלק ציבורי.
-   - תמונות וסרטונים בגלריה: מנוהלים מ"הגדרות" בניהול (נשמר ב-mangalSettings/gallery);
-     עד השינוי הראשון מוצגת רשימת ברירת המחדל שב-gallery-default.js.
+   - תמונות וסרטונים בגלריה: מנוהלים מ"הגדרות" בניהול (נשמר ב-mangalSettings/gallery).
    - תפריטים ומחירים: מערך MENUS למטה (מקור: תפריט הלקוח).
    - הכניסה לניהול (admin.html) היא עם חשבון Google; חוקי האבטחה ב-firestore.rules.
 -->
@@ -727,7 +726,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
   </div>
 </div>
 
-<script src="gallery-default.js"></script>
+<script src="media.js"></script>
 <script>
 const BUSINESS = { name:'BBQ', phone:'0523359599', whatsapp:'972527626562' };
 
@@ -737,13 +736,13 @@ let GALLERY = (function(){
     const cached=JSON.parse(localStorage.getItem('mangalGalleryCache')||'null');
     if(Array.isArray(cached)) return sortByGroup(cached.filter(g=>isSafeMediaUrl(g.url)));
   }catch(e){}
-  return sortByGroup(DEFAULT_GALLERY);
+  return [];
 })();
 async function loadGallery(){
   try{
     const res=await fetch(GALLERY_DOC_URL);
     let list;
-    if(res.status===404) list=DEFAULT_GALLERY;
+    if(res.status===404) list=[];
     else if(res.ok){
       const data=await res.json();
       const values=data?.fields?.items?.arrayValue?.values||[];

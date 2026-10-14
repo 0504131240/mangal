@@ -130,7 +130,7 @@ button{font-family:var(--font)}
 .mrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .mrow3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .drow-sub{font-weight:500;color:var(--text2);font-size:12px}
-.minfo{font-size:13px;color:var(--text2);background:var(--surface2);border-radius:10px;padding:10px 12px;margin-top:10px}
+.minfo{font-size:13px;color:#5E4F44;background:var(--surface2);border-radius:10px;padding:10px 12px;margin-top:10px}
 .minfo a{color:var(--flame-dark);font-weight:700;text-decoration:none}
 .quickpay{display:flex;gap:8px;margin-top:8px}
 .quickpay button{flex:1;padding:9px;border-radius:9px;border:1.5px solid var(--border);background:var(--surface);font-size:12px;font-weight:700;cursor:pointer;color:var(--text2)}
@@ -142,7 +142,7 @@ button{font-family:var(--font)}
 .drow b{font-weight:700;text-align:left;min-width:0;overflow-wrap:anywhere}
 .drow a{color:var(--flame-dark);text-decoration:none}
 .modal-actions button{flex:1;padding:12px;border-radius:11px;border:none;font-weight:700;font-size:13px;cursor:pointer}
-.btn-save{background:var(--flame);color:#fff}
+.btn-save{background:#C63F14;color:#fff}
 .btn-danger{background:var(--bad-bg);color:var(--bad)}
 .status-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 .status-pill{font-size:11.5px;font-weight:700;padding:6px 11px;border-radius:16px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer}
@@ -181,53 +181,111 @@ button{font-family:var(--font)}
 .set-btn{flex-shrink:0;border:1.5px solid var(--flame);background:var(--surface);color:var(--flame-dark);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer}
 .set-btn.on{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
 .set-test{width:100%;margin:-2px 0 8px;padding:10px;border-radius:var(--r2);border:1.5px dashed var(--border);background:transparent;color:var(--text2);font-weight:700;font-size:12.5px;cursor:pointer}
-.set-upload{display:block;text-align:center;padding:13px;border-radius:var(--r2);border:1.5px dashed var(--flame);background:var(--flame-bg);color:var(--flame-dark);font-weight:700;font-size:13.5px;cursor:pointer;margin-top:8px}
-.set-upload.disabled{opacity:.45;pointer-events:none}
-.upload-status{font-size:12px;color:var(--text2);text-align:center;margin-top:8px;font-weight:600;white-space:pre-line;overflow-wrap:anywhere}
-.media-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:12px}
-.media-grid .empty{grid-column:1/-1;padding:24px 10px}
-.yt-add{display:flex;gap:8px;margin-top:10px}
-.yt-add input{flex:1;min-width:0;padding:11px 12px;border-radius:var(--r2);border:1.5px solid var(--border);background:var(--surface);font-family:var(--font);font-size:14px;direction:ltr;text-align:right}
-.yt-add button{padding:0 16px;border-radius:var(--r2);border:none;background:#C4302B;color:#fff;font-family:var(--font);font-weight:700;font-size:14px;cursor:pointer}
+/* settings: the card that opens the gallery manager */
+.gal-card{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border-radius:var(--r2);border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:var(--font);text-align:right;cursor:pointer}
+.gal-ico{width:42px;height:42px;border-radius:12px;background:var(--flame-bg);display:flex;align-items:center;justify-content:center;font-size:21px;flex:none}
+.gal-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.gal-txt b{font-size:14px}
+.gal-txt small{font-size:12px;color:var(--text2)}
+.gal-card svg{flex:none;color:var(--text2)}
+
+/* the gallery manager: a full screen of its own */
 .media-video{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:22px;color:#fff;background:radial-gradient(circle at 50% 40%,#4A2E1C,#1A100A)}
 .media-video small{font-size:11px;font-weight:700}
-.media-tile{position:relative;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:var(--surface2)}
-.media-tile img,.media-tile video{width:100%;height:100%;object-fit:cover;display:block}
-.media-tile{cursor:pointer}
-.media-badge{position:absolute;top:5px;left:36px;font-size:13px;background:rgba(0,0,0,.5);border-radius:6px;padding:1px 5px}
 .media-yt{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:31px;border-radius:9px;background:#C4302B;color:#fff;font-size:15px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.4)}
-.media-cap{position:absolute;inset-inline:0;bottom:0;padding:14px 6px 5px;background:linear-gradient(0deg,rgba(0,0,0,.7),transparent);color:#fff;font-size:10.5px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.media-cap.none{color:rgba(255,255,255,.75);font-weight:500}
-.media-hint{font-size:11.5px;color:var(--text3);text-align:center;margin-top:10px}
-.cap-edit-bg{z-index:110}
-.cap-edit-preview{width:100%;max-height:42vh;object-fit:contain;border-radius:12px;background:var(--surface2);display:block}
-.cap-count{font-size:11px;color:var(--text3);text-align:left;margin-top:4px;direction:ltr}
-.media-tools{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:14px}
-.media-tools .mt-note{font-size:11.5px;color:var(--text2);line-height:1.35}
-.sort-btn{flex:none;font-family:var(--font);font-size:12.5px;font-weight:700;padding:7px 12px;border-radius:16px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer}
-.sort-btn.on{border-color:var(--flame);background:var(--flame);color:#fff}
-.mg{margin-top:14px}
-.mg-head{display:flex;align-items:center;gap:6px;padding:0 2px 6px;border-bottom:1.5px solid var(--border)}
-.mg-name{font-weight:800;font-size:14px;color:var(--flame-dark);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mg-count{font-size:11.5px;color:var(--text2);flex:none}
-.mg-move{display:flex;gap:4px;margin-inline-start:auto;flex:none}
-.mg-move button,.mv-bar button{width:34px;height:30px;border-radius:8px;border:none;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:var(--font)}
-.mg-move button{background:var(--flame-bg);color:var(--flame-dark)}
-.mg-move button:disabled,.mv-bar button:disabled{opacity:.3;cursor:default}
-.mg .media-grid{margin-top:8px}
-.media-tile.sorting{cursor:default;outline:2px dashed var(--flame);outline-offset:-2px}
-.mv-bar{position:absolute;inset-inline:0;bottom:0;display:flex;justify-content:space-between;padding:5px;background:linear-gradient(0deg,rgba(0,0,0,.6),transparent)}
-.mv-bar button{background:rgba(255,255,255,.92);color:#20140E}
-.media-pos{position:absolute;top:5px;right:5px;min-width:22px;height:22px;border-radius:11px;background:var(--flame);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 6px}
-.media-del{position:absolute;top:5px;left:5px;width:26px;height:26px;border-radius:50%;border:none;background:rgba(32,20,14,.75);color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.cap-count{font-size:11px;color:var(--text2);text-align:left;margin-top:4px;direction:ltr}
+.gm{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;flex-direction:column}
+.gm-top{flex:none;background:linear-gradient(135deg,var(--char),#3A2113);color:#fff;padding:calc(10px + env(safe-area-inset-top,0px)) 12px 10px}
+.gm-top.sel{background:var(--flame-dark)}
+.gm-top-in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:10px;min-height:40px}
+.gm-top h3{flex:1;min-width:0;font-family:var(--font-head);font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gm-back{width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,.14);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;font-size:16px}
+.gm-add{border:none;background:#C63F14;color:#fff;font-family:var(--font);font-weight:800;font-size:13.5px;padding:9px 16px;border-radius:20px;cursor:pointer;flex:none;box-shadow:0 4px 14px rgba(216,72,27,.35)}
+.gm-add:disabled{opacity:.5}
+.gm-add.big{margin-top:10px;padding:12px 28px;font-size:14.5px}
+.gm-body{flex:1;overflow-y:auto;overscroll-behavior:contain}
+.gm-in{max-width:760px;margin:0 auto;padding:14px 14px 32px}
+.gm-info{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 10px}
+.gm-stats{font-size:13px;font-weight:700}
+.gm-view{font-size:12.5px;font-weight:700;color:var(--flame-dark);text-decoration:none;padding:6px 12px;border-radius:16px;background:var(--flame-bg)}
+.gm-tip{flex-basis:100%;display:flex;flex-wrap:wrap;gap:2px 14px;font-size:11.5px;color:var(--text2);line-height:1.5}
+.gm-sec{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-top:12px;padding:2px 10px 10px}
+.gm-sec.none{border-color:#E4C68E;background:var(--warn-bg)}
+.gm-head{display:flex;align-items:center;gap:4px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.gm-fold{flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:none;border:none;padding:10px 2px;cursor:pointer;color:var(--text);font-family:var(--font);text-align:right;touch-action:manipulation}
+.gm-fold svg{flex:none;color:var(--text2);transition:transform .2s}
+.gm-sec.closed .gm-fold svg{transform:rotate(90deg)}
+.gm-name{font-weight:800;font-size:15px;color:var(--flame-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.gm-sec.none .gm-name{color:var(--text)}
+.gm-count{flex:none;font-size:11.5px;font-weight:700;color:var(--text2);background:var(--surface2);border-radius:10px;padding:1px 8px}
+.gm-more{flex:none;width:38px;height:38px;border-radius:50%;border:none;background:transparent;color:var(--text2);font-size:20px;font-weight:800;cursor:pointer;line-height:1}
+.gm-selall{flex:none;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);font-family:var(--font);font-size:12px;font-weight:700;padding:6px 11px;border-radius:16px;cursor:pointer}
+.gm-none-tip{font-size:11.5px;color:var(--text2);margin:-4px 2px 8px;line-height:1.45}
+.gm-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+@media(min-width:560px){.gm-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:720px){.gm-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.gm-sec.closed .gm-grid,.gm-sec.closed .gm-none-tip{display:none}
+.gm-tile{position:relative;display:block;width:100%;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:var(--surface2);border:none;padding:0;cursor:pointer;font-family:var(--font);user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
+.gm-tile img,.gm-tile video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.gm-cap{position:absolute;inset-inline:0;bottom:0;padding:16px 6px 4px;background:linear-gradient(0deg,rgba(0,0,0,.72),transparent);color:#fff;font-size:10.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right}
+.gm-tile.lifting,.gm-sec.lifting{transform:scale(1.05);box-shadow:0 10px 26px rgba(32,20,14,.3);transition:transform .15s,box-shadow .15s;position:relative;z-index:2}
+.gm-sec.lifting{transform:scale(1.015)}
+.gm-ph{opacity:.3}
+.gm-tile.gm-ph{outline:2px dashed var(--flame);outline-offset:-2px}
+.gm-sec.gm-ph{border:2px dashed var(--flame)}
+.gm-ghost{position:fixed;z-index:300;pointer-events:none;margin:0;box-shadow:0 16px 36px rgba(32,20,14,.4);transform:scale(1.06);opacity:.96}
+.gm-ghost.gm-head{background:var(--surface);border:1.5px solid var(--flame);border-radius:12px;padding:0 10px}
+.sorting-groups .gm-grid,.sorting-groups .gm-none-tip{display:none}
+.dragging-tile .gm-sec:not(.closed) .gm-grid{min-height:56px}
+.gm-check{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.3);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.gm-tile.sel{outline:3px solid var(--flame);outline-offset:-3px}
+.gm-tile.sel .gm-check{background:var(--flame);border-color:var(--flame)}
+.gm-actions{flex:none;display:flex;gap:8px;justify-content:center;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--border);box-shadow:0 -6px 20px rgba(32,20,14,.08)}
+.gm-act{flex:1;max-width:240px;padding:13px;border-radius:12px;border:none;font-family:var(--font);font-weight:800;font-size:13.5px;cursor:pointer;background:var(--flame-bg);color:var(--flame-dark)}
+.gm-act.danger{background:var(--bad-bg);color:var(--bad)}
+.gm-act:disabled{opacity:.4;cursor:default}
+.gm-up{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:10px 12px;margin-top:10px}
+.gm-up-row{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;font-weight:700;color:var(--text2);margin-bottom:7px}
+.gm-bar{height:6px;border-radius:3px;background:var(--surface2);overflow:hidden}
+.gm-bar i{display:block;height:100%;background:var(--flame);border-radius:3px;transition:width .2s}
+.gm-err{background:var(--bad-bg);color:var(--bad);border-radius:var(--r2);padding:10px 12px;margin-top:10px;font-size:12.5px;line-height:1.5;overflow-wrap:anywhere}
+.gm-err button,.gm-retry{margin-top:8px;border:none;background:var(--surface);color:var(--bad);font-family:var(--font);font-weight:700;padding:7px 14px;border-radius:14px;cursor:pointer}
+.gm-empty{text-align:center;padding:56px 20px;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--text2);font-size:13px}
+.gm-empty-ico{font-size:44px}
+.gm-empty b{font-size:16px;color:var(--text)}
 
-/* gallery groups */
-.grp-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.grp-chip{font-size:12px;font-weight:700;padding:6px 11px;border-radius:16px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;font-family:var(--font)}
+/* the small windows over the gallery manager */
+.sheet-bg{z-index:110}
+.sheet-prev{width:100%;max-height:38vh;object-fit:contain;border-radius:12px;background:var(--surface2);display:block}
+.sheet-yt{position:relative}
+.sheet-del{display:block;width:100%;margin-top:8px;padding:12px;border-radius:11px;border:none;background:transparent;color:var(--bad);font-family:var(--font);font-weight:700;font-size:13px;cursor:pointer}
+.sheet-opts{display:flex;flex-direction:column;gap:8px;margin-top:18px}
+.sheet-opt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;padding:12px 14px;border-radius:var(--r2);border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-family:var(--font);font-weight:700;font-size:14px;text-align:right;cursor:pointer}
+.sheet-opt small{font-weight:500;font-size:12px;color:var(--text2)}
+.sheet-opt.danger{color:var(--bad)}
+.sheet-tip{font-size:12px;color:var(--text2);margin-top:8px;line-height:1.5}
+.add-opts{display:flex;flex-direction:column;gap:10px}
+.add-opt{display:flex;align-items:center;gap:12px;width:100%;padding:14px;border-radius:var(--r);border:1.5px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;text-align:right;font-family:var(--font)}
+.add-opt .ico{width:46px;height:46px;border-radius:14px;background:var(--flame-bg);display:flex;align-items:center;justify-content:center;font-size:22px;flex:none}
+.add-opt .ico.yt{background:#C4302B;color:#fff;font-size:17px}
+.add-opt b{display:block;font-size:14.5px}
+.add-opt small{display:block;font-size:12px;color:var(--text2);margin-top:2px;font-weight:500}
+.add-opt.disabled{opacity:.45;pointer-events:none}
+.up-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.up-tile{position:relative;aspect-ratio:1/1;border-radius:9px;overflow:hidden;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:22px}
+.up-tile img,.up-tile video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.up-kind{position:absolute;bottom:4px;right:5px;font-size:13px}
+.up-tile.big{outline:2px solid var(--bad);outline-offset:-2px}
+.up-warn{position:absolute;inset-inline:0;bottom:0;background:var(--bad);color:#fff;font-size:10px;font-weight:700;padding:2px 4px;text-align:center}
+.up-x{position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;border:none;background:rgba(32,20,14,.75);color:#fff;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.yt-prev{position:relative;margin-top:10px;border-radius:12px;overflow:hidden;aspect-ratio:16/9;max-width:100%;background:#000}
+.yt-prev img{width:100%;height:100%;object-fit:cover;display:block}
+.grp-chips{display:flex;gap:6px;flex-wrap:wrap}
+.grp-chip{font-size:12.5px;font-weight:700;padding:7px 12px;border-radius:16px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;font-family:var(--font)}
 .grp-chip.on{border-color:var(--flame);background:var(--flame-bg);color:var(--flame-dark)}
-.upload-group{margin-top:12px}
-.upload-group label{display:block;font-size:11.5px;font-weight:700;color:var(--text2);margin-bottom:5px}
-.upload-group input{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:10px 11px;font-size:14px;font-family:var(--font);background:var(--bg);color:var(--text);direction:rtl}
+.grp-chip.none{border-style:dashed}
+.cat-new{margin-top:8px}
+.btn-save:disabled{opacity:.45;cursor:default}
 
 .cal-dot{position:absolute;bottom:3px;font-size:9px;background:var(--flame);color:#fff;border-radius:8px;min-width:14px;height:14px;display:flex;align-items:center;justify-content:center;padding:0 3px}
 </style>
@@ -1068,6 +1126,7 @@ function setModalStatus(el,status){
   document.getElementById('modalRoot').dataset.status=status;
 }
 function closeModal(){
+  gmSel=null;
   document.getElementById('modalRoot').innerHTML='';
   viewStack.length=0;
   syncBackHistory();
@@ -1075,9 +1134,10 @@ function closeModal(){
 
 /* ===== the phone's back button: one step back through the windows =====
    The windows in #modalRoot replace each other (calendar day → event details → edit), so every step is
-   kept: back shows the previous window, and from the first one returns to the board. The caption editor
-   opens over the settings as its own step. Each open step has one history entry; closing windows with
-   ✕ / saving / tapping outside removes their entries, so back never gets stuck on a closed window. */
+   kept: back shows the previous window, and from the first one returns to the board. In the gallery
+   manager, a small window (edit, add, category) and selecting photos are steps of their own. Each open
+   step has one history entry; closing windows with ✕ / saving / tapping outside removes their entries,
+   so back never gets stuck on a closed window. */
 const viewStack=[];
 let restoringView=false, backDepth=0, skipPops=0;
 function viewOpened(redo){
@@ -1086,8 +1146,7 @@ function viewOpened(redo){
   viewStack.push(redo);
   history.pushState({bbqAdmin:true},''); backDepth++;
 }
-function captionEditorOpen(){ const r=document.getElementById('capEditRoot'); return !!(r && r.innerHTML.trim()); }
-function openSteps(){ return (document.getElementById('modalRoot').innerHTML.trim()?viewStack.length:0)+(captionEditorOpen()?1:0); }
+function openSteps(){ return (document.getElementById('modalRoot').innerHTML.trim()?viewStack.length:0)+(sheetOpen()?1:0)+(gmSel&&gmIsOpen()?1:0); }
 function syncBackHistory(){
   // after the current click is handled, so a window opened right after this one keeps its entry
   setTimeout(()=>{
@@ -1099,7 +1158,8 @@ addEventListener('popstate',()=>{
   if(skipPops){ skipPops--; return; }
   if(backDepth<=0) return;
   backDepth--;
-  if(captionEditorOpen()){ closeCaptionEditor(); return; }
+  if(sheetOpen()){ closeSheet(); return; }
+  if(gmSel){ gmSel=null; renderGalleryManager(); return; }
   viewStack.pop();
   if(viewStack.length){ restoringView=true; try{ viewStack[viewStack.length-1](); } finally{ restoringView=false; } }
   else closeModal();
@@ -1269,26 +1329,6 @@ function groupNames(){
   (galleryItems||[]).forEach(g=>{ const n=itemGroup(g)||DEFAULT_GROUP; if(!out.includes(n)) out.push(n); });
   return out;
 }
-function renderGroupLists(){
-  const names=groupNames();
-  const dl=document.getElementById('groupList');
-  if(dl) dl.innerHTML=names.map(n=>`<option value="${esc(n)}"></option>`).join('');
-  const ch=document.getElementById('uploadGroupChips');
-  if(ch){
-    const cur=((document.getElementById('uploadGroup')||{}).value||'').trim();
-    ch.innerHTML=names.map(n=>`<button type="button" class="grp-chip ${n===cur?'on':''}" onclick="pickUploadGroup(this)">${esc(n)}</button>`).join('');
-  }
-}
-function pickUploadGroup(btn){
-  const inp=document.getElementById('uploadGroup');
-  if(!inp) return;
-  inp.value=btn.textContent; lastUploadGroup=inp.value;
-  document.querySelectorAll('#uploadGroupChips .grp-chip').forEach(c=>c.classList.toggle('on',c===btn));
-}
-function pickEditGroup(btn){
-  document.getElementById('grpInput').value=btn.textContent;
-  document.querySelectorAll('#capEditRoot .grp-chip').forEach(c=>c.classList.toggle('on',c===btn));
-}
 // a new photo goes first in its own group (so the order of the groups on the site stays); a new group goes last
 function withNewItem(items,item){
   const n=itemGroup(item)||DEFAULT_GROUP;
@@ -1299,7 +1339,6 @@ function withNewItem(items,item){
 }
 function openSettings(){
   viewOpened(openSettings);
-  mediaSortMode=false;
   document.getElementById('modalRoot').innerHTML=`
     <div class="modal-bg" onclick="if(event.target===this)closeModal()">
       <div class="modal">
@@ -1335,28 +1374,11 @@ function openSettings(){
         </div>
         <div class="set-sec">
           <div class="set-title">תמונות וסרטונים באתר</div>
-          <div id="storageNote"></div>
-          <div class="upload-group">
-            <label for="uploadGroup">הקבוצה של מה שמעלים עכשיו</label>
-            <input type="text" id="uploadGroup" maxlength="${GROUP_MAX}" list="groupList" placeholder="למשל: בשרים על האש (אפשר להשאיר ריק)" value="${esc(lastUploadGroup)}" oninput="lastUploadGroup=this.value;renderGroupLists()">
-            <datalist id="groupList"></datalist>
-            <div class="grp-chips" id="uploadGroupChips"></div>
-          </div>
-          <label class="set-upload disabled" id="uploadLabel">
-            ＋ הוספת תמונות / סרטונים
-            <input type="file" accept="image/*,video/*" multiple hidden onchange="handleMediaFiles(this.files);this.value=''">
-          </label>
-          <div class="yt-add">
-            <input type="url" id="ytLink" inputmode="url" placeholder="▶ הדבקת קישור לסרטון מיוטיוב" aria-label="קישור לסרטון מיוטיוב" onkeydown="if(event.key==='Enter')addYoutube()">
-            <button type="button" onclick="addYoutube()">הוספה</button>
-          </div>
-          <div class="upload-status" id="uploadStatus" hidden></div>
-          <div class="media-hint">סרטונים: עדיף מיוטיוב (לא נגמר באחסון), או קובץ עד 50MB · לחיצה על פריט לעריכת הכיתוב והקבוצה</div>
-          <div class="media-tools" id="mediaTools" hidden>
-            <div class="mt-note" id="sortNote"></div>
-            <button type="button" class="sort-btn" id="sortBtn" aria-pressed="false" onclick="toggleMediaSort()"></button>
-          </div>
-          <div id="mediaGrid"><div class="empty">טוען...</div></div>
+          <button type="button" class="gal-card" onclick="openGalleryManager()">
+            <span class="gal-ico" aria-hidden="true">🖼️</span>
+            <span class="gal-txt"><b>ניהול הגלריה</b><small id="galleryCardInfo">טוען...</small></span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+          </button>
         </div>
       </div>
     </div>`;
@@ -1430,13 +1452,18 @@ async function checkStorage(){
     }
   }catch(e){ reason='אין חיבור לשרת ההעלאה: '+(e.message||e); }
   storageReady=!reason;
+  storageReason=reason;
+  renderStorageNote();
+}
+let storageReason='';
+function renderStorageNote(){
   const note=document.getElementById('storageNote');
-  if(!note) return;
-  document.getElementById('uploadLabel').classList.toggle('disabled', !storageReady);
-  note.innerHTML = storageReady ? '' :
-    `<div class="minfo" style="margin:0 0 4px">אי אפשר להעלות כרגע: ${esc(reason)}. הסרת תמונות עובדת גם בלי זה.</div>`;
+  if(note) note.innerHTML = storageReady||!storageReason ? '' :
+    `<div class="minfo">אי אפשר להעלות קבצים כרגע: ${esc(storageReason)}. עריכה, סידור ומחיקה עובדים גם בלי זה.</div>`;
 }
 async function loadGalleryItems(){
+  galleryLoading=true;
+  renderGalleryManager();
   try{
     const {db,doc,getDoc}=await fbInit();
     const snap=await getDoc(doc(db,'mangalSettings','gallery'));
@@ -1444,12 +1471,13 @@ async function loadGalleryItems(){
       ? snap.data().items.filter(g=>isSafeMediaUrl(g.url))
       : [];
   }catch(e){ console.error(e); galleryItems=null; }
-  renderMediaGrid();
+  galleryLoading=false;
+  renderGalleryManager();
 }
 async function saveGalleryItems(items){
   // update memory first so an upload finishing mid-save builds on the latest list
   galleryItems=items;
-  renderMediaGrid();
+  renderGalleryManager();
   const {db,doc,setDoc}=await fbInit();
   await setDoc(doc(db,'mangalSettings','gallery'),{items, updatedAtMs:Date.now()});
 }
@@ -1464,169 +1492,631 @@ function mediaGroups(){
   });
   return out;
 }
-// sort mode: arrows move groups and photos instead of opening the caption editor
-let mediaSortMode=false;
-function toggleMediaSort(){ mediaSortMode=!mediaSortMode; renderMediaGrid(); }
+// the list stored group after group, which is the order the site shows
+function flattenGroups(items){
+  const order=[], map={};
+  items.forEach(g=>{ const n=itemGroup(g)||DEFAULT_GROUP; if(!map[n]){ map[n]=[]; order.push(n); } map[n].push(g); });
+  return order.flatMap(n=>map[n]);
+}
 function mediaThumb(g){
   return g.kind==='video'
-    ? `<div class="media-video" aria-hidden="true">▶<small>סרטון</small></div><span class="media-badge">🎬</span>`
+    ? `<div class="media-video" aria-hidden="true">▶<small>סרטון</small></div>`
     : g.kind==='youtube'
-    ? `<img src="${esc(YT.thumb(g.url))}" alt="" loading="lazy"><span class="media-yt" aria-label="YouTube">▶</span>`
-    : `<img src="${esc(g.url)}" alt="" loading="lazy">`;
+    ? `<img src="${esc(YT.thumb(g.url))}" alt="" loading="lazy" draggable="false"><span class="media-yt" aria-hidden="true">▶</span>`
+    : `<img src="${esc(g.url)}" alt="" loading="lazy" draggable="false">`;
 }
-function renderMediaGrid(){
-  const el=document.getElementById('mediaGrid');
+const countOf=(n,one,many)=>n===1?one:`${n} ${many}`;
+
+/* ===== the gallery manager: a full screen of its own, opened from the settings =====
+   Categories in the order the site shows them. A long press lifts a photo or a category for dragging;
+   letting go without moving starts selecting photos, to move or delete several together. */
+const NO_GROUP_LABEL='בלי קטגוריה';
+const ICON_BACK='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+const ICON_FOLD='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+let galleryLoading=false;
+let gmCollapsed=new Set();  // categories folded to their title
+let gmSel=null;             // while selecting: the selected items' urls
+let gmUp=null;              // the upload in progress
+let gmErrors=[];            // problems from the last upload
+function gmIsOpen(){ return !!document.getElementById('gmList'); }
+function renderGalleryCard(){
+  const el=document.getElementById('galleryCardInfo');
   if(!el) return;
-  renderGroupLists();
-  const tools=document.getElementById('mediaTools');
-  if(galleryItems===null){ if(tools) tools.hidden=true; el.innerHTML=`<div class="empty">לא הצליח לטעון את הגלריה</div>`; return; }
-  if(!galleryItems.length){ if(tools) tools.hidden=true; mediaSortMode=false; el.innerHTML=`<div class="empty">אין כרגע תמונות באתר</div>`; return; }
-  if(tools){
-    tools.hidden=false;
-    const btn=document.getElementById('sortBtn');
-    btn.textContent=mediaSortMode?'✓ סיום':'↕ שינוי סדר';
-    btn.classList.toggle('on',mediaSortMode);
-    btn.setAttribute('aria-pressed',String(mediaSortMode));
-    document.getElementById('sortNote').textContent=mediaSortMode
-      ? 'החצים מזיזים קטגוריה או תמונה · נשמר מיד באתר'
-      : 'כך מסודרת הגלריה באתר';
-  }
-  const groups=mediaGroups();
-  el.innerHTML=groups.map((grp,k)=>`
-    <div class="mg">
-      <div class="mg-head">
-        <span class="mg-name">${esc(grp.name)}</span><span class="mg-count">(${grp.idx.length})</span>
-        ${mediaSortMode&&groups.length>1?`<span class="mg-move">
-          <button type="button" data-mv="g${k}u" onclick="moveMediaGroup(${k},-1)" ${k===0?'disabled':''} aria-label="להזיז את ${esc(grp.name)} למעלה">▲</button>
-          <button type="button" data-mv="g${k}d" onclick="moveMediaGroup(${k},1)" ${k===groups.length-1?'disabled':''} aria-label="להזיז את ${esc(grp.name)} למטה">▼</button>
-        </span>`:''}
-      </div>
-      <div class="media-grid">${grp.idx.map((i,p)=>{ const g=galleryItems[i]; return mediaSortMode ? `
-        <div class="media-tile sorting">
-          ${mediaThumb(g)}
-          <span class="media-pos">${p+1}</span>
-          <div class="mv-bar">
-            <button type="button" data-mv="${esc(g.url)}|-1" onclick="moveMediaItem(${i},-1)" ${p===0?'disabled':''} aria-label="להקדים (מקום ${p+1} מתוך ${grp.idx.length})">→</button>
-            <button type="button" data-mv="${esc(g.url)}|1" onclick="moveMediaItem(${i},1)" ${p===grp.idx.length-1?'disabled':''} aria-label="לאחר (מקום ${p+1} מתוך ${grp.idx.length})">←</button>
-          </div>
-        </div>` : `
-        <div class="media-tile" onclick="openCaptionEditor(${i})">
-          ${mediaThumb(g)}
-          <div class="media-cap ${g.cap?'':'none'}">${g.cap?esc(g.cap):'✏️ הוספת כיתוב'}</div>
-          <button class="media-del" onclick="event.stopPropagation();removeMediaItem(${i})" aria-label="הסרה">✕</button>
-        </div>`; }).join('')}</div>
-    </div>`).join('');
+  el.textContent = galleryItems===null
+    ? (galleryLoading?'טוען...':'לא הצליח לטעון')
+    : galleryItems.length
+      ? `${countOf(galleryItems.length,'פריט אחד','פריטים')} · ${countOf(mediaGroups().length,'קטגוריה אחת','קטגוריות')}`
+      : 'עוד אין תמונות באתר';
 }
-// saves a new order; the list is stored group after group, which is the order the site shows
-async function saveMediaOrder(groups,focusKey){
-  try{
-    await saveGalleryItems(groups.flatMap(grp=>grp.idx.map(i=>galleryItems[i])));
-  }catch(e){ console.error(e); showToast('שמירת הסדר נכשלה'); loadGalleryItems(); return; }
-  // keep the keyboard on the arrow that was pressed (the grid was redrawn), or on its pair once it reached the end
-  const btns=focusKey ? [...document.querySelectorAll('#mediaGrid [data-mv]')] : [];
-  const pair=focusKey && focusKey.replace(/u$|d$|\|-?1$/,m=>({u:'d',d:'u','|-1':'|1','|1':'|-1'})[m]);
-  const btn=[focusKey,pair].map(key=>btns.find(b=>b.dataset.mv===key)).find(b=>b && !b.disabled);
-  if(btn) btn.focus();
-}
-function moveMediaGroup(k,dir){
-  const groups=mediaGroups(), j=k+dir;
-  if(!groups[k] || !groups[j]) return;
-  [groups[k],groups[j]]=[groups[j],groups[k]];
-  saveMediaOrder(groups,`g${j}${dir<0?'u':'d'}`);
-}
-function moveMediaItem(i,dir){
-  const groups=mediaGroups(), url=galleryItems[i]&&galleryItems[i].url;
-  const grp=groups.find(x=>x.idx.includes(i));
-  if(!grp) return;
-  const p=grp.idx.indexOf(i), q=p+dir;
-  if(q<0 || q>=grp.idx.length) return;
-  [grp.idx[p],grp.idx[q]]=[grp.idx[q],grp.idx[p]];
-  saveMediaOrder(groups,`${url}|${dir}`);
-}
-const CAPTION_MAX=80;
-function openCaptionEditor(i){
-  const item=galleryItems && galleryItems[i];
-  if(!item) return;
-  let root=document.getElementById('capEditRoot');
-  if(!root){ root=document.createElement('div'); root.id='capEditRoot'; document.body.appendChild(root); }
-  const curGroup=itemGroup(item);
-  root.innerHTML=`
-    <div class="modal-bg cap-edit-bg" onclick="if(event.target===this)closeCaptionEditor()">
-      <div class="modal">
-        <div class="modal-top"><h3>✏️ כיתוב וקבוצה</h3><button class="modal-close" onclick="closeCaptionEditor()">✕</button></div>
-        ${item.kind==='video'
-          ? `<video class="cap-edit-preview" src="${esc(item.url)}" controls playsinline preload="none"></video>`
-          : `<img class="cap-edit-preview" src="${esc(item.kind==='youtube'?YT.thumb(item.url):item.url)}" alt="">`}
-        <div class="mfld">
-          <label for="capInput">הכיתוב שיופיע על ${item.kind==='image'?'התמונה':'הסרטון'} באתר</label>
-          <input id="capInput" type="text" maxlength="${CAPTION_MAX}" value="${esc(item.cap||'')}" placeholder="למשל: אנטריקוט על האש באירוע בר מצווה"
-            oninput="document.getElementById('capCount').textContent=this.value.length+'/${CAPTION_MAX}'"
-            onkeydown="if(event.key==='Enter')saveCaption()">
-          <div class="cap-count" id="capCount">${(item.cap||'').length}/${CAPTION_MAX}</div>
-        </div>
-        <div class="mfld">
-          <label for="grpInput">הקבוצה בגלריה (לחצו על קבוצה, או כתבו שם חדש)</label>
-          <input id="grpInput" type="text" maxlength="${GROUP_MAX}" value="${esc(curGroup)}" placeholder="${esc(DEFAULT_GROUP)}"
-            onkeydown="if(event.key==='Enter')saveCaption()">
-          <div class="grp-chips">
-            ${groupNames().map(n=>`<button type="button" class="grp-chip ${n===(curGroup||DEFAULT_GROUP)?'on':''}" onclick="pickEditGroup(this)">${esc(n)}</button>`).join('')}
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button class="btn-save" onclick="saveCaption()">שמירה</button>
-          ${item.cap?`<button class="btn-danger" onclick="document.getElementById('capInput').value='';saveCaption()">מחיקת הכיתוב</button>`:''}
+function openGalleryManager(){
+  viewOpened(openGalleryManager);
+  gmSel=null;
+  document.getElementById('modalRoot').innerHTML=`
+    <div class="gm" role="dialog" aria-modal="true" aria-labelledby="gmTitle">
+      <div class="gm-top" id="gmTop"></div>
+      <div class="gm-body" id="gmBody">
+        <div class="gm-in">
+          <div class="gm-info" id="gmInfo"></div>
+          <div id="storageNote"></div>
+          <div id="gmUpload"></div>
+          <div id="gmList"></div>
         </div>
       </div>
+      <div class="gm-actions" id="gmActions" hidden></div>
     </div>`;
-  root.dataset.url=item.url;
-  history.pushState({bbqAdmin:true},''); backDepth++;
-  const inp=document.getElementById('capInput');
-  inp.focus();
-  inp.setSelectionRange(inp.value.length,inp.value.length);
+  renderGalleryManager();
+  renderStorageNote();
+  if(galleryItems===null && !galleryLoading) loadGalleryItems();
+  checkStorage();
 }
-function closeCaptionEditor(){
-  const root=document.getElementById('capEditRoot');
-  if(root) root.innerHTML='';
+// back to the settings from the manager's own back button
+function backToPrevView(){
+  viewStack.pop();
+  if(!viewStack.length){ closeModal(); return; }
+  restoringView=true; try{ viewStack[viewStack.length-1](); } finally{ restoringView=false; }
   syncBackHistory();
 }
-async function saveCaption(){
-  const root=document.getElementById('capEditRoot');
-  const url=root && root.dataset.url;
-  const inp=document.getElementById('capInput');
-  const grpInp=document.getElementById('grpInput');
-  if(!url || !inp || !galleryItems) return;
-  const cap=inp.value.trim().slice(0,CAPTION_MAX);
-  const group=(grpInp ? grpInp.value : '').trim().slice(0,GROUP_MAX);
-  if(!galleryItems.some(g=>g.url===url)){ closeCaptionEditor(); return; }
-  closeCaptionEditor();
-  try{
-    await saveGalleryItems(galleryItems.map(g=>g.url===url?{...g,cap,group}:g));
-    showToast('נשמר ✓');
-  }catch(e){
-    console.error(e); showToast('השמירה נכשלה'); loadGalleryItems();
+function renderGalleryManager(){
+  renderGalleryCard();
+  if(!gmIsOpen()) return;
+  if(gmDrag){ gmDrag.renderLater=true; return; }
+  const ready=Array.isArray(galleryItems);
+  const top=document.getElementById('gmTop');
+  top.classList.toggle('sel',!!gmSel);
+  top.innerHTML=`<div class="gm-top-in">${gmSel ? `
+    <button type="button" class="gm-back" onclick="exitSelect()" aria-label="ביטול הבחירה">✕</button>
+    <h3 id="gmTitle">${gmSel.size?`נבחרו ${gmSel.size}`:'בחירת פריטים'}</h3>` : `
+    <button type="button" class="gm-back" onclick="backToPrevView()" aria-label="חזרה להגדרות">${ICON_BACK}</button>
+    <h3 id="gmTitle">הגלריה באתר</h3>
+    <button type="button" class="gm-add" onclick="openAddSheet()" ${ready?'':'disabled'}>＋ הוספה</button>`}</div>`;
+  const act=document.getElementById('gmActions');
+  act.hidden=!gmSel;
+  act.innerHTML = gmSel ? `
+    <button type="button" class="gm-act" onclick="openMoveSheet()" ${gmSel.size?'':'disabled'}>📁 העברה לקטגוריה</button>
+    <button type="button" class="gm-act danger" onclick="deleteSelected()" ${gmSel.size?'':'disabled'}>🗑️ מחיקה</button>` : '';
+  const info=document.getElementById('gmInfo');
+  if(!ready || !galleryItems.length) info.innerHTML='';
+  else if(gmSel) info.innerHTML=`<p class="gm-tip">לחיצה על פריטים לבחירה, ואז בוחרים מה לעשות איתם למטה</p>`;
+  else {
+    const vids=galleryItems.filter(g=>g.kind!=='image').length;
+    info.innerHTML=`
+      <div class="gm-stats">${countOf(galleryItems.length-vids,'תמונה אחת','תמונות')} · ${countOf(vids,'סרטון אחד','סרטונים')} · ${countOf(mediaGroups().length,'קטגוריה אחת','קטגוריות')}</div>
+      <a class="gm-view" href="/#gallery" target="_blank" rel="noopener">👁 איך זה נראה באתר</a>
+      <p class="gm-tip"><span>✏️ לחיצה: עריכה</span><span>↕️ לחיצה ארוכה וגרירה: שינוי סדר</span><span>☑️ לחיצה ארוכה: בחירת כמה</span></p>`;
   }
+  renderUploadPanel();
+  const list=document.getElementById('gmList');
+  if(!ready){
+    list.innerHTML = galleryLoading
+      ? `<div class="empty">טוען...</div>`
+      : `<div class="empty">לא הצליח לטעון את הגלריה<br><button type="button" class="gm-retry" onclick="loadGalleryItems()">לנסות שוב</button></div>`;
+    return;
+  }
+  if(!galleryItems.length){
+    list.innerHTML=`<div class="gm-empty"><div class="gm-empty-ico" aria-hidden="true">📷</div><b>עוד אין תמונות באתר</b>
+      <span>אפשר להוסיף תמונות וסרטונים מהטלפון, או קישור לסרטון מיוטיוב</span>
+      <button type="button" class="gm-add big" onclick="openAddSheet()">＋ הוספה</button></div>`;
+    return;
+  }
+  list.innerHTML=mediaGroups().map(gmSectionHtml).join('');
 }
-async function removeMediaItem(i){
-  const item=galleryItems && galleryItems[i];
+function gmSectionHtml(grp){
+  const none = grp.name===DEFAULT_GROUP && grp.idx.some(i=>!itemGroup(galleryItems[i]));
+  const label = none ? NO_GROUP_LABEL : grp.name;
+  const closed = gmCollapsed.has(grp.name);
+  const allSel = gmSel && grp.idx.every(i=>gmSel.has(galleryItems[i].url));
+  return `
+    <section class="gm-sec ${none?'none':''} ${closed?'closed':''}" data-group="${esc(grp.name)}">
+      <div class="gm-head">
+        <button type="button" class="gm-fold" onclick="toggleGroupFold(this)" aria-expanded="${!closed}">
+          ${ICON_FOLD}<span class="gm-name">${none?'⚠️ ':''}${esc(label)}</span><span class="gm-count">${grp.idx.length}</span>
+        </button>
+        ${gmSel
+          ? `<button type="button" class="gm-selall" onclick="selectGroup(this)">${allSel?'ביטול הבחירה':'בחירת הכל'}</button>`
+          : `<button type="button" class="gm-more" onclick="openGroupSheet(this.closest('.gm-sec').dataset.group)" aria-label="אפשרויות לקטגוריה ${esc(label)}">⋯</button>`}
+      </div>
+      ${none?`<p class="gm-none-tip">באתר הן מופיעות תחת "כללי". אפשר לגרור אותן לקטגוריה, או ⋯ לקביעת קטגוריה לכולן.</p>`:''}
+      <div class="gm-grid">${grp.idx.map(i=>gmTileHtml(galleryItems[i])).join('')}</div>
+    </section>`;
+}
+function gmTileHtml(g){
+  const sel = gmSel && gmSel.has(g.url);
+  return `
+        <button type="button" class="gm-tile ${sel?'sel':''}" data-url="${esc(g.url)}" onclick="tileTap(this)"
+          aria-label="${g.kind==='image'?'תמונה':'סרטון'}${g.cap?': '+esc(g.cap):''}" ${gmSel?`aria-pressed="${!!sel}"`:''}>
+          ${mediaThumb(g)}
+          ${g.cap?`<span class="gm-cap" aria-hidden="true">${esc(g.cap)}</span>`:''}
+          ${gmSel?`<span class="gm-check" aria-hidden="true">${sel?'✓':''}</span>`:''}
+        </button>`;
+}
+function tileTap(btn){
+  const url=btn.dataset.url;
+  if(!gmSel){ openItemSheet(url); return; }
+  if(gmSel.has(url)) gmSel.delete(url); else gmSel.add(url);
+  renderGalleryManager();
+}
+function toggleGroupFold(btn){
+  const sec=btn.closest('.gm-sec'), name=sec.dataset.group;
+  const closed=!sec.classList.contains('closed');
+  sec.classList.toggle('closed',closed);
+  btn.setAttribute('aria-expanded',String(!closed));
+  if(closed) gmCollapsed.add(name); else gmCollapsed.delete(name);
+}
+function groupUrls(name){ return (galleryItems||[]).filter(g=>(itemGroup(g)||DEFAULT_GROUP)===name).map(g=>g.url); }
+
+/* selecting several items; the phone's back button ends it */
+function enterSelect(urls){
+  if(gmSel) return;
+  gmSel=new Set(urls);
+  history.pushState({bbqAdmin:true},''); backDepth++;
+  renderGalleryManager();
+}
+function exitSelect(){
+  if(!gmSel) return;
+  gmSel=null;
+  renderGalleryManager();
+  syncBackHistory();
+}
+function selectGroup(btn){
+  const urls=groupUrls(btn.closest('.gm-sec').dataset.group);
+  const all=urls.every(u=>gmSel.has(u));
+  urls.forEach(u=>all?gmSel.delete(u):gmSel.add(u));
+  renderGalleryManager();
+}
+function openMoveSheet(){
+  if(!gmSel || !gmSel.size) return;
+  openSheet(`📁 העברת ${countOf(gmSel.size,'פריט אחד','פריטים')}`, `
+    ${catPicker(null)}
+    <div class="modal-actions"><button type="button" class="btn-save" onclick="moveSelected()">העברה</button></div>`);
+}
+async function moveSelected(){
+  if(!gmSel || !galleryItems) return;
+  const group=catValue();
+  if(group===null){ showToast('בחרו קטגוריה'); return; }
+  const urls=[...gmSel];
+  const moved=galleryItems.filter(g=>urls.includes(g.url)).map(g=>({...g,group}));
+  const rest=galleryItems.filter(g=>!urls.includes(g.url));
+  // the moved items go to the end of their category; a new category goes last
+  let at=-1;
+  rest.forEach((g,i)=>{ if((itemGroup(g)||DEFAULT_GROUP)===(group||DEFAULT_GROUP)) at=i; });
+  const items = at<0 ? [...rest,...moved] : [...rest.slice(0,at+1),...moved,...rest.slice(at+1)];
+  closeSheet(); exitSelect();
+  try{
+    await saveGalleryItems(flattenGroups(items));
+    showToast(`${countOf(moved.length,'פריט אחד הועבר','פריטים הועברו')} ל${group?`"${group}"`:NO_GROUP_LABEL} ✓`);
+  }catch(e){ console.error(e); showToast('ההעברה נכשלה'); loadGalleryItems(); }
+}
+async function deleteSelected(){
+  if(!gmSel || !gmSel.size) return;
+  const urls=[...gmSel];
+  if(!confirm(`למחוק ${countOf(urls.length,'פריט אחד','פריטים')} מהאתר?`)) return;
+  exitSelect();
+  if(await removeItems(urls)) showToast(urls.length===1?'נמחק מהאתר ✓':`${urls.length} פריטים נמחקו מהאתר ✓`);
+}
+async function removeItems(urls){
+  const gone=galleryItems.filter(g=>urls.includes(g.url));
+  try{
+    await saveGalleryItems(galleryItems.filter(g=>!urls.includes(g.url)));
+  }catch(e){ console.error(e); showToast('המחיקה נכשלה'); loadGalleryItems(); return false; }
+  const blobs=gone.filter(g=>g.blob);
+  if(blobs.length){
+    const token=await idToken();
+    blobs.forEach(g=>fetch('/api/media-delete',{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({url:g.url,idToken:token})}).catch(()=>{}));
+  }
+  return true;
+}
+
+/* ===== small windows over the manager (edit, add, category); each is one step for the back button ===== */
+function sheetOpen(){ const r=document.getElementById('sheetRoot'); return !!(r && r.innerHTML.trim()); }
+function openSheet(title, body){
+  let root=document.getElementById('sheetRoot');
+  if(!root){ root=document.createElement('div'); root.id='sheetRoot'; document.body.appendChild(root); }
+  const wasOpen=sheetOpen();
+  root.innerHTML=`
+    <div class="modal-bg sheet-bg" onclick="if(event.target===this)closeSheet()">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+        <div class="modal-top"><h3 id="sheetTitle">${title}</h3><button type="button" class="modal-close" onclick="closeSheet()" aria-label="סגירה">✕</button></div>
+        ${body}
+      </div>
+    </div>`;
+  if(!wasOpen){ history.pushState({bbqAdmin:true},''); backDepth++; }
+  return root;
+}
+function closeSheet(){
+  const root=document.getElementById('sheetRoot');
+  if(root){ root.innerHTML=''; delete root.dataset.url; delete root.dataset.group; }
+  clearPending();
+  syncBackHistory();
+}
+// choosing a category: one of the existing ones, none, or a new name. cur=null starts with nothing chosen
+function catPicker(cur){
+  if(cur!==null){ cur=(cur||'').trim(); if(cur===DEFAULT_GROUP) cur=''; }
+  const names=groupNames().filter(n=>n!==DEFAULT_GROUP);
+  return `
+    <div class="mfld">
+      <label for="catInput">קטגוריה</label>
+      <div class="grp-chips" id="catChips" data-picked="${cur===null?'':'1'}">
+        ${names.map(n=>`<button type="button" class="grp-chip ${n===cur?'on':''}" data-v="${esc(n)}" onclick="pickCat(this)">${esc(n)}</button>`).join('')}
+        <button type="button" class="grp-chip none ${cur===''?'on':''}" data-v="" onclick="pickCat(this)">${NO_GROUP_LABEL}</button>
+      </div>
+      <input class="cat-new" id="catInput" type="text" maxlength="${GROUP_MAX}" value="${esc(cur||'')}" placeholder="או שם לקטגוריה חדשה" oninput="syncCatChips(true)">
+    </div>`;
+}
+function pickCat(btn){ document.getElementById('catInput').value=btn.dataset.v; syncCatChips(true); }
+function syncCatChips(picked){
+  const box=document.getElementById('catChips');
+  if(picked) box.dataset.picked='1';
+  const v=document.getElementById('catInput').value.trim();
+  box.querySelectorAll('.grp-chip').forEach(c=>c.classList.toggle('on',box.dataset.picked==='1' && c.dataset.v===v));
+}
+// the chosen category ('' = none), or null when nothing was chosen yet
+function catValue(){
+  const box=document.getElementById('catChips'), inp=document.getElementById('catInput');
+  if(!box || !inp || box.dataset.picked!=='1') return null;
+  const v=inp.value.trim().slice(0,GROUP_MAX);
+  return v===DEFAULT_GROUP?'':v;
+}
+
+const CAPTION_MAX=80;
+function openItemSheet(url){
+  const item=galleryItems && galleryItems.find(g=>g.url===url);
   if(!item) return;
-  if(!confirm(item.kind==='image'?'להסיר את התמונה מהאתר?':'להסיר את הסרטון מהאתר?')) return;
-  try{
-    await saveGalleryItems(galleryItems.filter(g=>g.url!==item.url));
-    showToast('הוסר מהאתר ✓');
-  }catch(e){
-    console.error(e); showToast('ההסרה נכשלה'); loadGalleryItems(); return;
-  }
-  if(item.blob){
-    fetch('/api/media-delete',{method:'POST',headers:{'content-type':'application/json'},
-      body:JSON.stringify({url:item.url,idToken:await idToken()})}).catch(()=>{});
-  }
+  const what=item.kind==='image'?'התמונה':'הסרטון';
+  const root=openSheet(item.kind==='image'?'✏️ עריכת תמונה':'✏️ עריכת סרטון', `
+    ${item.kind==='video'
+      ? `<video class="sheet-prev" src="${esc(item.url)}" controls playsinline preload="none"></video>`
+      : item.kind==='youtube'
+      ? `<div class="sheet-yt"><img class="sheet-prev" src="${esc(YT.thumb(item.url))}" alt=""><span class="media-yt" aria-hidden="true">▶</span></div>`
+      : `<img class="sheet-prev" src="${esc(item.url)}" alt="">`}
+    <div class="mfld">
+      <label for="capInput">כיתוב שיופיע על ${what} באתר</label>
+      <input id="capInput" type="text" maxlength="${CAPTION_MAX}" value="${esc(item.cap||'')}" placeholder="למשל: אנטריקוט על האש באירוע בר מצווה"
+        oninput="document.getElementById('capCount').textContent=this.value.length+'/${CAPTION_MAX}'"
+        onkeydown="if(event.key==='Enter')saveItemSheet()">
+      <div class="cap-count" id="capCount">${(item.cap||'').length}/${CAPTION_MAX}</div>
+    </div>
+    ${catPicker(itemGroup(item))}
+    <div class="modal-actions"><button type="button" class="btn-save" onclick="saveItemSheet()">שמירה</button></div>
+    <button type="button" class="sheet-del" onclick="deleteSheetItem()">🗑️ מחיקת ${what} מהאתר</button>`);
+  root.dataset.url=url;
 }
-function setUploadStatus(text){
-  const el=document.getElementById('uploadStatus');
+async function saveItemSheet(){
+  const url=document.getElementById('sheetRoot').dataset.url;
+  const item=galleryItems && galleryItems.find(g=>g.url===url);
+  if(!item){ closeSheet(); return; }
+  const cap=document.getElementById('capInput').value.trim().slice(0,CAPTION_MAX);
+  const group=catValue();
+  const updated={...item, cap, group:group===null?itemGroup(item):group};
+  closeSheet();
+  // moved to another category: first in it (a new category goes last)
+  const items=(itemGroup(updated)||DEFAULT_GROUP)===(itemGroup(item)||DEFAULT_GROUP)
+    ? galleryItems.map(g=>g.url===url?updated:g)
+    : withNewItem(galleryItems.filter(g=>g.url!==url),updated);
+  try{ await saveGalleryItems(items); showToast('נשמר ✓'); }
+  catch(e){ console.error(e); showToast('השמירה נכשלה'); loadGalleryItems(); }
+}
+async function deleteSheetItem(){
+  const url=document.getElementById('sheetRoot').dataset.url;
+  const item=galleryItems && galleryItems.find(g=>g.url===url);
+  if(!item) return;
+  if(!confirm(item.kind==='image'?'למחוק את התמונה מהאתר?':'למחוק את הסרטון מהאתר?')) return;
+  closeSheet();
+  if(await removeItems([url])) showToast('נמחק מהאתר ✓');
+}
+
+// the ⋯ of a category (also a long press on its title)
+function openGroupSheet(name){
+  const urls=groupUrls(name);
+  if(!urls.length) return;
+  const none=name===DEFAULT_GROUP;
+  const root=openSheet(`📁 ${esc(none?NO_GROUP_LABEL:name)} <span class="gm-count">${urls.length}</span>`, `
+    <div class="mfld">
+      <label for="grpName">${none?'קטגוריה לכל הפריטים כאן':'שם הקטגוריה'}</label>
+      <input id="grpName" type="text" maxlength="${GROUP_MAX}" value="${none?'':esc(name)}" placeholder="${none?'למשל: בשרים על האש':''}" onkeydown="if(event.key==='Enter')renameGroup()">
+    </div>
+    <div class="modal-actions"><button type="button" class="btn-save" onclick="renameGroup()">${none?'שמירה':'שמירת השם'}</button></div>
+    <div class="sheet-opts">
+      <button type="button" class="sheet-opt" onclick="selectWholeGroup()">☑️ בחירת כל הפריטים כאן<small>להעברה או למחיקה של כולם ביחד</small></button>
+      ${none?'':`<button type="button" class="sheet-opt danger" onclick="dissolveGroup()">🗑️ ביטול הקטגוריה<small>הפריטים נשארים באתר, בלי קטגוריה</small></button>`}
+    </div>`);
+  root.dataset.group=name;
+}
+async function renameGroup(){
+  const name=document.getElementById('sheetRoot').dataset.group;
+  let to=document.getElementById('grpName').value.trim().slice(0,GROUP_MAX);
+  if(!to){ showToast('צריך לכתוב שם'); return; }
+  if(to===DEFAULT_GROUP) to='';
+  closeSheet();
+  if(to===name) return;
+  // same name as another category: they join it
+  const items=flattenGroups(galleryItems.map(g=>(itemGroup(g)||DEFAULT_GROUP)===name?{...g,group:to}:g));
+  try{ await saveGalleryItems(items); showToast('נשמר ✓'); }
+  catch(e){ console.error(e); showToast('השמירה נכשלה'); loadGalleryItems(); }
+}
+function selectWholeGroup(){
+  const name=document.getElementById('sheetRoot').dataset.group;
+  closeSheet();
+  gmCollapsed.delete(name);
+  enterSelect(groupUrls(name));
+}
+async function dissolveGroup(){
+  const name=document.getElementById('sheetRoot').dataset.group;
+  if(!confirm(`לבטל את הקטגוריה "${name}"? הפריטים יישארו באתר, בלי קטגוריה.`)) return;
+  closeSheet();
+  const items=flattenGroups(galleryItems.map(g=>itemGroup(g)===name?{...g,group:''}:g));
+  try{ await saveGalleryItems(items); showToast('הקטגוריה בוטלה ✓'); }
+  catch(e){ console.error(e); showToast('השמירה נכשלה'); loadGalleryItems(); }
+}
+
+/* adding: files from the phone or a YouTube link */
+let gmPending=null; // files chosen for upload, with a local preview
+function openAddSheet(){
+  if(!Array.isArray(galleryItems)){ showToast('הגלריה לא נטענה, נסו לפתוח שוב'); return; }
+  openSheet('＋ הוספה לגלריה', `
+    <div class="add-opts">
+      <label class="add-opt ${storageReady?'':'disabled'}">
+        <span class="ico" aria-hidden="true">📷</span>
+        <span><b>תמונות וסרטונים מהטלפון</b><small>אפשר לבחור כמה ביחד · סרטון עד 50MB</small></span>
+        <input type="file" accept="image/*,video/*" multiple hidden onchange="pickFiles(this.files)" ${storageReady?'':'disabled'}>
+      </label>
+      <button type="button" class="add-opt" onclick="openYoutubeSheet()">
+        <span class="ico yt" aria-hidden="true">▶</span>
+        <span><b>סרטון מיוטיוב</b><small>הכי מומלץ לסרטונים: לא נגמר באחסון</small></span>
+      </button>
+    </div>
+    ${storageReady?'':`<div class="minfo">${storageReason?`אי אפשר להעלות קבצים כרגע: ${esc(storageReason)}`:'בודק את האחסון...'}</div>`}`);
+}
+function pickFiles(fileList){
+  const files=[...fileList];
+  if(!files.length) return;
+  clearPending();
+  gmPending=files.map(file=>{
+    const video=(file.type||guessMediaType(file.name)).startsWith('video/');
+    return {file, video, big:video && file.size>MAX_VIDEO_BYTES, url:URL.createObjectURL(file)};
+  });
+  renderUploadSheet();
+}
+function clearPending(){
+  if(gmPending) gmPending.forEach(p=>URL.revokeObjectURL(p.url));
+  gmPending=null;
+}
+function renderUploadSheet(){
+  const ok=gmPending.filter(p=>!p.big).length;
+  const prev=catValue();
+  openSheet('📷 העלאה לגלריה', `
+    <div class="up-grid">${gmPending.map((p,k)=>`
+      <div class="up-tile ${p.big?'big':''}">
+        <span aria-hidden="true">${p.video?'🎬':'📷'}</span>
+        ${p.video?`<video src="${p.url}" muted playsinline preload="metadata"></video><span class="up-kind" aria-hidden="true">🎬</span>`:`<img src="${p.url}" alt="" onerror="this.remove()">`}
+        ${p.big?`<span class="up-warn">גדול מדי · ${Math.round(p.file.size/1048576)}MB</span>`:''}
+        <button type="button" class="up-x" onclick="unpickFile(${k})" aria-label="להוציא מההעלאה">✕</button>
+      </div>`).join('')}</div>
+    ${gmPending.some(p=>p.big)?`<div class="minfo">סרטון מעל 50MB לא יועלה. עדיף להעלות אותו ליוטיוב ולהוסיף כאן את הקישור.</div>`:''}
+    ${catPicker(prev!==null?prev:lastUploadGroup)}
+    <div class="modal-actions"><button type="button" class="btn-save" onclick="startUpload()" ${ok?'':'disabled'}>העלאה${ok>1?` של ${ok}`:''}</button></div>`);
+}
+function unpickFile(k){
+  URL.revokeObjectURL(gmPending[k].url);
+  gmPending.splice(k,1);
+  if(gmPending.length) renderUploadSheet(); else closeSheet();
+}
+function startUpload(){
+  const group=catValue()||'';
+  lastUploadGroup=group;
+  const files=gmPending.filter(p=>!p.big).map(p=>p.file);
+  closeSheet();
+  handleMediaFiles(files,group);
+}
+function openYoutubeSheet(){
+  openSheet('▶ סרטון מיוטיוב', `
+    <div class="mfld">
+      <label for="ytLink">הקישור לסרטון</label>
+      <input id="ytLink" type="url" inputmode="url" dir="ltr" placeholder="https://youtu.be/..." oninput="ytPreview()" onkeydown="if(event.key==='Enter')addYoutube()">
+    </div>
+    <div class="yt-prev" id="ytPrev" hidden></div>
+    <p class="sheet-tip">ביוטיוב: שיתוף ← העתקת קישור. כדאי להעלות את הסרטון כ"לא רשום" (Unlisted), ככה רק מי שבאתר רואה אותו.</p>
+    ${catPicker(lastUploadGroup)}
+    <div class="modal-actions"><button type="button" class="btn-save" onclick="addYoutube()">הוספה</button></div>`);
+}
+function ytPreview(){
+  const url=YT.fromLink(document.getElementById('ytLink').value);
+  const el=document.getElementById('ytPrev');
+  el.hidden=!url;
+  el.innerHTML=url?`<img src="${esc(YT.thumb(url))}" alt="התמונה של הסרטון"><span class="media-yt" aria-hidden="true">▶</span>`:'';
+}
+function renderUploadPanel(){
+  const el=document.getElementById('gmUpload');
   if(!el) return;
-  el.hidden=!text;
-  el.textContent=text;
+  if(gmUp) el.innerHTML=`
+    <div class="gm-up" role="status">
+      <div class="gm-up-row"><span>${esc(gmUp.label)}</span><span>${gmUp.n} מתוך ${gmUp.total}</span></div>
+      <div class="gm-bar"><i style="width:${Math.round(((gmUp.n-1)+gmUp.pct/100)/gmUp.total*100)}%"></i></div>
+    </div>`;
+  else if(gmErrors.length) el.innerHTML=`
+    <div class="gm-err" role="alert">${gmErrors.map(e=>`<p>⚠️ ${esc(e)}</p>`).join('')}
+      <button type="button" onclick="gmErrors=[];renderUploadPanel()">הבנתי</button></div>`;
+  else el.innerHTML='';
 }
+function setUploadProgress(n,total,label,pct){
+  gmUp={n,total,label,pct:pct||0};
+  renderUploadPanel();
+}
+
+/* ===== dragging in the manager =====
+   Touch: hold still for a moment to lift (a quick swipe still scrolls), then drag; let go without moving to select.
+   Mouse: drag right away. A photo can move inside its category or into another one; a category moves with
+   every category folded to its title. The new order is saved when it's dropped. */
+const LIFT_MS=320, MOVE_TOL=8;
+let gmPress=null, gmDrag=null, gmSuppressClick=0, gmTouchAt=0;
+function gmPressStart(x,y,target,touch){
+  if(gmPress || gmDrag || gmSel || !target.closest) return;
+  if(target.closest('.gm-more,.gm-selall')) return;
+  const tile=target.closest('#gmList .gm-tile');
+  const sec=!tile && target.closest('#gmList .gm-head') && target.closest('.gm-sec');
+  if(!tile && !sec) return;
+  gmPress={el:tile||sec, kind:tile?'tile':'group', x0:x, y0:y, x, y, touch, lifted:false};
+  if(touch) gmPress.timer=setTimeout(gmLift,LIFT_MS);
+}
+function gmLift(){
+  if(!gmPress) return;
+  gmPress.lifted=true;
+  gmPress.el.classList.add('lifting');
+  try{ if(navigator.vibrate) navigator.vibrate(12); }catch(e){}
+}
+function gmPressMove(x,y,e){
+  const p=gmPress;
+  if(!p) return;
+  p.x=x; p.y=y;
+  const far=Math.hypot(x-p.x0,y-p.y0)>MOVE_TOL;
+  if(gmDrag){ if(e.cancelable) e.preventDefault(); gmDragMove(); return; }
+  if(p.touch && !p.lifted){ if(far) gmCancelPress(); return; } // a swipe: let the page scroll
+  if(p.lifted && e.cancelable) e.preventDefault();
+  if(far) gmStartDrag();
+}
+function gmCancelPress(){
+  if(!gmPress) return;
+  clearTimeout(gmPress.timer);
+  gmPress.el.classList.remove('lifting');
+  gmPress=null;
+}
+function gmPressEnd(){
+  const p=gmPress;
+  if(!p) return;
+  clearTimeout(p.timer);
+  gmPress=null;
+  p.el.classList.remove('lifting');
+  if(gmDrag){ gmSuppressClick=Date.now()+300; gmDrop(); return; }
+  if(p.lifted){
+    gmSuppressClick=Date.now()+300;
+    if(p.kind==='tile') enterSelect([p.el.dataset.url]);
+    else openGroupSheet(p.el.dataset.group);
+  }
+}
+function gmStartDrag(){
+  const p=gmPress, el=p.el;
+  const body=document.getElementById('gmBody'), list=document.getElementById('gmList');
+  const handle=p.kind==='tile'?el:el.querySelector('.gm-head');
+  const r=handle.getBoundingClientRect();
+  const ghost=handle.cloneNode(true);
+  ghost.classList.remove('lifting');
+  ghost.classList.add('gm-ghost');
+  Object.assign(ghost.style,{width:r.width+'px',height:r.height+'px',left:r.left+'px',top:r.top+'px'});
+  document.body.appendChild(ghost);
+  el.classList.remove('lifting');
+  el.classList.add('gm-ph');
+  gmDrag={kind:p.kind, el, ghost, body, dx:p.x0-r.left, dy:p.y0-r.top, lockUntil:0, raf:0};
+  if(p.kind==='group'){
+    // fold every category to its title, and keep the lifted one under the finger
+    list.classList.add('sorting-groups');
+    body.scrollTop+=handle.getBoundingClientRect().top-r.top;
+  } else list.classList.add('dragging-tile');
+  gmDragMove();
+  gmDrag.raf=requestAnimationFrame(gmAutoScroll);
+}
+function gmDragMove(){
+  const d=gmDrag, p=gmPress;
+  if(!d || !p) return;
+  d.ghost.style.top=(p.y-d.dy)+'px';
+  if(d.kind==='tile') d.ghost.style.left=(p.x-d.dx)+'px';
+  if(performance.now()<d.lockUntil) return; // the last move is still animating
+  const hit=document.elementFromPoint(p.x,p.y);
+  if(!hit || !hit.closest('#gmList')) return;
+  if(d.kind==='tile'){
+    const t=hit.closest('.gm-tile');
+    if(t && t!==d.el){
+      const same=t.parentNode===d.el.parentNode;
+      gmFlip('.gm-tile',()=>{ if(same && gmIndex(t)>gmIndex(d.el)) t.after(d.el); else t.before(d.el); });
+      return;
+    }
+    const sec=!t && hit.closest('.gm-sec');
+    if(sec && sec!==d.el.closest('.gm-sec')){
+      const grid=sec.querySelector('.gm-grid');
+      if(sec.classList.contains('closed')){
+        sec.classList.remove('closed'); gmCollapsed.delete(sec.dataset.group);
+        sec.querySelector('.gm-fold').setAttribute('aria-expanded','true');
+      }
+      gmFlip('.gm-tile',()=>{ if(hit.closest('.gm-head')) grid.prepend(d.el); else grid.append(d.el); });
+    }
+  } else {
+    const sec=hit.closest('.gm-sec');
+    if(sec && sec!==d.el){
+      const r=sec.getBoundingClientRect();
+      gmFlip('.gm-sec',()=>{ if(p.y<r.top+r.height/2) sec.before(d.el); else sec.after(d.el); });
+    }
+  }
+}
+const gmIndex=el=>[...el.parentNode.children].indexOf(el);
+// moves the dragged element and slides the others into their new places
+function gmFlip(sel,mutate){
+  const els=[...document.querySelectorAll('#gmList '+sel)];
+  const before=new Map(els.map(e=>[e,e.getBoundingClientRect()]));
+  mutate();
+  gmDrag.lockUntil=performance.now()+170;
+  if(document.documentElement.classList.contains('a11y-still')) return;
+  els.forEach(e=>{
+    const a=before.get(e), b=e.getBoundingClientRect();
+    const dx=a.left-b.left, dy=a.top-b.top;
+    if((!dx && !dy) || !b.width) return;
+    e.style.transition='none';
+    e.style.transform=`translate(${dx}px,${dy}px)`;
+    requestAnimationFrame(()=>{ e.style.transition='transform .16s ease'; e.style.transform=''; });
+  });
+}
+// near the top or bottom edge the list scrolls by itself
+function gmAutoScroll(){
+  const d=gmDrag, p=gmPress;
+  if(!d || !p) return;
+  const r=d.body.getBoundingClientRect(), edge=70;
+  const v = p.y<r.top+edge ? -Math.ceil((r.top+edge-p.y)/5) : p.y>r.bottom-edge ? Math.ceil((p.y-(r.bottom-edge))/5) : 0;
+  if(v){ const was=d.body.scrollTop; d.body.scrollTop+=v; if(d.body.scrollTop!==was) gmDragMove(); }
+  d.raf=requestAnimationFrame(gmAutoScroll);
+}
+function gmDrop(){
+  const d=gmDrag;
+  cancelAnimationFrame(d.raf);
+  d.ghost.remove();
+  d.el.classList.remove('gm-ph');
+  const list=document.getElementById('gmList');
+  list.classList.remove('sorting-groups','dragging-tile');
+  gmDrag=null;
+  if(d.kind==='group') d.el.scrollIntoView({block:'nearest'});
+  // the new order as it is on the screen; a photo dropped in another category joins it
+  const byUrl=new Map((galleryItems||[]).map(g=>[g.url,g]));
+  let items=[];
+  list.querySelectorAll('.gm-sec').forEach(sec=>{
+    const name=sec.dataset.group;
+    sec.querySelectorAll('.gm-tile').forEach(t=>{
+      const g=byUrl.get(t.dataset.url);
+      if(!g) return;
+      byUrl.delete(t.dataset.url);
+      items.push((itemGroup(g)||DEFAULT_GROUP)===name ? g : {...g, group:name===DEFAULT_GROUP?'':name});
+    });
+  });
+  byUrl.forEach(g=>{ items=withNewItem(items,g); }); // added while dragging
+  if(JSON.stringify(items)===JSON.stringify(galleryItems)){ renderGalleryManager(); return; }
+  const changedGroup=items.find(g=>{ const o=galleryItems.find(x=>x.url===g.url); return o && itemGroup(o)!==itemGroup(g); });
+  saveGalleryItems(items)
+    .then(()=>showToast(changedGroup?`הועבר ל${itemGroup(changedGroup)?`"${itemGroup(changedGroup)}"`:NO_GROUP_LABEL} ✓`:'הסדר נשמר ✓'))
+    .catch(e=>{ console.error(e); showToast('שמירת הסדר נכשלה'); loadGalleryItems(); });
+}
+document.addEventListener('touchstart',e=>{
+  gmTouchAt=Date.now();
+  if(e.touches.length!==1){ if(!gmDrag) gmCancelPress(); return; }
+  gmPressStart(e.touches[0].clientX,e.touches[0].clientY,e.target,true);
+},{passive:true});
+document.addEventListener('touchmove',e=>{ if(gmPress) gmPressMove(e.touches[0].clientX,e.touches[0].clientY,e); },{passive:false});
+document.addEventListener('touchend',gmPressEnd);
+document.addEventListener('touchcancel',gmPressEnd);
+document.addEventListener('mousedown',e=>{ if(e.button===0 && Date.now()-gmTouchAt>800) gmPressStart(e.clientX,e.clientY,e.target,false); });
+document.addEventListener('mousemove',e=>{ if(gmPress && !gmPress.touch) gmPressMove(e.clientX,e.clientY,e); });
+document.addEventListener('mouseup',()=>{ if(gmPress && !gmPress.touch) gmPressEnd(); });
+// the click that follows a long press or a drop isn't a tap
+document.addEventListener('click',e=>{
+  if(Date.now()<gmSuppressClick && e.target.closest && e.target.closest('#gmList')){ e.preventDefault(); e.stopPropagation(); }
+},true);
+document.addEventListener('contextmenu',e=>{ if(e.target.closest && e.target.closest('#gmList')) e.preventDefault(); });
+
 async function shrinkImage(file){
   let bmp;
   try{ bmp=await createImageBitmap(file,{imageOrientation:'from-image'}); }catch(e){ return file; }
@@ -1648,38 +2138,31 @@ async function addYoutube(){
   const inp=document.getElementById('ytLink');
   const url=YT.fromLink(inp.value);
   if(!url){ showToast('זה לא נראה כמו קישור לסרטון ביוטיוב'); inp.focus(); return; }
-  if(galleryItems===null){ showToast('הגלריה לא נטענה, נסו לפתוח שוב'); return; }
+  if(!Array.isArray(galleryItems)){ showToast('הגלריה לא נטענה, נסו לפתוח שוב'); return; }
   if(galleryItems.some(g=>g.url===url)){ showToast('הסרטון הזה כבר באתר'); return; }
-  // the group chosen above, like uploaded files
-  const groupInput=document.getElementById('uploadGroup');
-  const group=((groupInput ? groupInput.value : lastUploadGroup)||'').trim().slice(0,GROUP_MAX);
+  const group=catValue()||'';
   lastUploadGroup=group;
+  closeSheet();
   try{
     await saveGalleryItems(withNewItem(galleryItems,{kind:'youtube', url, cap:'', group}));
-    inp.value='';
     showToast('הסרטון נוסף לאתר ✓');
   }catch(e){ console.error(e); showToast('ההוספה נכשלה'); loadGalleryItems(); }
 }
-async function handleMediaFiles(fileList){
-  const files=[...fileList];
+async function handleMediaFiles(files,group){
   if(!files.length) return;
   if(!storageReady){ showToast('האחסון עוד לא מחובר'); return; }
-  if(galleryItems===null){ showToast('הגלריה לא נטענה, נסו לפתוח שוב'); return; }
-  // the group chosen above the upload button
-  const groupInput=document.getElementById('uploadGroup');
-  const group=((groupInput ? groupInput.value : lastUploadGroup)||'').trim().slice(0,GROUP_MAX);
-  lastUploadGroup=group;
+  if(!Array.isArray(galleryItems)){ showToast('הגלריה לא נטענה, נסו לפתוח שוב'); return; }
   let added=0;
   const errors=[];
+  gmErrors=[];
   for(let i=0;i<files.length;i++){
     const f=files[i];
-    const prefix=files.length>1?`(${i+1}/${files.length}) `:'';
     // some phones hand over files with an empty type, so fall back to the extension
     const fType=f.type||guessMediaType(f.name);
     const isVideo=fType.startsWith('video/');
-    if(isVideo && f.size>MAX_VIDEO_BYTES){ errors.push(`${f.name}: הסרטון גדול מדי (${Math.round(f.size/1048576)}MB, אפשר עד 50MB). עדיף להעלות אותו ליוטיוב ולהדביק כאן את הקישור, או לשלוח אותו לעצמך בוואטסאפ, שמקטין אותו, ולהעלות את הגרסה משם`); continue; }
+    if(isVideo && f.size>MAX_VIDEO_BYTES){ errors.push(`${f.name}: הסרטון גדול מדי (${Math.round(f.size/1048576)}MB, אפשר עד 50MB). עדיף להעלות אותו ליוטיוב ולהוסיף כאן את הקישור`); continue; }
     try{
-      setUploadStatus(prefix+'מכין קובץ...');
+      setUploadProgress(i+1,files.length,'מכין קובץ...');
       const body=fType.startsWith('image/') ? await shrinkImage(f) : f;
       const type=body.type||fType;
       const ext=MEDIA_EXT[type];
@@ -1694,7 +2177,7 @@ async function handleMediaFiles(fileList){
         clientPayload:JSON.stringify({idToken:await idToken()}),
         contentType:type,
         multipart:body.size>20*1024*1024,
-        onUploadProgress:({percentage})=>{ if(uploading) setUploadStatus(`${prefix}מעלה ${isVideo?'סרטון':'תמונה'}... ${Math.round(percentage)}%`); }
+        onUploadProgress:({percentage})=>{ if(uploading) setUploadProgress(i+1,files.length,`מעלה ${isVideo?'סרטון':'תמונה'}...`,percentage); }
       }).finally(()=>{ uploading=false; });
       await saveGalleryItems(withNewItem(galleryItems,{kind:isVideo?'video':'image', url:res.url, cap:'', group, blob:true}));
       added++;
@@ -1705,7 +2188,9 @@ async function handleMediaFiles(fileList){
       errors.push(`${f.name}: ההעלאה נכשלה - ${msg}`);
     }
   }
-  setUploadStatus(errors.length ? '⚠️ '+errors.join('\n⚠️ ') : '');
+  gmUp=null;
+  gmErrors=errors;
+  renderUploadPanel();
   if(added) showToast(added===1?'נוסף לאתר ✓':`${added} קבצים נוספו לאתר ✓`);
 }
 // the blob client only says "Failed to retrieve the client token / presigned URL"; ask the server directly for its reason

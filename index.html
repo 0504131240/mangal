@@ -1195,6 +1195,8 @@ window.addEventListener('resize',applyMediaNav);
 applyMediaNav();
 
 renderGallery();renderLevels();renderMenus();loadGallery();applyA11y();
+// admin.html links here with #gallery to show how the gallery looks
+if(location.hash==='#gallery'){ history.replaceState(null,'',location.pathname+location.search); openGalleryModal(); }
 // direct links, e.g. the poster's QR code opens .../#book
 ({'#book':openBookModal,'#gallery':openGalleryModal,'#menus':openMenusModal,'#massage':openMassageModal,'#spa':openMassageModal,'#privacy':openPrivacy,'#accessibility':openStatement}[location.hash]||(()=>{}))();
 

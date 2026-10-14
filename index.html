@@ -110,6 +110,12 @@ section{padding:52px 0}
   background:linear-gradient(180deg,#F2662B,#B83C14);box-shadow:0 0 14px rgba(242,102,43,.5)}
 .vt-label{font-size:12.5px;font-weight:700}
 .lb-thumb .video-tile{gap:2px}.lb-thumb .vt-play{width:24px;height:24px;font-size:10px}.lb-thumb .vt-label{font-size:10px}
+.yt-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;
+  width:44px;height:44px;border-radius:50%;padding-left:3px;font-size:18px;color:#fff;background:linear-gradient(180deg,#F2662B,#B83C14);
+  box-shadow:0 0 14px rgba(242,102,43,.5);pointer-events:none}
+.lb-thumb .yt-play{width:24px;height:24px;font-size:10px}
+.lb-yt{width:100%;max-width:900px;max-height:100%;aspect-ratio:16/9;border:0;border-radius:14px;background:#000;box-shadow:0 12px 40px rgba(0,0,0,.6)}
+.lb-yt.vert{width:auto;height:100%;aspect-ratio:9/16}
 .gtile-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;padding-left:3px;pointer-events:none}
 .gtile-cap{position:absolute;inset-inline:0;bottom:0;padding:8px 10px 7px;background:linear-gradient(0deg,rgba(0,0,0,.55),transparent);color:#fff;font-size:11.5px;font-weight:600}
 .lightbox{position:fixed;inset:0;background:rgba(15,9,6,.95);z-index:100;display:flex;flex-direction:column}
@@ -695,6 +701,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
         <li>האתר לא משתמש בעוגיות מעקב, בפרסום או בכלי ניתוח תנועה.</li>
         <li>הגדרות הנגישות שבחרתם ועותק של רשימת התמונות נשמרים רק בדפדפן שלכם, ולא נשלחים אלינו.</li>
         <li>ספקי האחסון של האתר עשויים לשמור רישומים טכניים (כמו כתובת IP) לצורכי אבטחה ותפעול.</li>
+        <li>חלק מהסרטונים בגלריה מגיעים מ-YouTube: התמונות המקדימות שלהם נטענות כשפותחים את הגלריה, והסרטון עצמו כשמפעילים אותו (במצב הפרטיות המוגברת של YouTube). Google עשויה לקבל אז מידע טכני, כמו כתובת IP, לפי מדיניות הפרטיות שלה.</li>
       </ul>
       <h4>למה המידע משמש</h4>
       <p>כדי לטפל בבקשה, לבדוק זמינות, לחזור אליכם, לתאם את האירוע ואת התשלום, ולנהל את רישום ההזמנות. לא נשלח לכם פרסומות בלי הסכמה מפורשת.</p>
@@ -734,7 +741,8 @@ async function loadGallery(){
       const values=data?.fields?.items?.arrayValue?.values||[];
       list=values.map(v=>{
         const f=v.mapValue?.fields||{};
-        return {kind:f.kind?.stringValue==='video'?'video':'image', url:f.url?.stringValue, cap:f.cap?.stringValue||''};
+        const k=f.kind?.stringValue;
+        return {kind:k==='video'||k==='youtube'?k:'image', url:f.url?.stringValue, cap:f.cap?.stringValue||''};
       }).filter(g=>isSafeMediaUrl(g.url));
     } else return;
     try{ localStorage.setItem('mangalGalleryCache', JSON.stringify(list)); }catch(e){}
@@ -790,15 +798,19 @@ const MENUS = {
 // and loading them on every visit used up the storage's monthly data transfer
 let galleryOpened=false;
 const VIDEO_TILE='<span class="video-tile" aria-hidden="true"><span class="vt-play">▶</span><span class="vt-label">סרטון</span></span>';
+// a small tile for the gallery and the row under the big photo
+function mediaTile(g){
+  if(g.kind==='video') return VIDEO_TILE;
+  if(g.kind==='youtube') return `<img src="${escHtml(YT.thumb(g.url))}" alt="" loading="lazy"><span class="yt-play" aria-hidden="true">▶</span>`;
+  return `<img src="${escHtml(g.url)}" alt="" loading="lazy">`;
+}
 function renderGallery(){
   if(!galleryOpened) return;
   const grid=document.getElementById('galleryGrid');
   if(!GALLERY.length){ grid.innerHTML='<p class="gallery-empty">תמונות מאירועים יעלו כאן בקרוב 📷</p>'; return; }
   grid.innerHTML=GALLERY.map((g,i)=>`
     <button type="button" class="gtile" onclick="openLightbox(${i})" aria-label="${escHtml(mediaLabel(g,i))}">
-      ${g.kind==='video'
-        ? VIDEO_TILE
-        : `<img src="${escHtml(g.url)}" alt="" loading="lazy">`}
+      ${mediaTile(g)}
       ${g.cap?`<span class="gtile-cap" aria-hidden="true">${escHtml(g.cap)}</span>`:''}
     </button>`).join('');
 }
@@ -837,7 +849,7 @@ function openStatement(){ openDialog('statementBg'); }
 function openPrivacy(){ openDialog('privacyBg'); }
 
 function mediaLabel(g,i){
-  const kind=g.kind==='video'?'סרטון':'תמונה';
+  const kind=g.kind==='image'?'תמונה':'סרטון';
   return g.cap ? `${kind}: ${g.cap}` : `${kind} ${i+1} מתוך ${GALLERY.length}`;
 }
 let lightboxIndex=-1, lightboxOpener=null;
@@ -861,9 +873,7 @@ function buildLightbox(){
     <p class="lb-cap" id="lbCap" aria-live="polite"></p>
     <div class="lb-strip" id="lbStrip" role="group" aria-label="כל התמונות">
       ${GALLERY.map((g,i)=>`<button type="button" class="lb-thumb" data-i="${i}" aria-label="${escHtml(mediaLabel(g,i))}" onclick="lightboxGo(${i})">
-        ${g.kind==='video'
-          ? VIDEO_TILE
-          : `<img src="${escHtml(g.url)}" alt="" loading="lazy">`}</button>`).join('')}
+        ${mediaTile(g)}</button>`).join('')}
     </div>
   </div>`;
   // swipe the big photo to move between photos (the row below scrolls on its own)
@@ -883,8 +893,11 @@ function renderLightbox(first){
   document.getElementById('lbCounter').textContent=`${lightboxIndex+1} מתוך ${GALLERY.length}`;
   const cap=document.getElementById('lbCap');
   cap.textContent=g.cap||''; cap.hidden=!g.cap;
+  const still=document.documentElement.classList.contains('a11y-still');
   document.getElementById('lbMedia').innerHTML = g.kind==='video'
-    ? `<video src="${escHtml(g.url)}" controls ${document.documentElement.classList.contains('a11y-still')?'':'autoplay'} playsinline></video>`
+    ? `<video src="${escHtml(g.url)}" controls ${still?'':'autoplay'} playsinline></video>`
+    : g.kind==='youtube'
+    ? `<iframe class="lb-yt ${YT.vertical(g.url)?'vert':''}" src="${escHtml(YT.embed(g.url,!still))}" title="${escHtml(mediaLabel(g,lightboxIndex))}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`
     : `<img src="${escHtml(g.url)}" alt="${escHtml(g.cap||mediaLabel(g,lightboxIndex))}">`;
   document.querySelectorAll('#lbStrip .lb-thumb').forEach(t=>{
     const on=Number(t.dataset.i)===lightboxIndex;

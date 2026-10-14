@@ -4,7 +4,7 @@ import { isAdmin } from './_auth.js';
 import { blobAuth, blobEnvReport } from './_blob.js';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/quicktime', 'video/webm'];
-const MAX_BYTES = 300 * 1024 * 1024;
+const MAX_BYTES = 50 * 1024 * 1024; // matches the admin's video limit; photos are shrunk before upload
 
 async function requireAdmin(pathname, clientPayload) {
   let idToken = null;

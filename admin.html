@@ -1274,7 +1274,7 @@ function openSettings(){
             <input type="file" accept="image/*,video/*" multiple hidden onchange="handleMediaFiles(this.files);this.value=''">
           </label>
           <div class="upload-status" id="uploadStatus" hidden></div>
-          <div class="media-hint">לחיצה על תמונה לעריכת הכיתוב שלה</div>
+          <div class="media-hint">סרטונים עד 50MB · לחיצה על תמונה לעריכת הכיתוב שלה</div>
           <div class="media-grid" id="mediaGrid"><div class="empty">טוען...</div></div>
           <button type="button" class="set-restore" id="restoreDefaults" hidden onclick="restoreDefaultMedia()"></button>
         </div>
@@ -1488,7 +1488,8 @@ async function shrinkImage(file){
   return out||file;
 }
 const MEDIA_EXT={'image/jpeg':'jpg','image/png':'png','image/webp':'webp','video/mp4':'mp4','video/quicktime':'mov','video/webm':'webm'};
-const MAX_VIDEO_BYTES=300*1024*1024;
+// videos are the heavy files in the storage's monthly data transfer, so they're kept small
+const MAX_VIDEO_BYTES=50*1024*1024;
 let _blobClient=null;
 async function handleMediaFiles(fileList){
   const files=[...fileList];
@@ -1503,7 +1504,7 @@ async function handleMediaFiles(fileList){
     // some phones hand over files with an empty type, so fall back to the extension
     const fType=f.type||guessMediaType(f.name);
     const isVideo=fType.startsWith('video/');
-    if(isVideo && f.size>MAX_VIDEO_BYTES){ errors.push(`${f.name}: הסרטון גדול מדי (עד 300MB)`); continue; }
+    if(isVideo && f.size>MAX_VIDEO_BYTES){ errors.push(`${f.name}: הסרטון גדול מדי (${Math.round(f.size/1048576)}MB, אפשר עד 50MB). כדאי לשלוח אותו לעצמך בוואטסאפ, שמקטין אותו, ולהעלות את הגרסה משם`); continue; }
     try{
       setUploadStatus(prefix+'מכין קובץ...');
       const body=fType.startsWith('image/') ? await shrinkImage(f) : f;

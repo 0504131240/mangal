@@ -195,7 +195,9 @@ button{font-family:var(--font)}
 .media-tile{position:relative;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:var(--surface2)}
 .media-tile img,.media-tile video{width:100%;height:100%;object-fit:cover;display:block}
 .media-tile{cursor:pointer}
-.media-badge{position:absolute;top:5px;right:5px;font-size:13px;background:rgba(0,0,0,.5);border-radius:6px;padding:1px 5px}
+.media-badge{position:absolute;top:5px;left:36px;font-size:13px;background:rgba(0,0,0,.5);border-radius:6px;padding:1px 5px}
+.media-yt{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:31px;border-radius:9px;background:#C4302B;color:#fff;font-size:15px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.media-group{position:absolute;top:5px;right:5px;max-width:calc(100% - 44px);font-size:10.5px;font-weight:700;background:rgba(216,72,27,.92);color:#fff;border-radius:6px;padding:1px 6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .media-cap{position:absolute;inset-inline:0;bottom:0;padding:14px 6px 5px;background:linear-gradient(0deg,rgba(0,0,0,.7),transparent);color:#fff;font-size:10.5px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .media-cap.none{color:rgba(255,255,255,.75);font-weight:500}
 .media-hint{font-size:11.5px;color:var(--text3);text-align:center;margin-top:10px}
@@ -203,6 +205,14 @@ button{font-family:var(--font)}
 .cap-edit-preview{width:100%;max-height:42vh;object-fit:contain;border-radius:12px;background:var(--surface2);display:block}
 .cap-count{font-size:11px;color:var(--text3);text-align:left;margin-top:4px;direction:ltr}
 .media-del{position:absolute;top:5px;left:5px;width:26px;height:26px;border-radius:50%;border:none;background:rgba(32,20,14,.75);color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+/* gallery groups */
+.grp-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.grp-chip{font-size:12px;font-weight:700;padding:6px 11px;border-radius:16px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;font-family:var(--font)}
+.grp-chip.on{border-color:var(--flame);background:var(--flame-bg);color:var(--flame-dark)}
+.upload-group{margin-top:12px}
+.upload-group label{display:block;font-size:11.5px;font-weight:700;color:var(--text2);margin-bottom:5px}
+.upload-group input{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:10px 11px;font-size:14px;font-family:var(--font);background:var(--bg);color:var(--text);direction:rtl}
 
 .cal-dot{position:absolute;bottom:3px;font-size:9px;background:var(--flame);color:#fff;border-radius:8px;min-width:14px;height:14px;display:flex;align-items:center;justify-content:center;padding:0 3px}
 </style>
@@ -1234,6 +1244,44 @@ function esc(s){
 let galleryItems=null;
 let storageReady=false;
 let storageMode=null;
+// gallery groups: a photo with no group shows on the site under "כללי"
+const DEFAULT_GROUP='כללי';
+const GROUP_MAX=40;
+let lastUploadGroup='';
+function itemGroup(g){ return (g && g.group || '').trim(); }
+function groupNames(){
+  const out=[];
+  (galleryItems||[]).forEach(g=>{ const n=itemGroup(g)||DEFAULT_GROUP; if(!out.includes(n)) out.push(n); });
+  return out;
+}
+function renderGroupLists(){
+  const names=groupNames();
+  const dl=document.getElementById('groupList');
+  if(dl) dl.innerHTML=names.map(n=>`<option value="${esc(n)}"></option>`).join('');
+  const ch=document.getElementById('uploadGroupChips');
+  if(ch){
+    const cur=((document.getElementById('uploadGroup')||{}).value||'').trim();
+    ch.innerHTML=names.map(n=>`<button type="button" class="grp-chip ${n===cur?'on':''}" onclick="pickUploadGroup(this)">${esc(n)}</button>`).join('');
+  }
+}
+function pickUploadGroup(btn){
+  const inp=document.getElementById('uploadGroup');
+  if(!inp) return;
+  inp.value=btn.textContent; lastUploadGroup=inp.value;
+  document.querySelectorAll('#uploadGroupChips .grp-chip').forEach(c=>c.classList.toggle('on',c===btn));
+}
+function pickEditGroup(btn){
+  document.getElementById('grpInput').value=btn.textContent;
+  document.querySelectorAll('#capEditRoot .grp-chip').forEach(c=>c.classList.toggle('on',c===btn));
+}
+// a new photo goes first in its own group (so the order of the groups on the site stays); a new group goes last
+function withNewItem(items,item){
+  const n=itemGroup(item)||DEFAULT_GROUP;
+  const idx=items.findIndex(g=>(itemGroup(g)||DEFAULT_GROUP)===n);
+  const out=items.slice();
+  if(idx<0) out.push(item); else out.splice(idx,0,item);
+  return out;
+}
 function openSettings(){
   viewOpened(openSettings);
   document.getElementById('modalRoot').innerHTML=`
@@ -1272,6 +1320,12 @@ function openSettings(){
         <div class="set-sec">
           <div class="set-title">תמונות וסרטונים באתר</div>
           <div id="storageNote"></div>
+          <div class="upload-group">
+            <label for="uploadGroup">הקבוצה של מה שמעלים עכשיו</label>
+            <input type="text" id="uploadGroup" maxlength="${GROUP_MAX}" list="groupList" placeholder="למשל: בשרים על האש (אפשר להשאיר ריק)" value="${esc(lastUploadGroup)}" oninput="lastUploadGroup=this.value;renderGroupLists()">
+            <datalist id="groupList"></datalist>
+            <div class="grp-chips" id="uploadGroupChips"></div>
+          </div>
           <label class="set-upload disabled" id="uploadLabel">
             ＋ הוספת תמונות / סרטונים
             <input type="file" accept="image/*,video/*" multiple hidden onchange="handleMediaFiles(this.files);this.value=''">
@@ -1281,7 +1335,7 @@ function openSettings(){
             <button type="button" onclick="addYoutube()">הוספה</button>
           </div>
           <div class="upload-status" id="uploadStatus" hidden></div>
-          <div class="media-hint">סרטונים: עדיף מיוטיוב (לא נגמר באחסון), או קובץ עד 50MB · לחיצה על פריט לעריכת הכיתוב</div>
+          <div class="media-hint">סרטונים: עדיף מיוטיוב (לא נגמר באחסון), או קובץ עד 50MB · לחיצה על פריט לעריכת הכיתוב והקבוצה</div>
           <div class="media-grid" id="mediaGrid"><div class="empty">טוען...</div></div>
           <button type="button" class="set-restore" id="restoreDefaults" hidden onclick="restoreDefaultMedia()"></button>
         </div>
@@ -1398,6 +1452,7 @@ function renderMediaGrid(){
   if(!el) return;
   const restore=document.getElementById('restoreDefaults'), missing=missingDefaults().length;
   if(restore){ restore.hidden=!missing; restore.textContent=`↺ החזרת התמונות המקוריות שהוסרו (${missing})`; }
+  renderGroupLists();
   if(galleryItems===null){ el.innerHTML=`<div class="empty">לא הצליח לטעון את הגלריה</div>`; return; }
   if(!galleryItems.length){ el.innerHTML=`<div class="empty">אין כרגע תמונות באתר</div>`; return; }
   el.innerHTML=galleryItems.map((g,i)=>`
@@ -1405,8 +1460,9 @@ function renderMediaGrid(){
       ${g.kind==='video'
         ? `<div class="media-video" aria-hidden="true">▶<small>סרטון</small></div><span class="media-badge">🎬</span>`
         : g.kind==='youtube'
-        ? `<img src="${esc(YT.thumb(g.url))}" alt="" loading="lazy"><span class="media-badge">▶ YouTube</span>`
+        ? `<img src="${esc(YT.thumb(g.url))}" alt="" loading="lazy"><span class="media-yt" aria-label="YouTube">▶</span>`
         : `<img src="${esc(g.url)}" alt="" loading="lazy">`}
+      <span class="media-group">${esc(itemGroup(g)||DEFAULT_GROUP)}</span>
       <div class="media-cap ${g.cap?'':'none'}">${g.cap?esc(g.cap):'✏️ הוספת כיתוב'}</div>
       <button class="media-del" onclick="event.stopPropagation();removeMediaItem(${i})" aria-label="הסרה">✕</button>
     </div>`).join('');
@@ -1417,10 +1473,11 @@ function openCaptionEditor(i){
   if(!item) return;
   let root=document.getElementById('capEditRoot');
   if(!root){ root=document.createElement('div'); root.id='capEditRoot'; document.body.appendChild(root); }
+  const curGroup=itemGroup(item);
   root.innerHTML=`
     <div class="modal-bg cap-edit-bg" onclick="if(event.target===this)closeCaptionEditor()">
       <div class="modal">
-        <div class="modal-top"><h3>✏️ כיתוב</h3><button class="modal-close" onclick="closeCaptionEditor()">✕</button></div>
+        <div class="modal-top"><h3>✏️ כיתוב וקבוצה</h3><button class="modal-close" onclick="closeCaptionEditor()">✕</button></div>
         ${item.kind==='video'
           ? `<video class="cap-edit-preview" src="${esc(item.url)}" controls playsinline preload="none"></video>`
           : `<img class="cap-edit-preview" src="${esc(item.kind==='youtube'?YT.thumb(item.url):item.url)}" alt="">`}
@@ -1430,6 +1487,14 @@ function openCaptionEditor(i){
             oninput="document.getElementById('capCount').textContent=this.value.length+'/${CAPTION_MAX}'"
             onkeydown="if(event.key==='Enter')saveCaption()">
           <div class="cap-count" id="capCount">${(item.cap||'').length}/${CAPTION_MAX}</div>
+        </div>
+        <div class="mfld">
+          <label for="grpInput">הקבוצה בגלריה (לחצו על קבוצה, או כתבו שם חדש)</label>
+          <input id="grpInput" type="text" maxlength="${GROUP_MAX}" value="${esc(curGroup)}" placeholder="${esc(DEFAULT_GROUP)}"
+            onkeydown="if(event.key==='Enter')saveCaption()">
+          <div class="grp-chips">
+            ${groupNames().map(n=>`<button type="button" class="grp-chip ${n===(curGroup||DEFAULT_GROUP)?'on':''}" onclick="pickEditGroup(this)">${esc(n)}</button>`).join('')}
+          </div>
         </div>
         <div class="modal-actions">
           <button class="btn-save" onclick="saveCaption()">שמירה</button>
@@ -1452,13 +1517,15 @@ async function saveCaption(){
   const root=document.getElementById('capEditRoot');
   const url=root && root.dataset.url;
   const inp=document.getElementById('capInput');
+  const grpInp=document.getElementById('grpInput');
   if(!url || !inp || !galleryItems) return;
   const cap=inp.value.trim().slice(0,CAPTION_MAX);
+  const group=(grpInp ? grpInp.value : '').trim().slice(0,GROUP_MAX);
   if(!galleryItems.some(g=>g.url===url)){ closeCaptionEditor(); return; }
   closeCaptionEditor();
   try{
-    await saveGalleryItems(galleryItems.map(g=>g.url===url?{...g,cap}:g));
-    showToast(cap?'הכיתוב נשמר ✓':'הכיתוב נמחק ✓');
+    await saveGalleryItems(galleryItems.map(g=>g.url===url?{...g,cap,group}:g));
+    showToast('נשמר ✓');
   }catch(e){
     console.error(e); showToast('השמירה נכשלה'); loadGalleryItems();
   }
@@ -1507,8 +1574,12 @@ async function addYoutube(){
   if(!url){ showToast('זה לא נראה כמו קישור לסרטון ביוטיוב'); inp.focus(); return; }
   if(galleryItems===null){ showToast('הגלריה לא נטענה, נסו לפתוח שוב'); return; }
   if(galleryItems.some(g=>g.url===url)){ showToast('הסרטון הזה כבר באתר'); return; }
+  // the group chosen above, like uploaded files
+  const groupInput=document.getElementById('uploadGroup');
+  const group=((groupInput ? groupInput.value : lastUploadGroup)||'').trim().slice(0,GROUP_MAX);
+  lastUploadGroup=group;
   try{
-    await saveGalleryItems([{kind:'youtube', url, cap:''}, ...galleryItems]);
+    await saveGalleryItems(withNewItem(galleryItems,{kind:'youtube', url, cap:'', group}));
     inp.value='';
     showToast('הסרטון נוסף לאתר ✓');
   }catch(e){ console.error(e); showToast('ההוספה נכשלה'); loadGalleryItems(); }
@@ -1518,6 +1589,10 @@ async function handleMediaFiles(fileList){
   if(!files.length) return;
   if(!storageReady){ showToast('האחסון עוד לא מחובר'); return; }
   if(galleryItems===null){ showToast('הגלריה לא נטענה, נסו לפתוח שוב'); return; }
+  // the group chosen above the upload button
+  const groupInput=document.getElementById('uploadGroup');
+  const group=((groupInput ? groupInput.value : lastUploadGroup)||'').trim().slice(0,GROUP_MAX);
+  lastUploadGroup=group;
   let added=0;
   const errors=[];
   for(let i=0;i<files.length;i++){
@@ -1545,7 +1620,7 @@ async function handleMediaFiles(fileList){
         multipart:body.size>20*1024*1024,
         onUploadProgress:({percentage})=>{ if(uploading) setUploadStatus(`${prefix}מעלה ${isVideo?'סרטון':'תמונה'}... ${Math.round(percentage)}%`); }
       }).finally(()=>{ uploading=false; });
-      await saveGalleryItems([{kind:isVideo?'video':'image', url:res.url, cap:'', blob:true}, ...galleryItems]);
+      await saveGalleryItems(withNewItem(galleryItems,{kind:isVideo?'video':'image', url:res.url, cap:'', group, blob:true}));
       added++;
     }catch(e){
       console.error(e);

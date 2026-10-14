@@ -377,6 +377,14 @@ footer .ys-sig{margin-top:10px;padding-bottom:0}
   .fx-glow,.fx-embers,.short-banner::after,footer::before{animation:none}
 }
 
+/* ===== gallery groups ===== */
+.g-nav{position:sticky;top:0;z-index:3;display:flex;gap:8px;overflow-x:auto;padding:10px 18px;margin:0 -18px 12px;background:var(--bg);scrollbar-width:none}
+.g-nav::-webkit-scrollbar{display:none}
+.g-chip{flex:none;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);padding:8px 14px;border-radius:20px;font:700 13px var(--font);cursor:pointer}
+.g-chip:active{background:var(--flame-bg);color:var(--flame-dark)}
+.g-group{margin-bottom:24px;scroll-margin-top:64px}
+.g-group h4{font-family:var(--font-head);font-size:17px;color:var(--flame-dark);margin-bottom:10px}
+
 /* ===== accessibility ===== */
 .sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .skip-link{position:absolute;top:-60px;right:12px;z-index:200;background:var(--flame-btn);color:#fff;padding:10px 16px;border-radius:10px;font-weight:700;text-decoration:none}
@@ -523,7 +531,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
 <div class="modal-bg" id="galleryModalBg" hidden onclick="if(event.target===this)closeGalleryModal()">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="galleryTitle">
     <div class="modal-top"><h3 id="galleryTitle">תמונות מאירועים</h3><button type="button" class="modal-close" aria-label="סגירה" onclick="closeGalleryModal()">✕</button></div>
-    <div class="gallery" id="galleryGrid"></div>
+    <div id="galleryGrid"></div>
   </div>
 </div>
 
@@ -727,9 +735,9 @@ const GALLERY_DOC_URL='https://firestore.googleapis.com/v1/projects/mangal-b11fe
 let GALLERY = (function(){
   try{
     const cached=JSON.parse(localStorage.getItem('mangalGalleryCache')||'null');
-    if(Array.isArray(cached)) return cached.filter(g=>isSafeMediaUrl(g.url));
+    if(Array.isArray(cached)) return sortByGroup(cached.filter(g=>isSafeMediaUrl(g.url)));
   }catch(e){}
-  return DEFAULT_GALLERY;
+  return sortByGroup(DEFAULT_GALLERY);
 })();
 async function loadGallery(){
   try{
@@ -742,9 +750,10 @@ async function loadGallery(){
       list=values.map(v=>{
         const f=v.mapValue?.fields||{};
         const k=f.kind?.stringValue;
-        return {kind:k==='video'||k==='youtube'?k:'image', url:f.url?.stringValue, cap:f.cap?.stringValue||''};
+        return {kind:k==='video'||k==='youtube'?k:'image', url:f.url?.stringValue, cap:f.cap?.stringValue||'', group:f.group?.stringValue||''};
       }).filter(g=>isSafeMediaUrl(g.url));
     } else return;
+    list=sortByGroup(list);
     try{ localStorage.setItem('mangalGalleryCache', JSON.stringify(list)); }catch(e){}
     if(JSON.stringify(list)===JSON.stringify(GALLERY)) return;
     GALLERY=list;
@@ -804,15 +813,35 @@ function mediaTile(g){
   if(g.kind==='youtube') return `<img src="${escHtml(YT.thumb(g.url))}" alt="" loading="lazy"><span class="yt-play" aria-hidden="true">▶</span>`;
   return `<img src="${escHtml(g.url)}" alt="" loading="lazy">`;
 }
+function groupName(g){ return (g.group||'').trim()||'כללי'; }
+// groups in order of first appearance; photos of one group sit together, so the big viewer goes through them in the same order as the page
+function sortByGroup(list){
+  const order=[];
+  list.forEach(g=>{ const n=groupName(g); if(!order.includes(n)) order.push(n); });
+  return list.map((g,i)=>[g,i]).sort((a,b)=>order.indexOf(groupName(a[0]))-order.indexOf(groupName(b[0]))||a[1]-b[1]).map(x=>x[0]);
+}
+function scrollToGroup(k){
+  const still=document.documentElement.classList.contains('a11y-still');
+  document.getElementById('ggrp'+k).scrollIntoView({behavior:still?'auto':'smooth',block:'start'});
+}
 function renderGallery(){
   if(!galleryOpened) return;
   const grid=document.getElementById('galleryGrid');
   if(!GALLERY.length){ grid.innerHTML='<p class="gallery-empty">תמונות מאירועים יעלו כאן בקרוב 📷</p>'; return; }
-  grid.innerHTML=GALLERY.map((g,i)=>`
+  const order=[], map={};
+  GALLERY.forEach((g,i)=>{ const n=groupName(g); if(!map[n]){ map[n]=[]; order.push(n); } map[n].push(i); });
+  const tile=i=>{ const g=GALLERY[i]; return `
     <button type="button" class="gtile" onclick="openLightbox(${i})" aria-label="${escHtml(mediaLabel(g,i))}">
       ${mediaTile(g)}
       ${g.cap?`<span class="gtile-cap" aria-hidden="true">${escHtml(g.cap)}</span>`:''}
-    </button>`).join('');
+    </button>`; };
+  const nav = order.length>1
+    ? `<nav class="g-nav" aria-label="קבוצות">${order.map((n,k)=>`<button type="button" class="g-chip" onclick="scrollToGroup(${k})">${escHtml(n)}</button>`).join('')}</nav>` : '';
+  grid.innerHTML = nav + order.map((n,k)=>`
+    <div class="g-group" id="ggrp${k}">
+      <h4>${escHtml(n)}</h4>
+      <div class="gallery">${map[n].map(tile).join('')}</div>
+    </div>`).join('');
 }
 /* ===== accessibility menu ===== */
 const A11Y_ZOOMS=['100%','115%','130%','150%'];

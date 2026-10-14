@@ -133,6 +133,8 @@ section{padding:52px 0}
 /* the photo's caption, under the big photo */
 .lb-cap{flex:none;margin:0 auto;padding:4px 20px 12px;max-width:560px;text-align:center;font-size:15px;font-weight:600;line-height:1.5;color:#FBF3EA;text-shadow:0 1px 3px rgba(0,0,0,.7)}
 .lb-cap[hidden]{display:none}
+.lb-ytlink{flex:none;align-self:center;margin:0 auto 8px;padding:7px 16px;border-radius:20px;background:rgba(255,255,255,.12);color:#FBF3EA;font-size:13px;font-weight:700;text-decoration:none}
+.lb-ytlink[hidden]{display:none}
 /* a row of small photos at the bottom: scroll through them and tap one to open it */
 .lb-strip{flex:none;display:flex;gap:8px;overflow-x:auto;padding:10px 12px calc(12px + env(safe-area-inset-bottom,0px));
   background:rgba(0,0,0,.45);border-top:1px solid rgba(255,170,110,.15);scrollbar-width:none;-webkit-overflow-scrolling:touch}
@@ -899,6 +901,7 @@ function buildLightbox(){
       <button type="button" class="lb-nav lb-next" aria-label="הבא" onclick="lightboxShift(1)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
     <p class="lb-cap" id="lbCap" aria-live="polite"></p>
+    <a class="lb-ytlink" id="lbYt" target="_blank" rel="noopener" hidden>הסרטון לא נפתח? לצפייה ביוטיוב ↗</a>
     <div class="lb-strip" id="lbStrip" role="group" aria-label="כל התמונות">
       ${GALLERY.map((g,i)=>`<button type="button" class="lb-thumb" data-i="${i}" aria-label="${escHtml(mediaLabel(g,i))}" onclick="lightboxGo(${i})">
         ${mediaTile(g)}</button>`).join('')}
@@ -921,6 +924,10 @@ function renderLightbox(first){
   document.getElementById('lbCounter').textContent=`${lightboxIndex+1} מתוך ${GALLERY.length}`;
   const cap=document.getElementById('lbCap');
   cap.textContent=g.cap||''; cap.hidden=!g.cap;
+  // some YouTube videos can't play inside other sites (embedding turned off, Shorts music), so YouTube itself is one tap away
+  const yt=document.getElementById('lbYt');
+  yt.hidden=g.kind!=='youtube';
+  if(g.kind==='youtube') yt.href=g.url; else yt.removeAttribute('href');
   const still=document.documentElement.classList.contains('a11y-still');
   document.getElementById('lbMedia').innerHTML = g.kind==='video'
     ? `<video src="${escHtml(g.url)}" controls ${still?'':'autoplay'} playsinline></video>`

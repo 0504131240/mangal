@@ -104,6 +104,12 @@ section{padding:52px 0}
 .gtile{aspect-ratio:1/1;border-radius:16px;overflow:hidden;position:relative;cursor:pointer;border:1px solid var(--border)}
 .gtile img,.gtile video{width:100%;height:100%;object-fit:cover;display:block}
 .gtile video{pointer-events:none;background:#000}
+.video-tile{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  background:radial-gradient(circle at 50% 40%,#4A2E1C,#1A100A);color:#FBF3EA}
+.vt-play{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;padding-left:3px;font-size:18px;
+  background:linear-gradient(180deg,#F2662B,#B83C14);box-shadow:0 0 14px rgba(242,102,43,.5)}
+.vt-label{font-size:12.5px;font-weight:700}
+.lb-thumb .video-tile{gap:2px}.lb-thumb .vt-play{width:24px;height:24px;font-size:10px}.lb-thumb .vt-label{font-size:10px}
 .gtile-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;padding-left:3px;pointer-events:none}
 .gtile-cap{position:absolute;inset-inline:0;bottom:0;padding:8px 10px 7px;background:linear-gradient(0deg,rgba(0,0,0,.55),transparent);color:#fff;font-size:11.5px;font-weight:600}
 .lightbox{position:fixed;inset:0;background:rgba(15,9,6,.95);z-index:100;display:flex;flex-direction:column}
@@ -780,13 +786,18 @@ const MENUS = {
   }
 };
 
+// the gallery's photos load only once it is opened, and videos only when one is played: videos are large,
+// and loading them on every visit used up the storage's monthly data transfer
+let galleryOpened=false;
+const VIDEO_TILE='<span class="video-tile" aria-hidden="true"><span class="vt-play">▶</span><span class="vt-label">סרטון</span></span>';
 function renderGallery(){
+  if(!galleryOpened) return;
   const grid=document.getElementById('galleryGrid');
   if(!GALLERY.length){ grid.innerHTML='<p class="gallery-empty">תמונות מאירועים יעלו כאן בקרוב 📷</p>'; return; }
   grid.innerHTML=GALLERY.map((g,i)=>`
     <button type="button" class="gtile" onclick="openLightbox(${i})" aria-label="${escHtml(mediaLabel(g,i))}">
       ${g.kind==='video'
-        ? `<video src="${escHtml(g.url)}#t=0.1" muted playsinline preload="metadata" aria-hidden="true"></video><span class="gtile-play" aria-hidden="true">▶</span>`
+        ? VIDEO_TILE
         : `<img src="${escHtml(g.url)}" alt="" loading="lazy">`}
       ${g.cap?`<span class="gtile-cap" aria-hidden="true">${escHtml(g.cap)}</span>`:''}
     </button>`).join('');
@@ -851,7 +862,7 @@ function buildLightbox(){
     <div class="lb-strip" id="lbStrip" role="group" aria-label="כל התמונות">
       ${GALLERY.map((g,i)=>`<button type="button" class="lb-thumb" data-i="${i}" aria-label="${escHtml(mediaLabel(g,i))}" onclick="lightboxGo(${i})">
         ${g.kind==='video'
-          ? `<video src="${escHtml(g.url)}#t=0.1" muted playsinline preload="metadata"></video><span class="play" aria-hidden="true">▶</span>`
+          ? VIDEO_TILE
           : `<img src="${escHtml(g.url)}" alt="" loading="lazy">`}</button>`).join('')}
     </div>
   </div>`;
@@ -1010,7 +1021,7 @@ addEventListener('popstate',()=>{
   else if(topId==='menusModalBg' && activeMenuTab) setMenuTab(null);
   else closeDialog(topId);
 });
-function openGalleryModal(){ openDialog('galleryModalBg'); }
+function openGalleryModal(){ if(!galleryOpened){ galleryOpened=true; renderGallery(); } openDialog('galleryModalBg'); }
 function closeGalleryModal(){ closeDialog('galleryModalBg'); }
 function openMenusModal(){ activeMenuTab=null; renderMenus(); openDialog('menusModalBg'); }
 function closeMenusModal(){ closeDialog('menusModalBg'); }

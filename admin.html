@@ -187,6 +187,8 @@ button{font-family:var(--font)}
 .upload-status{font-size:12px;color:var(--text2);text-align:center;margin-top:8px;font-weight:600;white-space:pre-line;overflow-wrap:anywhere}
 .media-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:12px}
 .media-grid .empty{grid-column:1/-1;padding:24px 10px}
+.media-video{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:22px;color:#fff;background:radial-gradient(circle at 50% 40%,#4A2E1C,#1A100A)}
+.media-video small{font-size:11px;font-weight:700}
 .media-tile{position:relative;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:var(--surface2)}
 .media-tile img,.media-tile video{width:100%;height:100%;object-fit:cover;display:block}
 .media-tile{cursor:pointer}
@@ -1394,7 +1396,7 @@ function renderMediaGrid(){
   el.innerHTML=galleryItems.map((g,i)=>`
     <div class="media-tile" onclick="openCaptionEditor(${i})">
       ${g.kind==='video'
-        ? `<video src="${esc(g.url)}#t=0.1" muted playsinline preload="metadata"></video><span class="media-badge">🎬</span>`
+        ? `<div class="media-video" aria-hidden="true">▶<small>סרטון</small></div><span class="media-badge">🎬</span>`
         : `<img src="${esc(g.url)}" alt="" loading="lazy">`}
       <div class="media-cap ${g.cap?'':'none'}">${g.cap?esc(g.cap):'✏️ הוספת כיתוב'}</div>
       <button class="media-del" onclick="event.stopPropagation();removeMediaItem(${i})" aria-label="הסרה">✕</button>
@@ -1411,7 +1413,7 @@ function openCaptionEditor(i){
       <div class="modal">
         <div class="modal-top"><h3>✏️ כיתוב</h3><button class="modal-close" onclick="closeCaptionEditor()">✕</button></div>
         ${item.kind==='video'
-          ? `<video class="cap-edit-preview" src="${esc(item.url)}#t=0.1" muted playsinline preload="metadata"></video>`
+          ? `<video class="cap-edit-preview" src="${esc(item.url)}" controls playsinline preload="none"></video>`
           : `<img class="cap-edit-preview" src="${esc(item.url)}" alt="">`}
         <div class="mfld">
           <label for="capInput">הכיתוב שיופיע על ${item.kind==='video'?'הסרטון':'התמונה'} באתר</label>

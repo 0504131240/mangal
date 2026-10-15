@@ -445,8 +445,8 @@ html.a11y-contrast .peek{background:#fff}html.a11y-contrast .peek::before{displa
   .big-card.has-peek .peek{min-height:198px}
   .big-card .txt b{font-size:24px}
   .big-card .txt span{font-size:15.5px}
-  /* five buttons: the last one in the middle of its row */
-  .big-cards>.big-card:nth-child(5):not([hidden]){grid-column:1/-1;justify-self:center;width:calc(50% - 11px)}
+  /* five buttons (when there are reviews): the last one in the middle of its row */
+  .big-cards:not(:has(#reviewsCard[hidden]))>.big-card:last-child{grid-column:1/-1;justify-self:center;width:calc(50% - 11px)}
 }
 
 /* shared modal shells (gallery/menus/booking) */
@@ -597,10 +597,10 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
 <div class="wrap">
   <div class="big-cards">
     <button type="button" class="big-card has-peek" onclick="openMenusModal()"><div class="peek-txt"><div class="txt"><b>תפריטים</b><span>CLASIC · SPECIAL · CRAZY</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><div class="peek-menus" id="menusPeek"></div></div></div></button>
-    <button type="button" class="big-card has-peek" onclick="openMassageModal()"><div class="peek-txt"><div class="txt"><b>הצעה מיוחדת לימי גיבוש</b><span>ספא לקבוצה, עם אפשרות למסאז'יסט</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><img src="images/spa-peek.jpg" alt=""></div></div></button>
-    <button type="button" class="big-card has-peek" onclick="openBookModal()"><div class="peek-txt"><div class="txt"><b>בדיקת זמינות</b><span>שולחים פרטים ונחזור אליכם לאשר</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><img src="images/calendar-peek.jpg" alt=""></div></div></button>
     <button type="button" class="big-card has-peek" onclick="openGalleryModal()"><div class="peek-txt"><div class="txt"><b>תמונות מאירועים</b><span>הצצה לאירועים קודמים</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><div class="peek-rot" id="galleryPeek"></div></div></div></button>
     <button type="button" class="big-card has-peek" id="reviewsCard" hidden onclick="openReviewsModal()"><div class="peek-txt"><div class="txt"><b>מה אומרים עלינו</b><span>המלצות של לקוחות מאירועים</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><div class="peek-rot" id="reviewsPeek"></div></div></div></button>
+    <button type="button" class="big-card has-peek" onclick="openMassageModal()"><div class="peek-txt"><div class="txt"><b>הצעה מיוחדת לימי גיבוש</b><span>ספא לקבוצה, עם אפשרות למסאז'יסט</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><img src="images/spa-peek.jpg" alt=""></div></div></button>
+    <button type="button" class="big-card has-peek" onclick="openBookModal()"><div class="peek-txt"><div class="txt"><b>בדיקת זמינות</b><span>שולחים פרטים ונחזור אליכם לאשר</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><img src="images/calendar-peek.jpg" alt=""></div></div></button>
   </div>
 </div>
 

@@ -360,6 +360,52 @@ footer .ys-sig{margin-top:10px;padding-bottom:0}
 .big-card{position:relative;flex-direction:column;justify-content:center;gap:8px;text-align:center;padding:18px 44px}
 .big-card .txt{flex:none}
 .big-card .arrow{position:absolute;left:18px;top:50%;transform:translateY(-50%)}
+/* gallery and reviews: title on the right, a small window on the left that changes by itself */
+.big-card.has-peek{flex-direction:row;align-items:stretch;gap:14px;padding:12px;text-align:center}
+.big-card.has-peek .peek-txt{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:6px 0}
+/* the window has a frame of fire turning around it (like the logo's ring of fire) */
+.peek{position:relative;flex:none;width:46%;min-height:118px;padding:3px;border-radius:14px;overflow:hidden;isolation:isolate;
+  background:#C8461A;box-shadow:0 0 10px rgba(255,110,30,.55),0 4px 12px rgba(0,0,0,.45)}
+.peek::before{content:'';position:absolute;left:50%;top:50%;width:200%;aspect-ratio:1;z-index:-1;
+  background:conic-gradient(#F2662B,#FFD27A,#C8461A,#FF9A4C,#F2662B,#FFD27A,#C8461A,#F2662B);
+  transform:translate(-50%,-50%);animation:peek-spin 5s linear infinite}
+@keyframes peek-spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.peek::before{animation:none}}
+html.a11y-still .peek::before{animation:none}
+.peek-in{position:relative;height:100%;border-radius:10px;overflow:hidden;background:#1A120E;box-shadow:inset 0 0 0 2px rgba(0,0,0,.55)}
+.peek-in>img{width:100%;height:100%;object-fit:cover;display:block}
+.peek-in::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:inset 0 0 10px rgba(0,0,0,.5)}
+.peek-rot{position:absolute;inset:0}
+.peek-layer{position:absolute;inset:0;opacity:0;transition:opacity .9s ease}
+.peek-layer.on{opacity:1}
+.peek-layer img{width:100%;height:100%;object-fit:cover;display:block}
+.peek-quote{display:flex;flex-direction:column;justify-content:center;gap:6px;height:100%;padding:10px 12px;text-align:right;
+  background:linear-gradient(160deg,rgba(244,199,102,.16),rgba(0,0,0,.2))}
+.peek-quote p{margin:0;font-size:12.5px;line-height:1.45;color:#FBF3EA;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.peek-quote p::before{content:'”';color:#F4C766;font-size:20px;line-height:0;margin-left:3px;vertical-align:-6px}
+.peek-quote small{font-size:11px;color:#F4C766;font-weight:700}
+.peek-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;text-shadow:0 1px 6px #000}
+/* menus: the three menus as small standing pages, each one half over the one beside it */
+.peek-menus{position:relative;height:100%;background:radial-gradient(circle at 50% 40%,#3A2416,#1A120E)}
+.peek-page{position:absolute;top:50%;width:64px;height:100px;margin-top:-50px;border-radius:5px;overflow:hidden;
+  border:1px solid rgba(244,199,102,.75);box-shadow:-3px 3px 8px rgba(0,0,0,.6);background:#4A2E1C}
+.peek-page:nth-child(1){right:calc(50% - 64px);transform:rotate(5deg)}
+.peek-page:nth-child(2){right:calc(50% - 32px);transform:translateY(-3px)}
+.peek-page:nth-child(3){right:calc(50% - 0px);transform:rotate(-5deg)}
+/* the page is laid out at full size and shrunk, so it looks like the real menu */
+.pp-doc{width:160px;height:250px;transform:scale(.4);transform-origin:top right;direction:rtl;text-align:center;
+  background:linear-gradient(180deg,#3A2416,#5E3B24 40%,#4A2E1C)}
+.pp-hero{height:92px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px;padding-bottom:8px;
+  background:linear-gradient(0deg,rgba(40,24,14,.95),rgba(0,0,0,.1) 70%),var(--img) center/cover}
+.pp-hero b{font:700 15px var(--font-head);color:#fff;text-shadow:0 1px 4px #000;white-space:nowrap}
+.pp-hero i{font-style:normal;font-size:9px;font-weight:700;padding:2px 8px;border-radius:999px;background:linear-gradient(180deg,#F6CF7A,#D9962F);color:#1C1007;white-space:nowrap}
+.pp-grp{margin-top:9px;font:700 12px var(--font-head);color:#F4C766}
+.pp-grp::after{content:'';display:block;height:1.5px;width:36px;margin:3px auto 4px;background:linear-gradient(90deg,transparent,#F4C766,transparent)}
+.pp-doc ul{list-style:none;margin:0;padding:0 8px}
+.pp-doc li{font-size:9.5px;line-height:1.75;color:#F3E5D7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* spa and availability: one big picture in the window */
+.peek-ico{display:flex;align-items:center;justify-content:center;height:100%;font-size:52px;background:radial-gradient(circle at 50% 45%,rgba(244,199,102,.28),rgba(0,0,0,0) 65%),#2A1A10}
+html.a11y-contrast .peek{background:#fff}html.a11y-contrast .peek::before{display:none}
 
 /* shared modal shells (gallery/menus/booking) */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:90;display:flex;align-items:flex-end;justify-content:center}
@@ -506,11 +552,11 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
 <div class="short-banner"><img src="images/poster-hero.jpg" alt="חגיגת מנגל עם דודי. חוויית מנגל יוקרתית שמגיעה עד אליכם: ציוד מקצועי, בשרים איכותיים, עריכה מוקפדת עם כלים יפים, שתייה קרה ושפע טעמים משובחים. אתם רק מביאים שולחנות וכיסאות, ודודי דואג לכל השאר. שירות אישי, הפקה בסטנדרט גבוה ואווירה בלתי נשכחת!"></div>
 <div class="wrap">
   <div class="big-cards">
-    <button type="button" class="big-card" onclick="openGalleryModal()"><div class="ico" aria-hidden="true">📷</div><div class="txt"><b>תמונות מאירועים</b><span>הצצה לאירועים קודמים</span></div><div class="arrow" aria-hidden="true">‹</div></button>
-    <button type="button" class="big-card" id="reviewsCard" onclick="openReviewsModal()" hidden><div class="ico" aria-hidden="true">⭐</div><div class="txt"><b>מה אומרים עלינו</b><span>המלצות של לקוחות מאירועים</span></div><div class="arrow" aria-hidden="true">‹</div></button>
-    <button type="button" class="big-card" onclick="openMenusModal()"><div class="ico" aria-hidden="true">📋</div><div class="txt"><b>תפריטים</b><span>CLASIC · SPECIAL · CRAZY</span></div><div class="arrow" aria-hidden="true">‹</div></button>
-    <button type="button" class="big-card" onclick="openMassageModal()"><div class="ico" aria-hidden="true">🧖</div><div class="txt"><b>הצעה מיוחדת לימי גיבוש</b><span>ספא לקבוצה, עם אפשרות למסאז'יסט</span></div><div class="arrow" aria-hidden="true">‹</div></button>
-    <button type="button" class="big-card" onclick="openBookModal()"><div class="ico" aria-hidden="true">📅</div><div class="txt"><b>בדיקת זמינות</b><span>שולחים פרטים ונחזור אליכם לאשר</span></div><div class="arrow" aria-hidden="true">‹</div></button>
+    <button type="button" class="big-card has-peek" onclick="openMenusModal()"><div class="peek-txt"><div class="txt"><b>תפריטים</b><span>CLASIC · SPECIAL · CRAZY</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><div class="peek-menus" id="menusPeek"></div></div></div></button>
+    <button type="button" class="big-card has-peek" onclick="openMassageModal()"><div class="peek-txt"><div class="txt"><b>הצעה מיוחדת לימי גיבוש</b><span>ספא לקבוצה, עם אפשרות למסאז'יסט</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><img src="images/spa-peek.svg" alt=""></div></div></button>
+    <button type="button" class="big-card has-peek" onclick="openBookModal()"><div class="peek-txt"><div class="txt"><b>בדיקת זמינות</b><span>שולחים פרטים ונחזור אליכם לאשר</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><div class="peek-ico">📅</div></div></div></button>
+    <button type="button" class="big-card has-peek" onclick="openGalleryModal()"><div class="peek-txt"><div class="txt"><b>תמונות מאירועים</b><span>הצצה לאירועים קודמים</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><div class="peek-rot" id="galleryPeek"></div></div></div></button>
+    <button type="button" class="big-card has-peek" id="reviewsCard" hidden onclick="openReviewsModal()"><div class="peek-txt"><div class="txt"><b>מה אומרים עלינו</b><span>המלצות של לקוחות מאירועים</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><div class="peek-rot" id="reviewsPeek"></div></div></div></button>
   </div>
 </div>
 
@@ -773,6 +819,7 @@ async function loadGallery(){
         const k=f.kind?.stringValue;
         const thumb=f.thumb?.stringValue;
         return {kind:k==='video'||k==='youtube'?k:'image', url:f.url?.stringValue, cap:f.cap?.stringValue||'', group:f.group?.stringValue||'',
+          ...(f.front?.booleanValue ? {front:true} : {}),
           ...(thumb && isSafeMediaUrl(thumb) ? {thumb} : {})};
       }).filter(g=>isSafeMediaUrl(g.url));
     } else return;
@@ -780,7 +827,7 @@ async function loadGallery(){
     try{ localStorage.setItem('mangalGalleryCache', JSON.stringify(list)); }catch(e){}
     if(JSON.stringify(list)===JSON.stringify(GALLERY)) return;
     GALLERY=list;
-    renderGallery();
+    renderGallery(); startPeek('gallery');
     if(lbSource==='gallery' && lightboxIndex>=GALLERY.length) closeLightbox();
     else if(lbSource==='gallery' && lightboxIndex>=0) buildLightbox();
   }catch(e){}
@@ -794,9 +841,10 @@ let REVIEW_SHOTS=[], reviewsOpened=false;
 function parseReviews(values){
   return values.map(v=>{
     const f=v.mapValue?.fields||{}, str=k=>f[k]?.stringValue||'';
-    if(str('kind')==='text') return str('text') ? {kind:'text', name:str('name'), event:str('event'), text:str('text')} : null;
+    const front=f.front?.booleanValue ? {front:true} : {};
+    if(str('kind')==='text') return str('text') ? {kind:'text', name:str('name'), event:str('event'), text:str('text'), ...front} : null;
     const thumb=str('thumb');
-    return isSafeMediaUrl(str('url')) ? {kind:'image', url:str('url'), name:str('name'), event:str('event'), ...(thumb && isSafeMediaUrl(thumb) ? {thumb} : {})} : null;
+    return isSafeMediaUrl(str('url')) ? {kind:'image', url:str('url'), name:str('name'), event:str('event'), ...front, ...(thumb && isSafeMediaUrl(thumb) ? {thumb} : {})} : null;
   }).filter(Boolean);
 }
 function setReviews(list){
@@ -804,7 +852,7 @@ function setReviews(list){
   const same=JSON.stringify(list)===JSON.stringify(REVIEWS);
   REVIEWS=list;
   document.getElementById('reviewsCard').hidden=!REVIEWS.length;
-  if(!same) renderReviews();
+  if(!same){ renderReviews(); startPeek('reviews'); }
 }
 function reviewBy(r){
   return r.name||r.event ? `<div class="rv-by">${r.name?`<b>${escHtml(r.name)}</b>`:''}${r.event?`<span>${escHtml(r.event)}</span>`:''}</div>` : '';
@@ -821,6 +869,45 @@ function renderReviews(){
 }
 function openReviewsModal(){ if(!reviewsOpened){ reviewsOpened=true; renderReviews(); } openDialog('reviewsModalBg'); }
 function closeReviewsModal(){ closeDialog('reviewsModalBg'); }
+/* the small windows on the home buttons: a random photo / review, changing every few seconds */
+const peeks={};
+function peekHtml(kind,x){
+  if(kind==='reviews') return x.kind==='text'
+    ? `<div class="peek-quote"><p>${escHtml(x.text)}</p>${x.name?`<small>${escHtml(x.name)}</small>`:''}</div>`
+    : `<img src="${escHtml(x.thumb||x.url)}" alt="">`;
+  if(x.kind==='youtube') return `<img src="${escHtml(YT.thumb(x.url))}" alt=""><span class="peek-play">▶</span>`;
+  if(x.kind==='video') return `<img src="${escHtml(x.thumb)}" alt=""><span class="peek-play">▶</span>`;
+  return `<img src="${escHtml(x.thumb||x.url)}" alt="">`;
+}
+function renderMenusPeek(){
+  document.getElementById('menusPeek').innerHTML=LEVELS.map(l=>{
+    const m=MENUS[l.id], g=m.groups[0];
+    return `<div class="peek-page"><div class="pp-doc"><div class="pp-hero" style="--img:url(images/menu-${l.id.toLowerCase()}.jpg)"><b>${l.label}</b><i>${m.badge.split(' · ')[0]}</i></div>
+      <div class="pp-grp">${g.t}</div><ul>${g.items.slice(0,6).map(it=>`<li>${it}</li>`).join('')}</ul></div></div>`;
+  }).join('');
+}
+function startPeek(kind){
+  const box=document.getElementById(kind==='reviews'?'reviewsPeek':'galleryPeek');
+  const all=(kind==='reviews'?REVIEWS:GALLERY).filter(x=>x.kind!=='video'||x.thumb);
+  // one marked in the admin as "always on the home page" stays; otherwise they take turns
+  const front=all.find(x=>x.front), list=front?[front]:all;
+  const p=peeks[kind]||(peeks[kind]={});
+  clearInterval(p.timer); box.innerHTML=''; p.last=-1;
+  box.closest(".peek").hidden=!list.length;
+  if(!list.length) return;
+  const show=()=>{
+    let i=Math.floor(Math.random()*list.length);
+    if(list.length>1 && i===p.last) i=(i+1)%list.length;
+    p.last=i;
+    const layer=document.createElement('div'); layer.className='peek-layer'; layer.innerHTML=peekHtml(kind,list[i]);
+    box.appendChild(layer);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>layer.classList.add('on')));
+    while(box.children.length>2) box.firstChild.remove();
+  };
+  show();
+  const still=document.documentElement.classList.contains('a11y-still') || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!still && list.length>1) p.timer=setInterval(()=>{ if(!document.hidden) show(); }, kind==='reviews'?5000:3500);
+}
 function escHtml(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 const LEVELS = [
@@ -917,7 +1004,7 @@ function applyA11y(){
   document.getElementById('a11yZoomIn').disabled=z===A11Y_ZOOMS.length-1;
   try{ localStorage.setItem('mangalA11y', JSON.stringify(a11y)); }catch(e){}
 }
-function a11yToggle(k){ a11y[k]=!a11y[k]; applyA11y(); }
+function a11yToggle(k){ a11y[k]=!a11y[k]; applyA11y(); if(k==='still'){ startPeek('gallery'); startPeek('reviews'); } }
 function a11yZoom(d){ a11y.zoom=Math.max(0,Math.min(A11Y_ZOOMS.length-1,(a11y.zoom||0)+d)); applyA11y(); }
 function a11yReset(){ a11y={}; applyA11y(); }
 function toggleA11y(){ document.getElementById('a11yPanel').hidden ? openA11y() : closeA11y(); }
@@ -1267,6 +1354,7 @@ applyMediaNav();
 renderGallery();renderLevels();renderMenus();loadGallery();applyA11y();
 // admin.html links here with #gallery / #reviews to show how they look
 document.getElementById('reviewsCard').hidden=!REVIEWS.length; renderReviews();
+startPeek('gallery'); startPeek('reviews'); renderMenusPeek();
 if(location.hash==='#gallery' || location.hash==='#reviews'){
   const h=location.hash; history.replaceState(null,'',location.pathname+location.search);
   if(h==='#gallery') openGalleryModal(); else openReviewsModal();

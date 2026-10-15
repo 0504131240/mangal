@@ -2144,8 +2144,9 @@ function drawScaled(src,w,h){
   c.getContext('2d').drawImage(src,0,0,c.width,c.height);
   return c;
 }
+// a frame from a video file, or from a stored video by its same-site address (a frame drawn from another site can't be saved)
 async function videoFrame(file){
-  const src=URL.createObjectURL(file);
+  const local=typeof file!=='string', src=local?URL.createObjectURL(file):file;
   const v=document.createElement('video');
   v.muted=true; v.playsInline=true; v.preload='auto'; v.src=src;
   try{
@@ -2153,7 +2154,7 @@ async function videoFrame(file){
     const t=Math.min(1,(v.duration||0)/3);
     if(t>0) await new Promise(resolve=>{ v.onseeked=resolve; v.currentTime=t; setTimeout(resolve,4000); });
     return v.videoWidth ? drawScaled(v,v.videoWidth,v.videoHeight) : null;
-  } finally { v.removeAttribute('src'); v.load(); URL.revokeObjectURL(src); }
+  } finally { v.removeAttribute('src'); v.load(); if(local) URL.revokeObjectURL(src); }
 }
 async function makeThumb(data,isVideo){
   try{
@@ -2206,15 +2207,63 @@ async function addYoutube(){
    keeping each item's place, caption and category; the old Blob file is deleted once its item points to the new one */
 let gmMoving=false;
 function needsMove(g){ return g.kind!=='youtube' && !g.path && (g.blob || /^images\//.test(g.url)); }
+// files stored before small copies existed; the site passes Firebase Storage files through /fbs/ (vercel.json),
+// so the admin can read them back without the storage allowing other sites
+function needsThumb(g){ return !!g.path && !g.thumb && (g.kind==='image' || g.kind==='video'); }
+function sameSiteCopy(g){ return '/fbs/'+g.path.slice('gallery/'.length)+'?'+g.url.split('?')[1]; }
 function renderMigrateCard(){
   const el=document.getElementById('gmMigrate');
   if(!el) return;
-  const n = Array.isArray(galleryItems) && !gmSel && storageReady && !gmMoving ? galleryItems.filter(needsMove).length : 0;
-  el.innerHTML = n ? `
+  const ok=Array.isArray(galleryItems) && !gmSel && storageReady && !gmMoving;
+  const move=ok ? galleryItems.filter(needsMove).length : 0, thumbs=ok ? galleryItems.filter(needsThumb).length : 0;
+  el.innerHTML = move ? `
     <div class="gm-mig">
-      <div><b>📦 ${countOf(n,'קובץ אחד עדיין','קבצים עדיין')} באחסון הישן</b><small>העברה ל-Firebase, בלי לשנות סדר, כיתובים וקטגוריות</small></div>
+      <div><b>📦 ${countOf(move,'קובץ אחד עדיין','קבצים עדיין')} באחסון הישן</b><small>העברה ל-Firebase, בלי לשנות סדר, כיתובים וקטגוריות</small></div>
       <button type="button" onclick="moveAllToFirebase()">העברה</button>
+    </div>` : thumbs ? `
+    <div class="gm-mig">
+      <div><b>🖼️ ל-${countOf(thumbs,'פריט אחד','פריטים')} חסרה תמונה קטנה</b><small>כדי שהגלריה תיטען מהר, ובסרטונים תופיע תמונה מתוך הסרטון</small></div>
+      <button type="button" onclick="addMissingThumbs()">יצירה</button>
     </div>` : '';
+}
+async function addMissingThumbs(){
+  if(gmMoving || gmUp){ showToast('יש העלאה שעוד לא הסתיימה'); return; }
+  const todo=(galleryItems||[]).filter(needsThumb).map(g=>g.url);
+  if(!todo.length) return;
+  gmMoving=true; gmErrors=[];
+  renderMigrateCard();
+  const errors=[];
+  let made=0;
+  for(let i=0;i<todo.length;i++){
+    const g=galleryItems.find(x=>x.url===todo[i]);
+    if(!g) continue;
+    const name=g.path.split('/').pop();
+    try{
+      setUploadProgress(i+1,todo.length,'יוצר תמונה קטנה...');
+      let small;
+      if(g.kind==='video') small=await makeThumb(sameSiteCopy(g),true);
+      else {
+        const r=await fetch(sameSiteCopy(g));
+        if(!r.ok) throw new Error(`הקובץ לא נטען (${r.status})`);
+        small=await makeThumb(await r.blob(),false);
+      }
+      if(!small) throw new Error(g.kind==='video'?'לא הצלחתי לקחת תמונה מהסרטון':'לא הצלחתי להקטין את התמונה');
+      const st=await fbStorage();
+      const thumbPath=g.path.replace(/\.\w+$/,'t.jpg');
+      const snap=await st.uploadBytesResumable(st.ref(st.storage,thumbPath), small, {contentType:'image/jpeg', ...UPLOAD_META});
+      const thumb=await st.getDownloadURL(snap.ref);
+      if(!galleryItems.some(x=>x.url===todo[i])){ st.deleteObject(st.ref(st.storage,thumbPath)).catch(()=>{}); continue; } // deleted meanwhile
+      await saveGalleryItems(galleryItems.map(x=>x.url===todo[i]?{...x,thumb,thumbPath}:x));
+      made++;
+    }catch(e){
+      console.error(e);
+      errors.push(`${name}: ${e&&e.code?storageProblem(e):(e&&e.message||String(e))}`);
+    }
+  }
+  gmUp=null; gmMoving=false; gmErrors=errors;
+  renderUploadPanel();
+  renderMigrateCard();
+  if(made) showToast(made===1?'נוצרה תמונה קטנה ✓':`נוצרו ${made} תמונות קטנות ✓`);
 }
 async function moveAllToFirebase(){
   if(gmMoving || gmUp){ showToast('יש העלאה שעוד לא הסתיימה'); return; }

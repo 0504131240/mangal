@@ -1,4 +1,4 @@
-const CACHE='bbq-admin-v6';
+const CACHE='bbq-admin-v7';
 const SHELL=['admin.html','media.js','images/logo-v2.png','images/icon-192.png','images/app-icon-192.png','images/app-icon-512.png','manifest-admin.json'];
 
 self.addEventListener('install',(e)=>{
@@ -16,7 +16,7 @@ self.addEventListener('activate',(e)=>{
 self.addEventListener('fetch',(e)=>{
   const url=new URL(e.request.url);
   if(url.origin!==location.origin || e.request.method!=='GET') return; // let Firebase/CDN requests pass through untouched
-  if(url.pathname.startsWith('/api/') || url.pathname.endsWith('.rules')) return;
+  if(url.pathname.startsWith('/api/') || url.pathname.startsWith('/fbs/') || url.pathname.endsWith('.rules')) return;
 
   // the app manifest: always the current one, so changes to the installed app (icons, scope) reach the phone
   if(url.pathname.endsWith('/manifest-admin.json')){

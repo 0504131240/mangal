@@ -5,5 +5,8 @@
     { "path": "/api/reminders", "schedule": "0 20 * * *" },
     { "path": "/api/reminders", "schedule": "0 9 * * 5" },
     { "path": "/api/reminders", "schedule": "0 10 * * 5" }
+  ],
+  "rewrites": [
+    { "source": "/fbs/:file", "destination": "https://firebasestorage.googleapis.com/v0/b/mangal-b11fe.firebasestorage.app/o/gallery%2F:file" }
   ]
 }

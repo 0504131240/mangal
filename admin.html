@@ -204,6 +204,21 @@ button{font-family:var(--font)}
 .gm-in{max-width:760px;margin:0 auto;padding:14px 14px 32px}
 .gm-info{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 10px}
 .gm-stats{font-size:13px;font-weight:700}
+.gm-views{display:flex;flex-wrap:wrap;gap:8px}
+button.gm-view{border:none;cursor:pointer;font-family:var(--font)}
+.peek-opts{display:flex;flex-direction:column;gap:10px}
+.peek-opt{display:flex;align-items:center;gap:12px;width:100%;padding:14px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;font-family:var(--font);text-align:right;color:var(--text)}
+.peek-opt[aria-pressed="true"]{border-color:var(--flame);background:var(--flame-bg)}
+.peek-opt .ico{font-size:24px;flex:none}
+.peek-opt b{display:block;font-size:14.5px}
+.peek-opt small{display:block;font-size:12px;color:var(--text2);margin-top:2px;line-height:1.45}
+.peek-opt .peek-ok{margin-inline-start:auto;color:var(--flame);font-weight:700;font-size:18px}
+.peek-opt video,.peek-opt .peek-pic{flex:none;width:64px;height:50px;border-radius:8px;object-fit:cover;background:#1A120E}
+.peek-pick{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.peek-pick button{position:relative;aspect-ratio:1;padding:0;border:none;border-radius:8px;overflow:hidden;cursor:pointer;background:var(--surface2)}
+.peek-pick button[aria-pressed="true"]{outline:3px solid var(--flame);outline-offset:-3px}
+.peek-pick img{width:100%;height:100%;object-fit:cover;display:block}
+.peek-pick-t{margin-top:16px;font-size:13px;font-weight:700;color:var(--text2)}
 .gm-view{font-size:12.5px;font-weight:700;color:var(--flame-dark);text-decoration:none;padding:6px 12px;border-radius:16px;background:var(--flame-bg)}
 .gm-tip{flex-basis:100%;display:flex;flex-wrap:wrap;gap:2px 14px;font-size:11.5px;color:var(--text2);line-height:1.5}
 .gm-tabs{flex:none;background:var(--surface);border-bottom:1px solid var(--border);padding:8px 12px}
@@ -1492,6 +1507,7 @@ async function loadGalleryItems(){
     galleryItems = snap.exists() && Array.isArray(snap.data().items)
       ? snap.data().items.filter(g=>isSafeMediaUrl(g.url))
       : [];
+    peekMode = snap.exists() && snap.data().peekMode==='rotate' ? 'rotate' : 'video';
     reviewItems = snap.exists() && Array.isArray(snap.data().reviews)
       ? snap.data().reviews.filter(r=>r && r.id && (r.kind==='text' ? !!r.text : isSafeMediaUrl(r.url)))
       : [];
@@ -1658,7 +1674,8 @@ function renderGalleryManager(){
     const vids=galleryItems.filter(g=>g.kind!=='image').length;
     info.innerHTML=`
       <div class="gm-stats">${countOf(galleryItems.length-vids,'תמונה אחת','תמונות')} · ${countOf(vids,'סרטון אחד','סרטונים')} · ${countOf(mediaGroups().length,'קטגוריה אחת','קטגוריות')}</div>
-      <a class="gm-view" href="/#gallery" target="_blank" rel="noopener">👁 איך זה נראה באתר</a>
+      <div class="gm-views"><button type="button" class="gm-view" onclick="openPeekSheet()">🏠 תצוגה ראשית</button>
+      <a class="gm-view" href="/#gallery" target="_blank" rel="noopener">👁 איך זה נראה באתר</a></div>
       <p class="gm-tip"><span>✏️ לחיצה: עריכה, ו-📌 לתמונה קבועה בדף הבית</span><span>↕️ לחיצה ארוכה וגרירה: שינוי סדר</span><span>☑️ לחיצה ארוכה: בחירת כמה</span></p>`;
   }
   renderUploadPanel();
@@ -2011,13 +2028,52 @@ function openItemSheet(url){
     <button type="button" class="sheet-del" onclick="deleteSheetItem()">🗑️ מחיקת ${what} מהאתר</button>`);
   root.dataset.url=url;
 }
+/* the gallery button on the site's home page: what its small window shows */
+let peekMode='video';
+function peekPickable(g){ return g.kind==='image' || g.kind==='youtube' || (g.kind==='video' && g.thumb); }
+function openPeekSheet(){
+  if(!Array.isArray(galleryItems)){ showToast('הגלריה לא נטענה, נסו לפתוח שוב'); return; }
+  const front=galleryItems.find(g=>g.front);
+  const cur=front ? 'pick' : peekMode;
+  const opt=(m, ico, title, sub)=>`<button type="button" class="peek-opt" aria-pressed="${cur===m}" onclick="setPeekMode('${m}')">
+      ${ico}<span><b>${title}</b><small>${sub}</small></span>${cur===m?'<span class="peek-ok" aria-hidden="true">✓</span>':''}</button>`;
+  openSheet('🏠 תצוגה ראשית', `
+    <p class="front-note" style="text-align:right;margin:0 0 12px">מה יופיע בחלון הקטן של "תמונות מאירועים" בדף הבית של האתר</p>
+    <div class="peek-opts">
+      ${opt('video','<video src="/images/peek-video.mp4" poster="/images/peek-video.jpg" muted loop playsinline autoplay></video>','הסרטון (ברירת מחדל)','סרטון קצר של חיתוך האנטריקוט, רץ בלופ בלי קול')}
+      ${opt('rotate','<span class="ico" aria-hidden="true">🔀</span>','מתחלף','תמונות מהגלריה, מתחלפות כל כמה שניות')}
+      ${opt('pick', front?`<img class="peek-pic" src="${esc(front.kind==='youtube'?YT.thumb(front.url):(front.thumb||front.url))}" alt="">`:'<span class="ico" aria-hidden="true">📌</span>','תמונה שבחרתי', front?'זו התמונה שמופיעה עכשיו. אפשר לבחור אחרת למטה':'בוחרים למטה תמונה אחת שתופיע תמיד')}
+    </div>
+    <div class="peek-pick-t">בחירת תמונה:</div>
+    <div class="peek-pick">${galleryItems.filter(peekPickable).map(g=>`
+      <button type="button" aria-pressed="${!!g.front}" aria-label="${g.kind==='image'?'תמונה':'סרטון'}${g.cap?': '+esc(g.cap):''}" data-url="${esc(g.url)}" onclick="pickPeekItem(this.dataset.url)">
+        <img src="${esc(g.kind==='youtube'?YT.thumb(g.url):(g.thumb||g.url))}" alt="" loading="lazy"></button>`).join('')}</div>`);
+}
+async function setPeekMode(m){
+  if(m==='pick'){ document.querySelector('.peek-pick')?.scrollIntoView({behavior:'smooth', block:'center'}); return; }
+  closeSheet();
+  const was=peekMode;
+  peekMode=m;
+  try{
+    const {db,doc,setDoc}=await fbInit();
+    await setDoc(doc(db,'mangalSettings','gallery'),{peekMode:m, updatedAtMs:Date.now()},{merge:true});
+    if(galleryItems.some(g=>g.front)) await saveGalleryItems(withFront(galleryItems, ()=>false, false));
+    showToast(m==='rotate'?'בדף הבית התמונות יתחלפו ✓':'בדף הבית ירוץ הסרטון ✓');
+  }catch(e){ console.error(e); peekMode=was; showToast('השמירה נכשלה'); loadGalleryItems(); }
+}
+async function pickPeekItem(url){
+  closeSheet();
+  try{ await saveGalleryItems(withFront(galleryItems, x=>x.url===url, true)); showToast('בדף הבית תופיע התמונה שבחרת ✓'); }
+  catch(e){ console.error(e); showToast('השמירה נכשלה'); loadGalleryItems(); }
+}
+
 /* "always on the home page": one photo and one review can be marked to stay in the small window on
    the site's home page buttons; with none marked, the window shows them in turns */
 const FRONT_BADGE='<span class="gm-front" aria-hidden="true">📌 בחזית</span>';
 function frontBtn(x, what, kind){
   const it=`את ${what} ${what==='הסרטון'?'הזה':'הזאת'}`;
   return `<button type="button" class="front-btn ${x.front?'on':''}" onclick="toggleFront('${kind}')" aria-pressed="${!!x.front}">📌 ${x.front?'קבוע בדף הבית · לחיצה לביטול':'להציג קבוע בדף הבית'}</button>
-    <p class="front-note">${x.front?`כרגע בדף הבית רואים תמיד ${it}. בביטול, יתחלפו שם כמו קודם.`:`בדף הבית יראו תמיד ${it}, במקום שיתחלפו. אפשר לבחור רק אחד.`}</p>`;
+    <p class="front-note">${x.front?`כרגע בדף הבית רואים תמיד ${it}. בביטול, ${kind==='rv'?'ההמלצות יתחלפו שם כמו קודם':'יחזור מה שנבחר ב"תצוגה ראשית"'}.`:`בדף הבית יראו תמיד ${it}. אפשר לבחור רק אחד.`}</p>`;
 }
 function withFront(list, isIt, on){ return list.map(x=>{ const {front,...rest}=x; return on && isIt(x) ? {...rest, front:true} : rest; }); }
 async function toggleFront(kind){
@@ -2031,7 +2087,7 @@ async function toggleFront(kind){
     } else {
       const g=galleryItems.find(x=>x.url===url); if(!g) return;
       await saveGalleryItems(withFront(galleryItems, x=>x.url===url, !g.front));
-      showToast(g.front?'התמונות יתחלפו בדף הבית ✓':'קבוע בדף הבית ✓');
+      showToast(g.front?(peekMode==='rotate'?'התמונות יתחלפו בדף הבית ✓':'בדף הבית ירוץ הסרטון ✓'):'קבוע בדף הבית ✓');
     }
   }catch(e){ console.error(e); showToast('השמירה נכשלה'); loadGalleryItems(); }
 }

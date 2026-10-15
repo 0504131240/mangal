@@ -1,4 +1,4 @@
-const CACHE='bbq-admin-v5';
+const CACHE='bbq-admin-v6';
 const SHELL=['admin.html','media.js','images/logo-v2.png','images/icon-192.png','images/app-icon-192.png','images/app-icon-512.png','manifest-admin.json'];
 
 self.addEventListener('install',(e)=>{

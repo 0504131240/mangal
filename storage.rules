@@ -1,0 +1,30 @@
+rules_version = '2';
+// Paste into Firebase console → Storage → Rules, with __OWNER_EMAILS__ replaced by the owners' Google
+// emails in quotes, exactly as in firestore.rules (kept out of this public repo). The admins added in
+// the admin app's settings are read from Firestore, so Firebase asks once to allow that.
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedInEmail() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+    function isAdmin() {
+      return signedInEmail() && (request.auth.token.email.lower() in [__OWNER_EMAILS__]
+        || request.auth.token.email.lower()
+             in firestore.get(/databases/(default)/documents/mangalSettings/admins).data.emails);
+    }
+
+    // the site's gallery: anyone can view a file; only the admins add (photos and videos up to 500MB) and delete
+    match /gallery/{name} {
+      allow get: if true;
+      allow create: if isAdmin()
+        && name.matches('[0-9]+-[a-z0-9]+[.](jpg|png|webp|mp4|mov|webm)')
+        && request.resource.size <= 500 * 1024 * 1024
+        && request.resource.contentType.matches('(image|video)/.+');
+      allow delete: if isAdmin();
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,7 +1,7 @@
 // Shared by the site and the admin app: which gallery URLs may be shown, and YouTube link helpers.
 // The gallery list itself lives in Firestore at mangalSettings/gallery and is managed from the admin settings.
 
-// Only our own repo images, our Vercel Blob store and YouTube videos (stored as
+// Only our own repo images, our Firebase Storage and Vercel Blob stores, and YouTube videos (stored as
 // https://www.youtube.com/watch?v=ID or /shorts/ID) are rendered, so a tampered
 // Firestore doc can't inject arbitrary URLs into the page.
 const YT_SAVED=/^https:\/\/www\.youtube\.com\/(?:watch\?v=|shorts\/)([\w-]{11})$/;
@@ -9,6 +9,7 @@ window.isSafeMediaUrl = function(url){
   return typeof url==='string' && (
     /^images\/[\w.-]+$/.test(url) ||
     /^https:\/\/[a-z0-9]+\.public\.blob\.vercel-storage\.com\/[\w.\/-]+$/i.test(url) ||
+    /^https:\/\/firebasestorage\.googleapis\.com\/v0\/b\/mangal-b11fe\.firebasestorage\.app\/o\/gallery%2F[\w.-]+\?alt=media&token=[\w-]+$/.test(url) ||
     YT_SAVED.test(url)
   );
 };

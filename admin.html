@@ -374,6 +374,17 @@ async function fbInit(){
     googleSignIn:()=>authMod.signInWithPopup(auth,new authMod.GoogleAuthProvider())};
   return _fb;
 }
+// Firebase Storage holds the gallery's uploaded photos and videos (loaded only when the gallery needs it)
+let _st=null;
+async function fbStorage(){
+  if(_st) return _st;
+  await fbInit();
+  const appMod=await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js");
+  const m=await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js");
+  _st={storage:m.getStorage(appMod.getApp()), ref:m.ref, uploadBytesResumable:m.uploadBytesResumable,
+    getDownloadURL:m.getDownloadURL, getMetadata:m.getMetadata, deleteObject:m.deleteObject};
+  return _st;
+}
 const LEVELS = ['CLASIC','SPECIAL','CRAZY'];
 const LEVEL_ICON = {'CLASIC':'🔥','SPECIAL':'🔥🔥','CRAZY':'👑'};
 const LEVEL_PRICE = {'CLASIC':170,'SPECIAL':220,'CRAZY':300};
@@ -1314,7 +1325,6 @@ function esc(s){
 /* ===== settings: login, notifications, site gallery ===== */
 let galleryItems=null;
 let storageReady=false;
-let storageMode=null;
 // gallery groups: a photo with no group shows on the site under "כללי"
 const DEFAULT_GROUP='כללי';
 const GROUP_MAX=40;
@@ -1415,24 +1425,22 @@ async function removeAdminEmail(i){
   if(!email || !confirm(`להסיר את ${email} מהמורשים לניהול?`)) return;
   if(await saveAdminEmails(adminEmails.filter(e=>e!==email))) showToast('הוסר ✓');
 }
+// looks up a file that isn't there: "not found" means the storage is on and its rules are published
 async function checkStorage(){
   let reason='';
-  storageMode=null;
   try{
-    const r=await fetch('/api/upload',{cache:'no-store'});
-    if(!r.ok) reason=`שרת ההעלאה לא זמין (קוד ${r.status}) - כנראה הפריסה האחרונה ב-Vercel לא הצליחה`;
-    else {
-      const j=await r.json();
-      storageMode=j.mode||null;
-      if(j.configured!==true){
-        const names=(j.env&&j.env.names||[]).join(', ')||'אין';
-        reason=`האחסון לא מחובר לפרויקט, או שלא נעשה Redeploy אחרי החיבור (משתני אחסון שהשרת רואה: ${names}; OIDC: ${j.env&&j.env.oidc?'כן':'לא'})`;
-      }
-    }
-  }catch(e){ reason='אין חיבור לשרת ההעלאה: '+(e.message||e); }
+    const st=await fbStorage();
+    await st.getMetadata(st.ref(st.storage,'gallery/0-probe.jpg'));
+  }catch(e){ if(e.code!=='storage/object-not-found') reason=storageProblem(e); }
   storageReady=!reason;
   storageReason=reason;
   renderStorageNote();
+}
+function storageProblem(e){
+  const code=e&&e.code||'';
+  if(code==='storage/unauthorized') return 'אין הרשאה. צריך להדביק את חוקי האחסון (storage.rules) ב-Firebase ← Storage ← Rules';
+  if(code==='storage/retry-limit-exceeded' || !navigator.onLine) return 'אין חיבור לאינטרנט';
+  return `האחסון של Firebase עוד לא הופעל (Storage ← Get started)${code?` [${code}]`:''}`;
 }
 let storageReason='';
 function renderStorageNote(){
@@ -1677,6 +1685,11 @@ async function removeItems(urls){
   try{
     await saveGalleryItems(galleryItems.filter(g=>!urls.includes(g.url)));
   }catch(e){ console.error(e); showToast('המחיקה נכשלה'); loadGalleryItems(); return false; }
+  const stored=gone.filter(g=>g.path);
+  if(stored.length){
+    const st=await fbStorage();
+    stored.forEach(g=>st.deleteObject(st.ref(st.storage,g.path)).catch(e=>console.error(e)));
+  }
   const blobs=gone.filter(g=>g.blob);
   if(blobs.length){
     const token=await idToken();
@@ -1836,12 +1849,12 @@ function openAddSheet(){
     <div class="add-opts">
       <label class="add-opt ${storageReady?'':'disabled'}">
         <span class="ico" aria-hidden="true">📷</span>
-        <span><b>תמונות וסרטונים מהטלפון</b><small>אפשר לבחור כמה ביחד · סרטון עד 50MB</small></span>
+        <span><b>תמונות וסרטונים מהטלפון</b><small>אפשר לבחור כמה ביחד · סרטון עד 500MB</small></span>
         <input type="file" accept="image/*,video/*" multiple hidden onchange="pickFiles(this.files)" ${storageReady?'':'disabled'}>
       </label>
       <button type="button" class="add-opt" onclick="openYoutubeSheet()">
         <span class="ico yt" aria-hidden="true">▶</span>
-        <span><b>סרטון מיוטיוב</b><small>הכי מומלץ לסרטונים: לא נגמר באחסון</small></span>
+        <span><b>סרטון מיוטיוב</b><small>לסרטון שכבר נמצא ביוטיוב</small></span>
       </button>
     </div>
     ${storageReady?'':`<div class="minfo">${storageReason?`אי אפשר להעלות קבצים כרגע: ${esc(storageReason)}`:'בודק את האחסון...'}</div>`}`);
@@ -1871,7 +1884,7 @@ function renderUploadSheet(){
         ${p.big?`<span class="up-warn">גדול מדי · ${Math.round(p.file.size/1048576)}MB</span>`:''}
         <button type="button" class="up-x" onclick="unpickFile(${k})" aria-label="להוציא מההעלאה">✕</button>
       </div>`).join('')}</div>
-    ${gmPending.some(p=>p.big)?`<div class="minfo">סרטון מעל 50MB לא יועלה. עדיף להעלות אותו ליוטיוב ולהוסיף כאן את הקישור.</div>`:''}
+    ${gmPending.some(p=>p.big)?`<div class="minfo">סרטון מעל 500MB לא יועלה. אפשר לקצר אותו, או לשלוח אותו לעצמך בוואטסאפ, שמקטין אותו, ולהעלות משם.</div>`:''}
     ${catPicker(prev!==null?prev:lastUploadGroup)}
     <div class="modal-actions"><button type="button" class="btn-save" onclick="startUpload()" ${ok?'':'disabled'}>העלאה${ok>1?` של ${ok}`:''}</button></div>`);
 }
@@ -2109,9 +2122,8 @@ async function shrinkImage(file){
   return out||file;
 }
 const MEDIA_EXT={'image/jpeg':'jpg','image/png':'png','image/webp':'webp','video/mp4':'mp4','video/quicktime':'mov','video/webm':'webm'};
-// videos are the heavy files in the storage's monthly data transfer, so they're kept small
-const MAX_VIDEO_BYTES=50*1024*1024;
-let _blobClient=null;
+// matches storage.rules
+const MAX_VIDEO_BYTES=500*1024*1024;
 // a YouTube video: only its link is saved; it plays from YouTube on the site
 async function addYoutube(){
   const inp=document.getElementById('ytLink');
@@ -2139,47 +2151,32 @@ async function handleMediaFiles(files,group){
     // some phones hand over files with an empty type, so fall back to the extension
     const fType=f.type||guessMediaType(f.name);
     const isVideo=fType.startsWith('video/');
-    if(isVideo && f.size>MAX_VIDEO_BYTES){ errors.push(`${f.name}: הסרטון גדול מדי (${Math.round(f.size/1048576)}MB, אפשר עד 50MB). עדיף להעלות אותו ליוטיוב ולהוסיף כאן את הקישור`); continue; }
+    if(isVideo && f.size>MAX_VIDEO_BYTES){ errors.push(`${f.name}: הסרטון גדול מדי (${Math.round(f.size/1048576)}MB, אפשר עד 500MB)`); continue; }
     try{
       setUploadProgress(i+1,files.length,'מכין קובץ...');
       const body=fType.startsWith('image/') ? await shrinkImage(f) : f;
       const type=body.type||fType;
       const ext=MEDIA_EXT[type];
       if(!ext){ errors.push(`${f.name}: סוג קובץ לא נתמך (${type||'לא ידוע'})`); continue; }
-      _blobClient=_blobClient||await import('./vendor/vercel-blob-upload-2.8.0.js');
-      const uploadFn = storageMode==='oidc' ? _blobClient.uploadPresigned : _blobClient.upload;
-      const name=`gallery/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
-      let uploading=true; // the progress callback is throttled and can fire after the upload resolves
-      const res=await uploadFn(name, body, {
-        access:'public',
-        handleUploadUrl:'/api/upload',
-        clientPayload:JSON.stringify({idToken:await idToken()}),
-        contentType:type,
-        multipart:body.size>20*1024*1024,
-        onUploadProgress:({percentage})=>{ if(uploading) setUploadProgress(i+1,files.length,`מעלה ${isVideo?'סרטון':'תמונה'}...`,percentage); }
-      }).finally(()=>{ uploading=false; });
-      await saveGalleryItems(withNewItem(galleryItems,{kind:isVideo?'video':'image', url:res.url, cap:'', group, blob:true}));
+      const st=await fbStorage();
+      const path=`gallery/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+      // a file's name never changes, so browsers may keep it for a year
+      const task=st.uploadBytesResumable(st.ref(st.storage,path), body, {contentType:type, cacheControl:'public, max-age=31536000, immutable'});
+      await new Promise((resolve,reject)=>task.on('state_changed',
+        snap=>setUploadProgress(i+1,files.length,`מעלה ${isVideo?'סרטון':'תמונה'}...`,snap.totalBytes?snap.bytesTransferred/snap.totalBytes*100:0),
+        reject, resolve));
+      const url=await st.getDownloadURL(task.snapshot.ref);
+      await saveGalleryItems(withNewItem(galleryItems,{kind:isVideo?'video':'image', url, cap:'', group, path}));
       added++;
     }catch(e){
       console.error(e);
-      let msg=e&&e.message||String(e);
-      if(/client token|presigned URL/i.test(msg)) msg+=' | '+await uploadServerReason();
-      errors.push(`${f.name}: ההעלאה נכשלה - ${msg}`);
+      errors.push(`${f.name}: ההעלאה נכשלה - ${e&&e.code?storageProblem(e):(e&&e.message||String(e))}`);
     }
   }
   gmUp=null;
   gmErrors=errors;
   renderUploadPanel();
   if(added) showToast(added===1?'נוסף לאתר ✓':`${added} קבצים נוספו לאתר ✓`);
-}
-// the blob client only says "Failed to retrieve the client token / presigned URL"; ask the server directly for its reason
-async function uploadServerReason(){
-  try{
-    const r=await fetch('/api/upload',{method:'POST',headers:{'content-type':'application/json'},
-      body:JSON.stringify({type:storageMode==='oidc'?'blob.generate-presigned-url':'blob.generate-client-token',payload:{pathname:'gallery/probe.jpg',multipart:false,clientPayload:JSON.stringify({idToken:await idToken()})}})});
-    const j=await r.json().catch(()=>({}));
-    return `שרת: ${r.status} ${j.error||''}`.trim();
-  }catch(e){ return 'שרת לא זמין'; }
 }
 function guessMediaType(name){
   const ext=(String(name).split('.').pop()||'').toLowerCase();

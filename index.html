@@ -98,6 +98,17 @@ section{padding:52px 0}
 .sect-head p{margin-top:10px;color:var(--text2);font-size:14.5px;line-height:1.7}
 
 /* gallery */
+.reviews{columns:260px;column-gap:14px}
+.rv{break-inside:avoid;margin:0 0 14px;background:linear-gradient(160deg,#2A1B13,#1C130E);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.rv-text{padding:32px 18px 16px;position:relative}
+.rv-text::before{content:"”";position:absolute;top:-4px;right:14px;font-family:Georgia,serif;font-size:64px;line-height:1;color:var(--flame);opacity:.55}
+.rv-text p{position:relative;font-size:15px;line-height:1.7;color:var(--text);white-space:pre-line;overflow-wrap:anywhere}
+.rv-by{display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+.rv-by b{font-family:var(--font-head);font-size:14.5px;color:var(--flame-dark)}
+.rv-by span{font-size:12.5px;color:var(--text2)}
+.rv-shot{display:block;width:100%;padding:0;border:none;background:#000;cursor:zoom-in;font:inherit;color:inherit;text-align:right}
+.rv-shot img{display:block;width:100%;max-height:420px;object-fit:cover;object-position:top}
+.rv-shot .rv-by{margin:0;padding:10px 14px 12px;background:linear-gradient(160deg,#2A1B13,#1C130E)}
 .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
 .gallery-empty{grid-column:1/-1;text-align:center;color:var(--text2);padding:40px 10px;font-size:15px}
 .gtile{aspect-ratio:1/1;border-radius:16px;overflow:hidden;position:relative;cursor:pointer;border:1px solid var(--border)}
@@ -496,6 +507,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
 <div class="wrap">
   <div class="big-cards">
     <button type="button" class="big-card" onclick="openGalleryModal()"><div class="ico" aria-hidden="true">📷</div><div class="txt"><b>תמונות מאירועים</b><span>הצצה לאירועים קודמים</span></div><div class="arrow" aria-hidden="true">‹</div></button>
+    <button type="button" class="big-card" id="reviewsCard" onclick="openReviewsModal()" hidden><div class="ico" aria-hidden="true">⭐</div><div class="txt"><b>מה אומרים עלינו</b><span>המלצות של לקוחות מאירועים</span></div><div class="arrow" aria-hidden="true">‹</div></button>
     <button type="button" class="big-card" onclick="openMenusModal()"><div class="ico" aria-hidden="true">📋</div><div class="txt"><b>תפריטים</b><span>CLASIC · SPECIAL · CRAZY</span></div><div class="arrow" aria-hidden="true">‹</div></button>
     <button type="button" class="big-card" onclick="openMassageModal()"><div class="ico" aria-hidden="true">🧖</div><div class="txt"><b>הצעה מיוחדת לימי גיבוש</b><span>ספא לקבוצה, עם אפשרות למסאז'יסט</span></div><div class="arrow" aria-hidden="true">‹</div></button>
     <button type="button" class="big-card" onclick="openBookModal()"><div class="ico" aria-hidden="true">📅</div><div class="txt"><b>בדיקת זמינות</b><span>שולחים פרטים ונחזור אליכם לאשר</span></div><div class="arrow" aria-hidden="true">‹</div></button>
@@ -533,6 +545,13 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="galleryTitle">
     <div class="modal-top"><h3 id="galleryTitle">תמונות מאירועים</h3><button type="button" class="modal-close" aria-label="סגירה" onclick="closeGalleryModal()">✕</button></div>
     <div id="galleryGrid"></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="reviewsModalBg" hidden onclick="if(event.target===this)closeReviewsModal()">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="reviewsTitle">
+    <div class="modal-top"><h3 id="reviewsTitle">⭐ מה אומרים עלינו</h3><button type="button" class="modal-close" aria-label="סגירה" onclick="closeReviewsModal()">✕</button></div>
+    <div class="reviews" id="reviewsList"></div>
   </div>
 </div>
 
@@ -744,9 +763,10 @@ async function loadGallery(){
   try{
     const res=await fetch(GALLERY_DOC_URL);
     let list;
-    if(res.status===404) list=[];
+    if(res.status===404){ list=[]; setReviews([]); }
     else if(res.ok){
       const data=await res.json();
+      setReviews(parseReviews(data?.fields?.reviews?.arrayValue?.values||[]));
       const values=data?.fields?.items?.arrayValue?.values||[];
       list=values.map(v=>{
         const f=v.mapValue?.fields||{};
@@ -761,10 +781,46 @@ async function loadGallery(){
     if(JSON.stringify(list)===JSON.stringify(GALLERY)) return;
     GALLERY=list;
     renderGallery();
-    if(lightboxIndex>=GALLERY.length) closeLightbox();
-    else if(lightboxIndex>=0) buildLightbox();
+    if(lbSource==='gallery' && lightboxIndex>=GALLERY.length) closeLightbox();
+    else if(lbSource==='gallery' && lightboxIndex>=0) buildLightbox();
   }catch(e){}
 }
+/* reviews from customers: written ones, and screenshots (shown small, and big in the big view) */
+let REVIEWS=(function(){
+  try{ const c=JSON.parse(localStorage.getItem('mangalReviewsCache')||'null'); if(Array.isArray(c)) return c.filter(r=>r.kind==='text'||isSafeMediaUrl(r.url)); }catch(e){}
+  return [];
+})();
+let REVIEW_SHOTS=[], reviewsOpened=false;
+function parseReviews(values){
+  return values.map(v=>{
+    const f=v.mapValue?.fields||{}, str=k=>f[k]?.stringValue||'';
+    if(str('kind')==='text') return str('text') ? {kind:'text', name:str('name'), event:str('event'), text:str('text')} : null;
+    const thumb=str('thumb');
+    return isSafeMediaUrl(str('url')) ? {kind:'image', url:str('url'), name:str('name'), event:str('event'), ...(thumb && isSafeMediaUrl(thumb) ? {thumb} : {})} : null;
+  }).filter(Boolean);
+}
+function setReviews(list){
+  try{ localStorage.setItem('mangalReviewsCache', JSON.stringify(list)); }catch(e){}
+  const same=JSON.stringify(list)===JSON.stringify(REVIEWS);
+  REVIEWS=list;
+  document.getElementById('reviewsCard').hidden=!REVIEWS.length;
+  if(!same) renderReviews();
+}
+function reviewBy(r){
+  return r.name||r.event ? `<div class="rv-by">${r.name?`<b>${escHtml(r.name)}</b>`:''}${r.event?`<span>${escHtml(r.event)}</span>`:''}</div>` : '';
+}
+function renderReviews(){
+  REVIEW_SHOTS=REVIEWS.filter(r=>r.kind==='image').map(r=>({kind:'image', url:r.url, thumb:r.thumb, review:true, cap:[r.name,r.event].filter(Boolean).join(' · ')}));
+  if(!reviewsOpened) return;
+  let shot=0;
+  document.getElementById('reviewsList').innerHTML = REVIEWS.length ? REVIEWS.map(r=>r.kind==='text' ? `
+    <figure class="rv rv-text"><blockquote><p>${escHtml(r.text)}</p></blockquote>${reviewBy(r)}</figure>` : `
+    <figure class="rv"><button type="button" class="rv-shot" onclick="openLightbox(${shot},'reviews')" aria-label="${escHtml(mediaLabel(REVIEW_SHOTS[shot],shot++,REVIEW_SHOTS))} (הגדלה)">
+      <img src="${escHtml(r.thumb||r.url)}" alt="" loading="lazy">${reviewBy(r)}</button></figure>`).join('')
+    : '<p class="gallery-empty">ההמלצות יעלו כאן בקרוב</p>';
+}
+function openReviewsModal(){ if(!reviewsOpened){ reviewsOpened=true; renderReviews(); } openDialog('reviewsModalBg'); }
+function closeReviewsModal(){ closeDialog('reviewsModalBg'); }
 function escHtml(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 const LEVELS = [
@@ -881,12 +937,15 @@ function closeA11y(){
 function openStatement(){ openDialog('statementBg'); }
 function openPrivacy(){ openDialog('privacyBg'); }
 
-function mediaLabel(g,i){
-  const kind=g.kind==='image'?'תמונה':'סרטון';
-  return g.cap ? `${kind}: ${g.cap}` : `${kind} ${i+1} מתוך ${GALLERY.length}`;
+function mediaLabel(g,i,list=GALLERY){
+  const kind=g.review?'המלצה':g.kind==='image'?'תמונה':'סרטון';
+  return g.cap ? `${kind}: ${g.cap}` : `${kind} ${i+1} מתוך ${list.length}`;
 }
-let lightboxIndex=-1, lightboxOpener=null;
-function openLightbox(i){
+// the big view shows the gallery, or the screenshots of the reviews
+let lightboxIndex=-1, lightboxOpener=null, lbSource='gallery';
+const lbList=()=>lbSource==='reviews'?REVIEW_SHOTS:GALLERY;
+function openLightbox(i,source='gallery'){
+  lbSource=source;
   overlayOpened();
   lightboxOpener=document.activeElement;
   lightboxIndex=i;
@@ -906,7 +965,7 @@ function buildLightbox(){
     <p class="lb-cap" id="lbCap" aria-live="polite"></p>
     <a class="lb-ytlink" id="lbYt" target="_blank" rel="noopener" hidden>הסרטון לא נפתח? לצפייה ביוטיוב ↗</a>
     <div class="lb-strip" id="lbStrip" role="group" aria-label="כל התמונות">
-      ${GALLERY.map((g,i)=>`<button type="button" class="lb-thumb" data-i="${i}" aria-label="${escHtml(mediaLabel(g,i))}" onclick="lightboxGo(${i})">
+      ${lbList().map((g,i,list)=>`<button type="button" class="lb-thumb" data-i="${i}" aria-label="${escHtml(mediaLabel(g,i,list))}" onclick="lightboxGo(${i})">
         ${mediaTile(g)}</button>`).join('')}
     </div>
   </div>`;
@@ -922,9 +981,9 @@ function buildLightbox(){
   root.querySelector('.lb-close').focus();
 }
 function renderLightbox(first){
-  const g=GALLERY[lightboxIndex];
-  document.getElementById('lightboxEl').setAttribute('aria-label', mediaLabel(g,lightboxIndex));
-  document.getElementById('lbCounter').textContent=`${lightboxIndex+1} מתוך ${GALLERY.length}`;
+  const list=lbList(), g=list[lightboxIndex];
+  document.getElementById('lightboxEl').setAttribute('aria-label', mediaLabel(g,lightboxIndex,list));
+  document.getElementById('lbCounter').textContent=`${lightboxIndex+1} מתוך ${list.length}`;
   const cap=document.getElementById('lbCap');
   cap.textContent=g.cap||''; cap.hidden=!g.cap;
   // some YouTube videos can't play inside other sites (embedding turned off, Shorts music), so YouTube itself is one tap away
@@ -935,8 +994,8 @@ function renderLightbox(first){
   document.getElementById('lbMedia').innerHTML = g.kind==='video'
     ? `<video src="${escHtml(g.url)}" ${g.thumb?`poster="${escHtml(g.thumb)}"`:''} controls ${still?'':'autoplay'} playsinline></video>`
     : g.kind==='youtube'
-    ? `<iframe class="lb-yt ${YT.vertical(g.url)?'vert':''}" src="${escHtml(YT.embed(g.url,!still))}" title="${escHtml(mediaLabel(g,lightboxIndex))}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`
-    : `<img src="${escHtml(g.url)}" alt="${escHtml(g.cap||mediaLabel(g,lightboxIndex))}">`;
+    ? `<iframe class="lb-yt ${YT.vertical(g.url)?'vert':''}" src="${escHtml(YT.embed(g.url,!still))}" title="${escHtml(mediaLabel(g,lightboxIndex,list))}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`
+    : `<img src="${escHtml(g.url)}" alt="${escHtml(g.cap||mediaLabel(g,lightboxIndex,list))}">`;
   document.querySelectorAll('#lbStrip .lb-thumb').forEach(t=>{
     const on=Number(t.dataset.i)===lightboxIndex;
     t.setAttribute('aria-current', String(on));
@@ -948,7 +1007,8 @@ function lightboxGo(i){
   renderLightbox();
 }
 function lightboxShift(dir){
-  lightboxIndex=(lightboxIndex+dir+GALLERY.length)%GALLERY.length;
+  const n=lbList().length;
+  lightboxIndex=(lightboxIndex+dir+n)%n;
   renderLightbox();
 }
 function closeLightbox(){
@@ -1018,7 +1078,7 @@ function setMenuTab(id){
 }
 
 /* ===== windows: gallery / menus / booking ===== */
-const DIALOGS=['galleryModalBg','menusModalBg','massageModalBg','bookModalBg','statementBg','privacyBg'];
+const DIALOGS=['galleryModalBg','reviewsModalBg','menusModalBg','massageModalBg','bookModalBg','statementBg','privacyBg'];
 const dialogOpeners={};
 function openDialog(id){
   overlayOpened();
@@ -1205,8 +1265,12 @@ window.addEventListener('resize',applyMediaNav);
 applyMediaNav();
 
 renderGallery();renderLevels();renderMenus();loadGallery();applyA11y();
-// admin.html links here with #gallery to show how the gallery looks
-if(location.hash==='#gallery'){ history.replaceState(null,'',location.pathname+location.search); openGalleryModal(); }
+// admin.html links here with #gallery / #reviews to show how they look
+document.getElementById('reviewsCard').hidden=!REVIEWS.length; renderReviews();
+if(location.hash==='#gallery' || location.hash==='#reviews'){
+  const h=location.hash; history.replaceState(null,'',location.pathname+location.search);
+  if(h==='#gallery') openGalleryModal(); else openReviewsModal();
+}
 // direct links, e.g. the poster's QR code opens .../#book
 ({'#book':openBookModal,'#gallery':openGalleryModal,'#menus':openMenusModal,'#massage':openMassageModal,'#spa':openMassageModal,'#privacy':openPrivacy,'#accessibility':openStatement}[location.hash]||(()=>{}))();
 

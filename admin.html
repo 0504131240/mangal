@@ -206,6 +206,21 @@ button{font-family:var(--font)}
 .gm-stats{font-size:13px;font-weight:700}
 .gm-view{font-size:12.5px;font-weight:700;color:var(--flame-dark);text-decoration:none;padding:6px 12px;border-radius:16px;background:var(--flame-bg)}
 .gm-tip{flex-basis:100%;display:flex;flex-wrap:wrap;gap:2px 14px;font-size:11.5px;color:var(--text2);line-height:1.5}
+.gm-tabs{flex:none;background:var(--surface);border-bottom:1px solid var(--border);padding:8px 12px}
+.gm-tabs-in{max-width:760px;margin:0 auto;display:flex;gap:6px}
+.gm-tabs button{flex:1;padding:9px 10px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);color:var(--text2);font-family:var(--font);font-weight:800;font-size:13.5px;cursor:pointer}
+.gm-tabs button span{font-weight:700;font-size:11.5px;background:var(--surface2);border-radius:10px;padding:1px 7px;margin-inline-start:4px}
+.gm-tabs button[aria-pressed="true"]{background:var(--char);border-color:var(--char);color:#fff}
+.gm-tabs button[aria-pressed="true"] span{background:rgba(255,255,255,.18)}
+.gm-grid.rv-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(min-width:560px){.gm-grid.rv-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.rv-sec{padding-top:10px}
+.rv-tile img{object-position:top}
+.rv-t{position:absolute;inset:0;display:flex;flex-direction:column;gap:6px;padding:12px 12px 10px;background:linear-gradient(160deg,var(--flame-bg),var(--gold-bg));text-align:right}
+.rv-q{flex:1;min-height:0;overflow:hidden;font-size:12.5px;line-height:1.5;color:var(--text);display:-webkit-box;-webkit-line-clamp:7;-webkit-box-orient:vertical;white-space:pre-line}
+.rv-q::before{content:"”";font-family:Georgia,serif;font-size:22px;line-height:0;color:var(--flame);margin-inline-end:2px}
+.rv-t b{font-size:11.5px;color:var(--flame-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mfld textarea{resize:vertical;min-height:110px;line-height:1.55}
 .gm-sec{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-top:12px;padding:2px 10px 10px}
 .gm-sec.none{border-color:#E4C68E;background:var(--warn-bg)}
 .gm-head{display:flex;align-items:center;gap:4px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
@@ -1392,7 +1407,7 @@ function openSettings(){
           <div class="set-title">תמונות וסרטונים באתר</div>
           <button type="button" class="gal-card" onclick="openGalleryManager()">
             <span class="gal-ico" aria-hidden="true">🖼️</span>
-            <span class="gal-txt"><b>ניהול הגלריה</b><small id="galleryCardInfo">טוען...</small></span>
+            <span class="gal-txt"><b>ניהול הגלריה וההמלצות</b><small id="galleryCardInfo">טוען...</small></span>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
           </button>
         </div>
@@ -1473,7 +1488,10 @@ async function loadGalleryItems(){
     galleryItems = snap.exists() && Array.isArray(snap.data().items)
       ? snap.data().items.filter(g=>isSafeMediaUrl(g.url))
       : [];
-  }catch(e){ console.error(e); galleryItems=null; }
+    reviewItems = snap.exists() && Array.isArray(snap.data().reviews)
+      ? snap.data().reviews.filter(r=>r && r.id && (r.kind==='text' ? !!r.text : isSafeMediaUrl(r.url)))
+      : [];
+  }catch(e){ console.error(e); galleryItems=null; reviewItems=null; }
   galleryLoading=false;
   renderGalleryManager();
 }
@@ -1482,7 +1500,13 @@ async function saveGalleryItems(items){
   galleryItems=items;
   renderGalleryManager();
   const {db,doc,setDoc}=await fbInit();
-  await setDoc(doc(db,'mangalSettings','gallery'),{items, updatedAtMs:Date.now()});
+  await setDoc(doc(db,'mangalSettings','gallery'),{items, updatedAtMs:Date.now()},{merge:true});
+}
+async function saveReviews(list){
+  reviewItems=list;
+  renderGalleryManager();
+  const {db,doc,setDoc}=await fbInit();
+  await setDoc(doc(db,'mangalSettings','gallery'),{reviews:list, updatedAtMs:Date.now()},{merge:true});
 }
 // the gallery split into its groups, in the order they show on the site (a group's first photo decides its place)
 function mediaGroups(){
@@ -1529,7 +1553,7 @@ function renderGalleryCard(){
   el.textContent = galleryItems===null
     ? (galleryLoading?'טוען...':'לא הצליח לטעון')
     : galleryItems.length
-      ? `${countOf(galleryItems.length,'פריט אחד','פריטים')} · ${countOf(mediaGroups().length,'קטגוריה אחת','קטגוריות')}${storageUsed!==null?` · ${fmtBytes(storageUsed)} באחסון`:''}`
+      ? `${countOf(galleryItems.length,'פריט אחד','פריטים')} · ${countOf(mediaGroups().length,'קטגוריה אחת','קטגוריות')}${reviewItems&&reviewItems.length?` · ${countOf(reviewItems.length,'המלצה אחת','המלצות')}`:''}${storageUsed!==null?` · ${fmtBytes(storageUsed)} באחסון`:''}`
       : 'עוד אין תמונות באתר';
   refreshUsage();
 }
@@ -1541,7 +1565,7 @@ let storageUsed=null, usageBusy=false;
 function fmtBytes(n){ return n>=1e9 ? (n/1e9).toFixed(2)+'GB' : Math.max(n/1e6,n?0.1:0).toFixed(1)+'MB'; }
 async function refreshUsage(){
   if(usageBusy || !Array.isArray(galleryItems) || !storageReady) return;
-  const paths=galleryItems.flatMap(g=>[g.path,g.thumbPath]).filter(Boolean);
+  const paths=[...galleryItems,...(reviewItems||[])].flatMap(g=>[g.path,g.thumbPath]).filter(Boolean);
   const missing=paths.filter(p=>!sizeCache.has(p));
   if(missing.length){
     usageBusy=true;
@@ -1574,6 +1598,7 @@ function openGalleryManager(){
   document.getElementById('modalRoot').innerHTML=`
     <div class="gm" role="dialog" aria-modal="true" aria-labelledby="gmTitle">
       <div class="gm-top" id="gmTop"></div>
+      <div class="gm-tabs" id="gmTabs"></div>
       <div class="gm-body" id="gmBody">
         <div class="gm-in">
           <div class="gm-info" id="gmInfo"></div>
@@ -1609,8 +1634,14 @@ function renderGalleryManager(){
     <button type="button" class="gm-back" onclick="exitSelect()" aria-label="ביטול הבחירה">✕</button>
     <h3 id="gmTitle">${gmSel.size?`נבחרו ${gmSel.size}`:'בחירת פריטים'}</h3>` : `
     <button type="button" class="gm-back" onclick="backToPrevView()" aria-label="חזרה להגדרות">${ICON_BACK}</button>
-    <h3 id="gmTitle">הגלריה באתר</h3>
-    <button type="button" class="gm-add" onclick="openAddSheet()" ${ready?'':'disabled'}>＋ הוספה</button>`}</div>`;
+    <h3 id="gmTitle">${gmTab==='reviews'?'המלצות באתר':'הגלריה באתר'}</h3>
+    <button type="button" class="gm-add" onclick="${gmTab==='reviews'?'openReviewAddSheet()':'openAddSheet()'}" ${ready?'':'disabled'}>＋ הוספה</button>`}</div>`;
+  const tabs=document.getElementById('gmTabs');
+  tabs.hidden=!!gmSel;
+  tabs.innerHTML=`<div class="gm-tabs-in">
+    <button type="button" aria-pressed="${gmTab==='gallery'}" onclick="setGmTab('gallery')">🖼️ גלריה${ready?` <span>${galleryItems.length}</span>`:''}</button>
+    <button type="button" aria-pressed="${gmTab==='reviews'}" onclick="setGmTab('reviews')">⭐ המלצות${Array.isArray(reviewItems)?` <span>${reviewItems.length}</span>`:''}</button></div>`;
+  if(gmTab==='reviews'){ renderReviewsTab(); return; }
   const act=document.getElementById('gmActions');
   act.hidden=!gmSel;
   act.innerHTML = gmSel ? `
@@ -1644,6 +1675,148 @@ function renderGalleryManager(){
   }
   list.innerHTML=mediaGroups().map(gmSectionHtml).join('');
 }
+/* ===== reviews: written ones and screenshots, shown on the site in "מה אומרים עלינו" ===== */
+let reviewItems=null;
+let gmTab='gallery';
+const RV_NAME=40, RV_TEXT=600;
+function setGmTab(t){ gmTab=t; renderGalleryManager(); document.getElementById('gmBody').scrollTop=0; }
+function renderReviewsTab(){
+  const ready=Array.isArray(reviewItems);
+  document.getElementById('gmActions').hidden=true;
+  document.getElementById('gmInfo').innerHTML = ready && reviewItems.length ? `
+    <div class="gm-stats">${countOf(reviewItems.length,'המלצה אחת','המלצות')}</div>
+    <a class="gm-view" href="/#reviews" target="_blank" rel="noopener">👁 איך זה נראה באתר</a>
+    <p class="gm-tip"><span>✏️ לחיצה: עריכה ומחיקה</span><span>↕️ לחיצה ארוכה וגרירה: שינוי סדר</span></p>` : '';
+  document.getElementById('gmMigrate').innerHTML='';
+  renderUploadPanel();
+  renderUsage();
+  const list=document.getElementById('gmList');
+  if(!ready){
+    list.innerHTML = galleryLoading
+      ? `<div class="empty">טוען...</div>`
+      : `<div class="empty">לא הצליח לטעון<br><button type="button" class="gm-retry" onclick="loadGalleryItems()">לנסות שוב</button></div>`;
+    return;
+  }
+  if(!reviewItems.length){
+    list.innerHTML=`<div class="gm-empty"><div class="gm-empty-ico" aria-hidden="true">⭐</div><b>עוד אין המלצות באתר</b>
+      <span>אפשר לכתוב המלצה שקיבלת, או להעלות צילום מסך שלה (למשל מוואטסאפ). באתר הן יופיעו בכפתור "מה אומרים עלינו".</span>
+      <button type="button" class="gm-add big" onclick="openReviewAddSheet()">＋ הוספה</button></div>`;
+    return;
+  }
+  list.innerHTML=`<section class="gm-sec rv-sec"><div class="gm-grid rv-grid">${reviewItems.map(r=>`
+    <button type="button" class="gm-tile rv-tile" data-url="rv:${esc(r.id)}" onclick="tileTap(this)"
+      aria-label="המלצה${r.name?' של '+esc(r.name):''}${r.kind==='image'?' (צילום מסך)':''}">
+      ${r.kind==='image'
+        ? `<img src="${esc(r.thumb||r.url)}" alt="" loading="lazy" draggable="false">${r.name||r.event?`<span class="gm-cap" aria-hidden="true">${esc([r.name,r.event].filter(Boolean).join(' · '))}</span>`:''}`
+        : `<span class="rv-t" aria-hidden="true"><span class="rv-q">${esc(r.text)}</span>${r.name||r.event?`<b>${esc([r.name,r.event].filter(Boolean).join(' · '))}</b>`:''}</span>`}
+    </button>`).join('')}</div></section>`;
+}
+function dropReview(list){
+  const ids=[...list.querySelectorAll('.gm-tile')].map(t=>t.dataset.url.slice(3));
+  const byId=new Map((reviewItems||[]).map(r=>[r.id,r]));
+  const next=[...ids.map(id=>byId.get(id)).filter(Boolean), ...(reviewItems||[]).filter(r=>!ids.includes(r.id))];
+  if(JSON.stringify(next)===JSON.stringify(reviewItems)){ renderGalleryManager(); return; }
+  saveReviews(next).then(()=>showToast('הסדר נשמר ✓')).catch(e=>{ console.error(e); showToast('שמירת הסדר נכשלה'); loadGalleryItems(); });
+}
+function openReviewAddSheet(){
+  if(!Array.isArray(reviewItems)){ showToast('ההמלצות לא נטענו, נסו לפתוח שוב'); return; }
+  openSheet('＋ הוספת המלצה', `
+    <div class="add-opts">
+      <button type="button" class="add-opt" onclick="openReviewSheet()">
+        <span class="ico" aria-hidden="true">✍️</span>
+        <span><b>המלצה כתובה</b><small>מה כתבו, שם וסוג האירוע</small></span>
+      </button>
+      <label class="add-opt ${storageReady?'':'disabled'}">
+        <span class="ico" aria-hidden="true">📸</span>
+        <span><b>צילום מסך של המלצה</b><small>למשל הודעה מוואטסאפ · אפשר כמה ביחד</small></span>
+        <input type="file" accept="image/*" multiple hidden onchange="uploadReviewShots(this.files)" ${storageReady?'':'disabled'}>
+      </label>
+    </div>
+    ${storageReady?'':`<div class="minfo">${storageReason?`אי אפשר להעלות קבצים כרגע: ${esc(storageReason)}`:'בודק את האחסון...'}</div>`}`);
+}
+function openReviewSheet(id){
+  const r=id ? (reviewItems||[]).find(x=>x.id===id) : {kind:'text', name:'', event:'', text:''};
+  if(!r) return;
+  const root=openSheet(id?'✏️ עריכת המלצה':'✍️ המלצה חדשה', `
+    ${r.kind==='image' ? `<img class="sheet-prev" src="${esc(r.url)}" alt="צילום המסך של ההמלצה">` : `
+    <div class="mfld">
+      <label for="rvText">ההמלצה</label>
+      <textarea id="rvText" rows="6" maxlength="${RV_TEXT}" placeholder="מה הלקוחות כתבו"
+        oninput="document.getElementById('rvCount').textContent=this.value.length+'/${RV_TEXT}'">${esc(r.text)}</textarea>
+      <div class="cap-count" id="rvCount">${r.text.length}/${RV_TEXT}</div>
+    </div>`}
+    <div class="mfld">
+      <label for="rvName">שם${r.kind==='image'?' (לא חובה)':''}</label>
+      <input id="rvName" type="text" maxlength="${RV_NAME}" value="${esc(r.name||'')}" placeholder="למשל: משפחת כהן">
+    </div>
+    <div class="mfld">
+      <label for="rvEvent">האירוע (לא חובה)</label>
+      <input id="rvEvent" type="text" maxlength="${RV_NAME}" value="${esc(r.event||'')}" placeholder="למשל: בר מצווה, ערב גיבוש">
+    </div>
+    <div class="modal-actions"><button type="button" class="btn-save" onclick="saveReviewSheet()">${id?'שמירה':'הוספה לאתר'}</button></div>
+    ${id?`<button type="button" class="sheet-del" onclick="deleteReview()">🗑️ מחיקת ההמלצה</button>`:''}`);
+  root.dataset.rv=id||'';
+}
+const newReviewId=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+async function saveReviewSheet(){
+  const id=document.getElementById('sheetRoot').dataset.rv;
+  const old=id ? reviewItems.find(x=>x.id===id) : null;
+  const name=document.getElementById('rvName').value.trim().slice(0,RV_NAME);
+  const event=document.getElementById('rvEvent').value.trim().slice(0,RV_NAME);
+  let r;
+  if(!old || old.kind==='text'){
+    const text=document.getElementById('rvText').value.trim().slice(0,RV_TEXT);
+    if(!text){ showToast('צריך לכתוב את ההמלצה'); return; }
+    r={...(old||{id:newReviewId(), kind:'text'}), name, event, text};
+  } else r={...old, name, event};
+  closeSheet();
+  // a new review goes first
+  try{
+    await saveReviews(old ? reviewItems.map(x=>x.id===id?r:x) : [r,...reviewItems]);
+    showToast(old?'נשמר ✓':'ההמלצה נוספה לאתר ✓');
+  }catch(e){ console.error(e); showToast('השמירה נכשלה'); loadGalleryItems(); }
+}
+async function deleteReview(){
+  const id=document.getElementById('sheetRoot').dataset.rv;
+  const r=reviewItems.find(x=>x.id===id);
+  if(!r || !confirm('למחוק את ההמלצה מהאתר?')) return;
+  closeSheet();
+  try{
+    await saveReviews(reviewItems.filter(x=>x.id!==id));
+    showToast('ההמלצה נמחקה ✓');
+  }catch(e){ console.error(e); showToast('המחיקה נכשלה'); loadGalleryItems(); return; }
+  if(r.path) unstoreMedia(r);
+}
+async function uploadReviewShots(fileList){
+  const files=[...fileList];
+  closeSheet();
+  if(!files.length) return;
+  if(gmMoving || gmUp){ showToast('יש העלאה שעוד לא הסתיימה'); return; }
+  const errors=[];
+  let last=null;
+  gmErrors=[];
+  for(let i=0;i<files.length;i++){
+    const f=files[i];
+    try{
+      setUploadProgress(i+1,files.length,'מכין צילום מסך...');
+      const body=await shrinkImage(f);
+      const type=body.type||f.type||guessMediaType(f.name);
+      if(!/^image\//.test(type) || !MEDIA_EXT[type]) throw new Error(`סוג קובץ לא נתמך (${type||'לא ידוע'})`);
+      const m=await storeMedia(body,type,pct=>setUploadProgress(i+1,files.length,'מעלה צילום מסך...',pct));
+      last={id:newReviewId(), kind:'image', name:'', event:'', ...m};
+      await saveReviews([last,...reviewItems]);
+    }catch(e){
+      console.error(e);
+      errors.push(`${f.name}: ההעלאה נכשלה - ${e&&e.code?storageProblem(e):(e&&e.message||String(e))}`);
+    }
+  }
+  gmUp=null; gmErrors=errors;
+  renderUploadPanel();
+  if(!last) return;
+  // one screenshot: right away a chance to add the name and the event
+  if(files.length===1){ showToast('צילום המסך נוסף ✓ אפשר להוסיף שם ואירוע'); openReviewSheet(last.id); }
+  else showToast('צילומי המסך נוספו לאתר ✓');
+}
 function gmSectionHtml(grp){
   const none = grp.name===DEFAULT_GROUP && grp.idx.some(i=>!itemGroup(galleryItems[i]));
   const label = none ? NO_GROUP_LABEL : grp.name;
@@ -1675,6 +1848,7 @@ function gmTileHtml(g){
 }
 function tileTap(btn){
   const url=btn.dataset.url;
+  if(url.startsWith('rv:')){ openReviewSheet(url.slice(3)); return; }
   if(!gmSel){ openItemSheet(url); return; }
   if(gmSel.has(url)) gmSel.delete(url); else gmSel.add(url);
   renderGalleryManager();
@@ -1774,7 +1948,7 @@ function openSheet(title, body){
 }
 function closeSheet(){
   const root=document.getElementById('sheetRoot');
-  if(root){ root.innerHTML=''; delete root.dataset.url; delete root.dataset.group; }
+  if(root){ root.innerHTML=''; delete root.dataset.url; delete root.dataset.group; delete root.dataset.rv; }
   clearPending();
   syncBackHistory();
 }
@@ -2038,7 +2212,8 @@ function gmPressEnd(){
   if(gmDrag){ gmSuppressClick=Date.now()+300; gmDrop(); return; }
   if(p.lifted){
     gmSuppressClick=Date.now()+300;
-    if(p.kind==='tile') enterSelect([p.el.dataset.url]);
+    if(p.kind==='tile' && p.el.dataset.url.startsWith('rv:')) openReviewSheet(p.el.dataset.url.slice(3));
+    else if(p.kind==='tile') enterSelect([p.el.dataset.url]);
     else openGroupSheet(p.el.dataset.group);
   }
 }
@@ -2129,6 +2304,7 @@ function gmDrop(){
   const list=document.getElementById('gmList');
   list.classList.remove('sorting-groups','dragging-tile');
   gmDrag=null;
+  if(d.el.dataset.url && d.el.dataset.url.startsWith('rv:')){ dropReview(list); return; }
   if(d.kind==='group') d.el.scrollIntoView({block:'nearest'});
   // the new order as it is on the screen; a photo dropped in another category joins it
   const byUrl=new Map((galleryItems||[]).map(g=>[g.url,g]));
@@ -2261,7 +2437,7 @@ function sameSiteCopy(g){ return '/fbs/'+g.path.slice('gallery/'.length)+'?'+g.u
 function renderMigrateCard(){
   const el=document.getElementById('gmMigrate');
   if(!el) return;
-  const ok=Array.isArray(galleryItems) && !gmSel && storageReady && !gmMoving;
+  const ok=Array.isArray(galleryItems) && !gmSel && storageReady && !gmMoving && gmTab==='gallery';
   const move=ok ? galleryItems.filter(needsMove).length : 0, thumbs=ok ? galleryItems.filter(needsThumb).length : 0;
   el.innerHTML = move ? `
     <div class="gm-mig">

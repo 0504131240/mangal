@@ -751,7 +751,9 @@ async function loadGallery(){
       list=values.map(v=>{
         const f=v.mapValue?.fields||{};
         const k=f.kind?.stringValue;
-        return {kind:k==='video'||k==='youtube'?k:'image', url:f.url?.stringValue, cap:f.cap?.stringValue||'', group:f.group?.stringValue||''};
+        const thumb=f.thumb?.stringValue;
+        return {kind:k==='video'||k==='youtube'?k:'image', url:f.url?.stringValue, cap:f.cap?.stringValue||'', group:f.group?.stringValue||'',
+          ...(thumb && isSafeMediaUrl(thumb) ? {thumb} : {})};
       }).filter(g=>isSafeMediaUrl(g.url));
     } else return;
     list=sortByGroup(list);
@@ -809,10 +811,11 @@ const MENUS = {
 let galleryOpened=false;
 const VIDEO_TILE='<span class="video-tile" aria-hidden="true"><span class="vt-play">▶</span><span class="vt-label">סרטון</span></span>';
 // a small tile for the gallery and the row under the big photo
+// a small copy of the photo (or a frame of the video) when the admin made one, so the gallery loads light
 function mediaTile(g){
-  if(g.kind==='video') return VIDEO_TILE;
+  if(g.kind==='video') return g.thumb ? `<img src="${escHtml(g.thumb)}" alt="" loading="lazy"><span class="yt-play" aria-hidden="true">▶</span>` : VIDEO_TILE;
   if(g.kind==='youtube') return `<img src="${escHtml(YT.thumb(g.url))}" alt="" loading="lazy"><span class="yt-play" aria-hidden="true">▶</span>`;
-  return `<img src="${escHtml(g.url)}" alt="" loading="lazy">`;
+  return `<img src="${escHtml(g.thumb||g.url)}" alt="" loading="lazy">`;
 }
 function groupName(g){ return (g.group||'').trim()||'כללי'; }
 // groups in order of first appearance; photos of one group sit together, so the big viewer goes through them in the same order as the page
@@ -930,7 +933,7 @@ function renderLightbox(first){
   if(g.kind==='youtube') yt.href=g.url; else yt.removeAttribute('href');
   const still=document.documentElement.classList.contains('a11y-still');
   document.getElementById('lbMedia').innerHTML = g.kind==='video'
-    ? `<video src="${escHtml(g.url)}" controls ${still?'':'autoplay'} playsinline></video>`
+    ? `<video src="${escHtml(g.url)}" ${g.thumb?`poster="${escHtml(g.thumb)}"`:''} controls ${still?'':'autoplay'} playsinline></video>`
     : g.kind==='youtube'
     ? `<iframe class="lb-yt ${YT.vertical(g.url)?'vert':''}" src="${escHtml(YT.embed(g.url,!still))}" title="${escHtml(mediaLabel(g,lightboxIndex))}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`
     : `<img src="${escHtml(g.url)}" alt="${escHtml(g.cap||mediaLabel(g,lightboxIndex))}">`;

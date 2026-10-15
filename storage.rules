@@ -13,12 +13,12 @@ service firebase.storage {
              in firestore.get(/databases/(default)/documents/mangalSettings/admins).data.emails);
     }
 
-    // the site's gallery: anyone can view a file; only the admins add (photos and videos up to 500MB) and delete
+    // the site's gallery: anyone can view a file; only the admins add (photos, and videos up to 50MB) and delete
     match /gallery/{name} {
       allow get: if true;
       allow create: if isAdmin()
         && name.matches('[0-9]+-[a-z0-9]+[.](jpg|png|webp|mp4|mov|webm)')
-        && request.resource.size <= 500 * 1024 * 1024
+        && request.resource.size <= 50 * 1024 * 1024
         && request.resource.contentType.matches('(image|video)/.+');
       allow delete: if isAdmin();
     }

@@ -932,7 +932,7 @@ function startPeek(kind){
   };
   show();
   const still=document.documentElement.classList.contains('a11y-still') || matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(!still && list.length>1) p.timer=setInterval(()=>{ if(!document.hidden) show(); }, kind==='reviews'?5000:3500);
+  if(!still && list.length>1) p.timer=setInterval(()=>{ if(!document.hidden) show(); }, kind==='reviews'?5000:2500);
 }
 function escHtml(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 

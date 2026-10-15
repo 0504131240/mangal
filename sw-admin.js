@@ -1,4 +1,4 @@
-const CACHE='bbq-admin-v7';
+const CACHE='bbq-admin-v8';
 const SHELL=['admin.html','media.js','images/logo-v2.png','images/icon-192.png','images/app-icon-192.png','images/app-icon-512.png','manifest-admin.json'];
 
 self.addEventListener('install',(e)=>{
@@ -24,18 +24,19 @@ self.addEventListener('fetch',(e)=>{
     return;
   }
 
+  // its scope is the whole site, so it only takes care of the admin app's own files; everything else
+  // (the site's pages, photos, videos) goes to the network as if it were not here
+  const shell=SHELL.some(f=>url.pathname==='/'+f);
   if(e.request.mode==='navigate'){
-    e.respondWith(
-      fetch(e.request).catch(()=>caches.match('admin.html'))
-    );
+    if(!url.pathname.endsWith('/admin.html')) return;
+    e.respondWith(fetch(e.request).catch(()=>caches.match('admin.html')));
     return;
   }
-
+  if(!shell) return;
   e.respondWith(
     caches.match(e.request).then(cached=>
       cached || fetch(e.request).then(res=>{
-        const copy=res.clone();
-        caches.open(CACHE).then(c=>c.put(e.request,copy));
+        if(res.ok && res.status===200){ const copy=res.clone(); caches.open(CACHE).then(c=>c.put(e.request,copy)); }
         return res;
       }).catch(()=>cached)
     )

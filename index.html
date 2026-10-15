@@ -338,6 +338,7 @@ footer .ys-sig{margin-top:10px;padding-bottom:0}
 
 /* home: banner + big buttons that open windows */
 .short-banner{position:relative;overflow:hidden}
+.split{display:none}
 /* fades in under the header, trims the poster's white bottom-left corner and lets the sparks show through its lower edge */
 .short-banner img{display:block;width:100%;height:auto;margin-bottom:-2.6%;
   -webkit-mask-image:linear-gradient(to bottom,transparent,#000 10%,#000 82%,transparent);mask-image:linear-gradient(to bottom,transparent,#000 10%,#000 82%,transparent)}
@@ -413,9 +414,18 @@ html.a11y-still .peek::before{animation:none}
 html.a11y-contrast .peek{background:#fff}html.a11y-contrast .peek::before{display:none}
 /* computers: a smaller poster, and the buttons bigger, in two columns */
 @media (min-width:900px){
-  .short-banner{max-width:1080px;margin:0 auto}
-  .short-banner img{-webkit-mask-image:linear-gradient(to bottom,transparent,#000 10%,#000 82%,transparent),linear-gradient(to right,transparent,#000 9%,#000 91%,transparent);
-    -webkit-mask-composite:source-in;mask-image:linear-gradient(to bottom,transparent,#000 10%,#000 82%,transparent),linear-gradient(to right,transparent,#000 9%,#000 91%,transparent);mask-composite:intersect}
+  /* the poster cut in two: its words on the right, the steaks and fire beside them, melting into the background */
+  .short-banner{--h:min(430px,31vw);max-width:none;padding:24px 0 8px}
+  .short-banner>img{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+  .split{display:flex;direction:ltr;justify-content:center;align-items:center;height:var(--h)}
+  .split i{display:block;height:100%;flex:none;background:url(images/poster-hero.jpg) no-repeat;background-size:100% auto}
+  .split .s-top{width:calc(var(--h)*1.757);background-position:top;margin-left:calc(var(--h)*-.32);
+    -webkit-mask-image:linear-gradient(to bottom,transparent,#000 9%,#000 93%,transparent),linear-gradient(to right,transparent,#000 22%,#000 92%,transparent);-webkit-mask-composite:source-in;
+    mask-image:linear-gradient(to bottom,transparent,#000 9%,#000 93%,transparent),linear-gradient(to right,transparent,#000 22%,#000 92%,transparent);mask-composite:intersect}
+  .split .s-bot{width:calc(var(--h)*1.38);background-position:bottom;
+    -webkit-mask-image:linear-gradient(to bottom,transparent,#000 14%,#000 84%,transparent),linear-gradient(to right,transparent,#000 12%,#000 70%,transparent);-webkit-mask-composite:source-in;
+    mask-image:linear-gradient(to bottom,transparent,#000 14%,#000 84%,transparent),linear-gradient(to right,transparent,#000 12%,#000 70%,transparent);mask-composite:intersect}
+  .short-banner::after{display:none}
   .big-cards{display:grid;grid-template-columns:1fr 1fr;gap:22px;max-width:1080px;padding:36px 0 44px}
   .big-card.has-peek{padding:16px;gap:20px;min-height:230px}
   .big-card.has-peek .peek{min-height:198px}
@@ -567,7 +577,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
 
 <!-- banner + three big buttons; gallery, menus and booking each open in a window -->
 <main id="main" tabindex="-1">
-<div class="short-banner"><img src="images/poster-hero.jpg" alt="חגיגת מנגל עם דודי. חוויית מנגל יוקרתית שמגיעה עד אליכם: ציוד מקצועי, בשרים איכותיים, עריכה מוקפדת עם כלים יפים, שתייה קרה ושפע טעמים משובחים. אתם רק מביאים שולחנות וכיסאות, ודודי דואג לכל השאר. שירות אישי, הפקה בסטנדרט גבוה ואווירה בלתי נשכחת!"></div>
+<div class="short-banner"><div class="split" aria-hidden="true"><i class="s-bot"></i><i class="s-top"></i></div><img src="images/poster-hero.jpg" alt="חגיגת מנגל עם דודי. חוויית מנגל יוקרתית שמגיעה עד אליכם: ציוד מקצועי, בשרים איכותיים, עריכה מוקפדת עם כלים יפים, שתייה קרה ושפע טעמים משובחים. אתם רק מביאים שולחנות וכיסאות, ודודי דואג לכל השאר. שירות אישי, הפקה בסטנדרט גבוה ואווירה בלתי נשכחת!"></div>
 <div class="wrap">
   <div class="big-cards">
     <button type="button" class="big-card has-peek" onclick="openMenusModal()"><div class="peek-txt"><div class="txt"><b>תפריטים</b><span>CLASIC · SPECIAL · CRAZY</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><div class="peek-menus" id="menusPeek"></div></div></div></button>

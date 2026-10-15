@@ -607,7 +607,6 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
 <section id="contact">
   <div class="wrap">
     <div class="sect-head">
-      <div class="eyebrow">לשירותכם דודי</div>
       <h2>יש שאלה לפני שמזמינים?</h2>
     </div>
     <div class="contact-grid">
@@ -983,7 +982,7 @@ function startPeek(kind){
   };
   show();
   const still=document.documentElement.classList.contains('a11y-still') || matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(!still && list.length>1) p.timer=setInterval(()=>{ if(!document.hidden) show(); }, kind==='reviews'?5000:2500);
+  if(!still && list.length>1) p.timer=setInterval(()=>{ if(!document.hidden) show(); }, kind==='reviews'?1500:2500);
 }
 const FLAME='<span class="only-mobile" aria-hidden="true">🔥</span><svg class="ft-flame only-pc" aria-hidden="true" focusable="false"><use href="#flame"/></svg>';
 function escHtml(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }

@@ -299,6 +299,13 @@ html.a11y-contrast .mh-embers{display:none!important}
 .fld label,.fld .fld-label{display:block;font-size:12.5px;font-weight:700;color:var(--text2);margin-bottom:6px}
 .fld input,.fld textarea,.fld select{width:100%;border:1.5px solid var(--border);border-radius:var(--r2);padding:12px 13px;font-size:15px;font-family:var(--font);background:var(--surface);color:var(--text);direction:rtl}
 .fld textarea{resize:vertical;min-height:70px}
+/* under the phone: how to reach them (one of the two, or none) */
+.reach{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px}
+.fld .reach label{display:flex;align-items:center;gap:6px;margin:0;font-size:13px;font-weight:600;color:var(--text);cursor:pointer}
+.fld .reach input{width:18px;height:18px;padding:0;margin:0;flex:none;accent-color:#F2662B;cursor:pointer}
+.done-wa{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:11px 20px;border-radius:999px;text-decoration:none;
+  font-weight:700;font-size:15px;color:#fff;background:linear-gradient(180deg,#2BD366,#169C46);box-shadow:0 0 14px rgba(37,211,102,.4)}
+.done-wa .wa-mini{margin-left:0}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .prep-note{display:flex;gap:10px;align-items:flex-start;margin:14px 0 4px;padding:12px 14px;border-radius:var(--r2);
   border:2px solid var(--flame);background:var(--flame-bg);color:var(--text);font-size:14px;line-height:1.6}
@@ -695,6 +702,10 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
           <div class="fld">
             <label for="fPhone">טלפון *</label>
             <input type="tel" id="fPhone" required autocomplete="tel" placeholder="050-1234567">
+            <div class="reach" role="group" aria-label="איך לחזור אליכם">
+              <label><input type="checkbox" id="fHasWa" onchange="if(this.checked)fCallsOnly.checked=false">יש וואטסאפ</label>
+              <label><input type="checkbox" id="fCallsOnly" onchange="if(this.checked)fHasWa.checked=false">שיחות בלבד</label>
+            </div>
           </div>
           <div class="fld">
             <label for="fEmail">אימייל</label>
@@ -753,6 +764,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
         <div class="form-done-ico" aria-hidden="true">✅</div>
         <h3 id="doneTitle" tabindex="-1">הבקשה התקבלה!</h3>
         <p>תודה <span id="doneName"></span>, קיבלנו את הבקשה לבדיקת זמינות לתאריך <span id="doneDate"></span>.<br><b>זו עדיין לא הזמנה סופית:</b> נבדוק שהתאריך פנוי ונחזור אליכם בהקדם. האירוע נקבע רק אחרי שנאשר אותו איתכם.</p>
+        <a class="done-wa" id="doneWa" href="https://wa.me/972527626562" target="_blank" rel="noopener"><svg class="wa-mini" viewBox="0 0 32 32" aria-hidden="true"><path class="b" d="M16 4.5a11.5 11.5 0 0 0-9.9 17.35L4.6 27.4l5.7-1.47A11.5 11.5 0 1 0 16 4.5z"/><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" transform="translate(9.2 9.2) scale(.57)"/></svg>לשיחה עם דודי בוואטסאפ<span class="sr-only"> (נפתח בחלון חדש)</span></a>
       </div>
     </div>
   </div>
@@ -1378,7 +1390,8 @@ document.getElementById('bookForm').addEventListener('submit', async (e)=>{
   const guests=men+women;
   const washTime=document.getElementById('fWash').value;
   const location=document.getElementById('fLocation').value.trim();
-  const notes=document.getElementById('fNotes').value.trim();
+  const reach=document.getElementById('fHasWa').checked?'💬 יש וואטסאפ':document.getElementById('fCallsOnly').checked?'📞 שיחות בלבד':'';
+  const notes=[reach,document.getElementById('fNotes').value.trim()].filter(Boolean).join('\n');
 
   if(!name||!phone||!date||!washTime){errEl.textContent='נא למלא את כל השדות המסומנים בכוכבית';errEl.style.display='block';return;}
   if(men<0||women<0||guests<1){errEl.textContent='נא למלא כמה גברים וכמה נשים (לפחות משתתף אחד)';errEl.style.display='block';return;}
@@ -1412,6 +1425,7 @@ document.getElementById('bookForm').addEventListener('submit', async (e)=>{
     document.getElementById('bookForm').style.display='none';
     document.getElementById('doneName').textContent=name;
     document.getElementById('doneDate').textContent=new Date(date).toLocaleDateString('he-IL');
+    document.getElementById('doneWa').href=`https://wa.me/${BUSINESS.whatsapp}?text=${encodeURIComponent(`היי דודי! שלחתי עכשיו בקשה לבדיקת זמינות לתאריך ${new Date(date).toLocaleDateString('he-IL')} (${name}) 🔥`)}`;
     document.getElementById('formDone').style.display='block';
     document.getElementById('doneTitle').focus();
   }catch(err){

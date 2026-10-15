@@ -367,6 +367,7 @@ footer .ys-sig{margin-top:10px;padding-bottom:0}
 .peek{position:relative;flex:none;width:46%;min-height:118px;padding:4px;border-radius:14px;
   background:linear-gradient(145deg,#F8D98A,#B07A2E 45%,#F4C766 70%,#8A5A22);box-shadow:0 4px 12px rgba(0,0,0,.45),inset 0 0 0 1px rgba(255,240,200,.35)}
 .peek-in{position:relative;height:100%;border-radius:10px;overflow:hidden;background:#1A120E;box-shadow:inset 0 0 0 2px rgba(0,0,0,.55)}
+.peek-in>img{width:100%;height:100%;object-fit:cover;display:block}
 .peek-in::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:inset 0 0 10px rgba(0,0,0,.5)}
 .peek-rot{position:absolute;inset:0}
 .peek-layer{position:absolute;inset:0;opacity:0;transition:opacity .9s ease}
@@ -378,15 +379,24 @@ footer .ys-sig{margin-top:10px;padding-bottom:0}
 .peek-quote p::before{content:'”';color:#F4C766;font-size:20px;line-height:0;margin-left:3px;vertical-align:-6px}
 .peek-quote small{font-size:11px;color:#F4C766;font-weight:700}
 .peek-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;text-shadow:0 1px 6px #000}
-/* menus: the three menus as small pages, each one half over the one above it */
-.peek-menus{display:flex;flex-direction:column;justify-content:center;height:100%;padding:8px 10px;background:radial-gradient(circle at 50% 40%,#3A2416,#1A120E)}
-.peek-page{position:relative;display:flex;align-items:flex-start;justify-content:center;height:46px;border-radius:7px;padding-top:4px;
-  background:linear-gradient(180deg,rgba(0,0,0,.75),rgba(0,0,0,.05) 55%),var(--img) center/cover;border:1px solid rgba(244,199,102,.7);box-shadow:0 -3px 8px rgba(0,0,0,.6)}
-.peek-page+.peek-page{margin-top:-22px}
-.peek-page:nth-child(1){transform:rotate(-3deg) translateX(-6px)}
-.peek-page:nth-child(2){transform:rotate(1.5deg) translateX(4px)}
-.peek-page:nth-child(3){transform:rotate(-1deg)}
-.peek-page b{font:700 10.5px var(--font-head);letter-spacing:.4px;color:#fff;text-shadow:0 1px 3px #000}
+/* menus: the three menus as small standing pages, each one half over the one beside it */
+.peek-menus{position:relative;height:100%;background:radial-gradient(circle at 50% 40%,#3A2416,#1A120E)}
+.peek-page{position:absolute;top:50%;width:64px;height:100px;margin-top:-50px;border-radius:5px;overflow:hidden;
+  border:1px solid rgba(244,199,102,.75);box-shadow:-3px 3px 8px rgba(0,0,0,.6);background:#4A2E1C}
+.peek-page:nth-child(1){right:calc(50% - 64px);transform:rotate(5deg)}
+.peek-page:nth-child(2){right:calc(50% - 32px);transform:translateY(-3px)}
+.peek-page:nth-child(3){right:calc(50% - 0px);transform:rotate(-5deg)}
+/* the page is laid out at full size and shrunk, so it looks like the real menu */
+.pp-doc{width:160px;height:250px;transform:scale(.4);transform-origin:top right;direction:rtl;text-align:center;
+  background:linear-gradient(180deg,#3A2416,#5E3B24 40%,#4A2E1C)}
+.pp-hero{height:92px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px;padding-bottom:8px;
+  background:linear-gradient(0deg,rgba(40,24,14,.95),rgba(0,0,0,.1) 70%),var(--img) center/cover}
+.pp-hero b{font:700 15px var(--font-head);color:#fff;text-shadow:0 1px 4px #000;white-space:nowrap}
+.pp-hero i{font-style:normal;font-size:9px;font-weight:700;padding:2px 8px;border-radius:999px;background:linear-gradient(180deg,#F6CF7A,#D9962F);color:#1C1007;white-space:nowrap}
+.pp-grp{margin-top:9px;font:700 12px var(--font-head);color:#F4C766}
+.pp-grp::after{content:'';display:block;height:1.5px;width:36px;margin:3px auto 4px;background:linear-gradient(90deg,transparent,#F4C766,transparent)}
+.pp-doc ul{list-style:none;margin:0;padding:0 8px}
+.pp-doc li{font-size:9.5px;line-height:1.75;color:#F3E5D7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* spa and availability: one big picture in the window */
 .peek-ico{display:flex;align-items:center;justify-content:center;height:100%;font-size:52px;background:radial-gradient(circle at 50% 45%,rgba(244,199,102,.28),rgba(0,0,0,0) 65%),#2A1A10}
 html.a11y-contrast .peek{background:#fff}
@@ -536,8 +546,8 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
 <div class="short-banner"><img src="images/poster-hero.jpg" alt="חגיגת מנגל עם דודי. חוויית מנגל יוקרתית שמגיעה עד אליכם: ציוד מקצועי, בשרים איכותיים, עריכה מוקפדת עם כלים יפים, שתייה קרה ושפע טעמים משובחים. אתם רק מביאים שולחנות וכיסאות, ודודי דואג לכל השאר. שירות אישי, הפקה בסטנדרט גבוה ואווירה בלתי נשכחת!"></div>
 <div class="wrap">
   <div class="big-cards">
-    <button type="button" class="big-card has-peek" onclick="openMenusModal()"><div class="peek-txt"><div class="ico" aria-hidden="true">📋</div><div class="txt"><b>תפריטים</b><span>CLASIC · SPECIAL · CRAZY</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><div class="peek-menus"><div class="peek-page" style="--img:url(images/menu-clasic.jpg)"><b>CLASIC</b></div><div class="peek-page" style="--img:url(images/menu-special.jpg)"><b>SPECIAL</b></div><div class="peek-page" style="--img:url(images/menu-crazy.jpg)"><b>CRAZY</b></div></div></div></div></button>
-    <button type="button" class="big-card has-peek" onclick="openMassageModal()"><div class="peek-txt"><div class="ico" aria-hidden="true">🧖</div><div class="txt"><b>הצעה מיוחדת לימי גיבוש</b><span>ספא לקבוצה, עם אפשרות למסאז'יסט</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><div class="peek-ico">🧖‍♀️</div></div></div></button>
+    <button type="button" class="big-card has-peek" onclick="openMenusModal()"><div class="peek-txt"><div class="ico" aria-hidden="true">📋</div><div class="txt"><b>תפריטים</b><span>CLASIC · SPECIAL · CRAZY</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><div class="peek-menus" id="menusPeek"></div></div></div></button>
+    <button type="button" class="big-card has-peek" onclick="openMassageModal()"><div class="peek-txt"><div class="ico" aria-hidden="true">🧖</div><div class="txt"><b>הצעה מיוחדת לימי גיבוש</b><span>ספא לקבוצה, עם אפשרות למסאז'יסט</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><img src="images/spa-peek.svg" alt=""></div></div></button>
     <button type="button" class="big-card has-peek" onclick="openBookModal()"><div class="peek-txt"><div class="txt"><b>בדיקת זמינות</b><span>שולחים פרטים ונחזור אליכם לאשר</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><div class="peek-ico">📅</div></div></div></button>
     <button type="button" class="big-card has-peek" onclick="openGalleryModal()"><div class="peek-txt"><div class="ico" aria-hidden="true">📷</div><div class="txt"><b>תמונות מאירועים</b><span>הצצה לאירועים קודמים</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><div class="peek-rot" id="galleryPeek"></div></div></div></button>
     <button type="button" class="big-card has-peek" id="reviewsCard" hidden onclick="openReviewsModal()"><div class="peek-txt"><div class="ico" aria-hidden="true">⭐</div><div class="txt"><b>מה אומרים עלינו</b><span>המלצות של לקוחות מאירועים</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><div class="peek-rot" id="reviewsPeek"></div></div></div></button>
@@ -860,6 +870,13 @@ function peekHtml(kind,x){
   if(x.kind==='youtube') return `<img src="${escHtml(YT.thumb(x.url))}" alt=""><span class="peek-play">▶</span>`;
   if(x.kind==='video') return `<img src="${escHtml(x.thumb)}" alt=""><span class="peek-play">▶</span>`;
   return `<img src="${escHtml(x.thumb||x.url)}" alt="">`;
+}
+function renderMenusPeek(){
+  document.getElementById('menusPeek').innerHTML=LEVELS.map(l=>{
+    const m=MENUS[l.id], g=m.groups[0];
+    return `<div class="peek-page"><div class="pp-doc"><div class="pp-hero" style="--img:url(images/menu-${l.id.toLowerCase()}.jpg)"><b>${l.label}</b><i>${m.badge.split(' · ')[0]}</i></div>
+      <div class="pp-grp">${g.t}</div><ul>${g.items.slice(0,6).map(it=>`<li>${it}</li>`).join('')}</ul></div></div>`;
+  }).join('');
 }
 function startPeek(kind){
   const box=document.getElementById(kind==='reviews'?'reviewsPeek':'galleryPeek');
@@ -1327,7 +1344,7 @@ applyMediaNav();
 renderGallery();renderLevels();renderMenus();loadGallery();applyA11y();
 // admin.html links here with #gallery / #reviews to show how they look
 document.getElementById('reviewsCard').hidden=!REVIEWS.length; renderReviews();
-startPeek('gallery'); startPeek('reviews');
+startPeek('gallery'); startPeek('reviews'); renderMenusPeek();
 if(location.hash==='#gallery' || location.hash==='#reviews'){
   const h=location.hash; history.replaceState(null,'',location.pathname+location.search);
   if(h==='#gallery') openGalleryModal(); else openReviewsModal();

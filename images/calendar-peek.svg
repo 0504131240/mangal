@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
+  <defs>
+    <radialGradient id="bg" cx=".5" cy=".55" r=".75">
+      <stop offset="0" stop-color="#2A1A10"/><stop offset="1" stop-color="#0B0705"/>
+    </radialGradient>
+    <radialGradient id="halo" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#F2662B" stop-opacity=".45"/><stop offset="1" stop-color="#F2662B" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="head" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FF8A3D"/><stop offset=".55" stop-color="#F2662B"/><stop offset="1" stop-color="#B83C14"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#21170F"/><stop offset="1" stop-color="#140D09"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8A8A8A"/><stop offset=".5" stop-color="#F2F2F2"/><stop offset="1" stop-color="#7A7A7A"/>
+    </linearGradient>
+    <radialGradient id="day" cx=".5" cy=".4" r=".7">
+      <stop offset="0" stop-color="#FFB15C"/><stop offset=".6" stop-color="#F2662B"/><stop offset="1" stop-color="#C8461A"/>
+    </radialGradient>
+    <linearGradient id="flame" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#F2662B"/><stop offset=".6" stop-color="#FFB15C"/><stop offset="1" stop-color="#FFE7A3"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000" flood-opacity=".6"/>
+    </filter>
+  </defs>
+
+  <rect width="320" height="240" fill="url(#bg)"/>
+  <circle cx="160" cy="128" r="130" fill="url(#halo)" opacity=".55"/>
+
+  <!-- the calendar card -->
+  <g filter="url(#shadow)">
+    <rect x="72" y="34" width="176" height="186" rx="18" fill="url(#card)" stroke="#F2662B" stroke-opacity=".35"/>
+    <path d="M72 52a18 18 0 0 1 18-18h140a18 18 0 0 1 18 18v26H72z" fill="url(#head)"/>
+  </g>
+  <!-- binder rings -->
+  <g>
+    <rect x="108" y="22" width="8" height="24" rx="4" fill="url(#ring)"/>
+    <rect x="204" y="22" width="8" height="24" rx="4" fill="url(#ring)"/>
+    <circle cx="112" cy="50" r="5" fill="#7A2A0C"/><circle cx="208" cy="50" r="5" fill="#7A2A0C"/>
+  </g>
+  <!-- header: a thin line, like a month title, kept wordless -->
+  <rect x="128" y="58" width="64" height="7" rx="3.5" fill="#FFF3E6" opacity=".9"/>
+
+  <!-- the days: dim grid, 7 columns -->
+  <g fill="#3A2A1F">
+    <g id="row">
+      <rect x="86" y="92" width="16" height="16" rx="5"/><rect x="108" y="92" width="16" height="16" rx="5"/><rect x="130" y="92" width="16" height="16" rx="5"/>
+      <rect x="152" y="92" width="16" height="16" rx="5"/><rect x="174" y="92" width="16" height="16" rx="5"/><rect x="196" y="92" width="16" height="16" rx="5"/>
+      <rect x="218" y="92" width="16" height="16" rx="5"/>
+    </g>
+    <use href="#row" y="24"/><use href="#row" y="48"/><use href="#row" y="72"/>
+    <rect x="86" y="188" width="16" height="16" rx="5"/><rect x="108" y="188" width="16" height="16" rx="5"/><rect x="130" y="188" width="16" height="16" rx="5"/>
+  </g>
+  <!-- a few booked days, softly marked -->
+  <g fill="#F2662B" opacity=".35">
+    <rect x="196" y="116" width="16" height="16" rx="5"/><rect x="108" y="164" width="16" height="16" rx="5"/>
+  </g>
+
+  <!-- the event day: glowing, with a small flame -->
+  <g filter="url(#glow)">
+    <rect x="148" y="136" width="24" height="24" rx="7" fill="url(#day)"/>
+  </g>
+  <path d="M160 141c-4 4-6 7-6 10.5a6 6 0 0 0 12 0c0-2.4-1.2-4.6-2.6-6.2c-.3 1.8-1 2.8-2 3.4c.4-2.8-.2-5.4-1.4-7.7z" fill="#FFF6E8"/>
+
+  <!-- a check badge: the date is confirmed -->
+  <g transform="translate(232 186)">
+    <circle r="17" fill="#F2662B" stroke="#0B0705" stroke-width="4"/>
+    <path d="M-7 0l5 5l9-10" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

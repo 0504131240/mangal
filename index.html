@@ -400,7 +400,7 @@ html.a11y-still .peek::before{animation:none}
 .peek-layer.on{opacity:1}
 .peek-layer img,.peek-layer video{width:100%;height:100%;object-fit:cover;display:block}
 .peek-quote{display:flex;flex-direction:column;justify-content:center;gap:6px;height:100%;padding:10px 12px;text-align:right;
-  background:linear-gradient(160deg,rgba(244,199,102,.16),rgba(0,0,0,.2))}
+  background:linear-gradient(160deg,rgba(244,199,102,.16),rgba(0,0,0,.2)),#1A120E}
 .peek-quote p{margin:0;font-size:12.5px;line-height:1.45;color:#FBF3EA;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 .peek-quote p::before{content:'”';color:#F4C766;font-size:20px;line-height:0;margin-left:3px;vertical-align:-6px}
 .peek-quote small{font-size:11px;color:#F4C766;font-weight:700}
@@ -974,10 +974,12 @@ function startPeek(kind){
     let i=Math.floor(Math.random()*list.length);
     if(list.length>1 && i===p.last) i=(i+1)%list.length;
     p.last=i;
+    // the old one fades out while the new one fades in, and is then removed (a quote is see-through, so it must not stay under the new one)
+    const old=[...box.children];
     const layer=document.createElement('div'); layer.className='peek-layer'; layer.innerHTML=peekHtml(kind,list[i]);
     box.appendChild(layer);
-    requestAnimationFrame(()=>requestAnimationFrame(()=>layer.classList.add('on')));
-    while(box.children.length>2) box.firstChild.remove();
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{ layer.classList.add('on'); old.forEach(o=>o.classList.remove('on')); }));
+    setTimeout(()=>old.forEach(o=>o.remove()), 1000);
   };
   show();
   const still=document.documentElement.classList.contains('a11y-still') || matchMedia('(prefers-reduced-motion: reduce)').matches;

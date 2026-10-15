@@ -240,6 +240,11 @@ button{font-family:var(--font)}
 .gm-act{flex:1;max-width:240px;padding:13px;border-radius:12px;border:none;font-family:var(--font);font-weight:800;font-size:13.5px;cursor:pointer;background:var(--flame-bg);color:var(--flame-dark)}
 .gm-act.danger{background:var(--bad-bg);color:var(--bad)}
 .gm-act:disabled{opacity:.4;cursor:default}
+.gm-mig{display:flex;align-items:center;gap:12px;background:var(--surface);border:1.5px dashed var(--flame);border-radius:var(--r2);padding:11px 12px;margin-top:10px}
+.gm-mig div{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.gm-mig b{font-size:13.5px}
+.gm-mig small{font-size:11.5px;color:var(--text2);line-height:1.4}
+.gm-mig button{flex:none;border:none;background:#C63F14;color:#fff;font-family:var(--font);font-weight:800;font-size:13px;padding:9px 14px;border-radius:18px;cursor:pointer}
 .gm-up{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:10px 12px;margin-top:10px}
 .gm-up-row{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;font-weight:700;color:var(--text2);margin-bottom:7px}
 .gm-bar{height:6px;border-radius:3px;background:var(--surface2);overflow:hidden}
@@ -1445,6 +1450,7 @@ function storageProblem(e){
 let storageReason='';
 function renderStorageNote(){
   const note=document.getElementById('storageNote');
+  renderMigrateCard();
   if(note) note.innerHTML = storageReady||!storageReason ? '' :
     `<div class="minfo">אי אפשר להעלות קבצים כרגע: ${esc(storageReason)}. עריכה, סידור ומחיקה עובדים גם בלי זה.</div>`;
 }
@@ -1525,6 +1531,7 @@ function openGalleryManager(){
         <div class="gm-in">
           <div class="gm-info" id="gmInfo"></div>
           <div id="storageNote"></div>
+          <div id="gmMigrate"></div>
           <div id="gmUpload"></div>
           <div id="gmList"></div>
         </div>
@@ -1572,6 +1579,7 @@ function renderGalleryManager(){
       <p class="gm-tip"><span>✏️ לחיצה: עריכה</span><span>↕️ לחיצה ארוכה וגרירה: שינוי סדר</span><span>☑️ לחיצה ארוכה: בחירת כמה</span></p>`;
   }
   renderUploadPanel();
+  renderMigrateCard();
   const list=document.getElementById('gmList');
   if(!ready){
     list.innerHTML = galleryLoading
@@ -2139,8 +2147,68 @@ async function addYoutube(){
     showToast('הסרטון נוסף לאתר ✓');
   }catch(e){ console.error(e); showToast('ההוספה נכשלה'); loadGalleryItems(); }
 }
+/* moving what was uploaded before (to Vercel Blob, or kept in the site's images/ folder) into Firebase Storage,
+   keeping each item's place, caption and category; the old Blob file is deleted once its item points to the new one */
+let gmMoving=false;
+function needsMove(g){ return g.kind!=='youtube' && !g.path && (g.blob || /^images\//.test(g.url)); }
+function renderMigrateCard(){
+  const el=document.getElementById('gmMigrate');
+  if(!el) return;
+  const n = Array.isArray(galleryItems) && !gmSel && storageReady && !gmMoving ? galleryItems.filter(needsMove).length : 0;
+  el.innerHTML = n ? `
+    <div class="gm-mig">
+      <div><b>📦 ${countOf(n,'קובץ אחד עדיין','קבצים עדיין')} באחסון הישן</b><small>העברה ל-Firebase, בלי לשנות סדר, כיתובים וקטגוריות</small></div>
+      <button type="button" onclick="moveAllToFirebase()">העברה</button>
+    </div>` : '';
+}
+async function moveAllToFirebase(){
+  if(gmMoving || gmUp){ showToast('יש העלאה שעוד לא הסתיימה'); return; }
+  const todo=(galleryItems||[]).filter(needsMove).map(g=>g.url);
+  if(!todo.length) return;
+  gmMoving=true; gmErrors=[];
+  renderMigrateCard();
+  const errors=[];
+  let moved=0;
+  for(let i=0;i<todo.length;i++){
+    const oldUrl=todo[i], name=oldUrl.split('/').pop();
+    try{
+      setUploadProgress(i+1,todo.length,'מוריד מהאחסון הישן...');
+      let data;
+      try{
+        const r=await fetch(oldUrl);
+        if(!r.ok) throw new Error(`האחסון הישן החזיר ${r.status}`);
+        data=await r.blob();
+      }catch(e){ throw new Error(e instanceof TypeError ? 'לא הצלחתי להוריד את הקובץ מהאחסון הישן' : e.message); }
+      const ext=(name.split('.').pop()||'').toLowerCase();
+      const type=/^(image|video)\//.test(data.type) && MEDIA_EXT[data.type] ? data.type : guessMediaType('x.'+ext);
+      if(!MEDIA_EXT[type]) throw new Error(`סוג קובץ לא נתמך (${type||ext})`);
+      const st=await fbStorage();
+      const path=`gallery/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${MEDIA_EXT[type]}`;
+      const task=st.uploadBytesResumable(st.ref(st.storage,path), data, {contentType:type, cacheControl:'public, max-age=31536000, immutable'});
+      await new Promise((resolve,reject)=>task.on('state_changed',
+        snap=>setUploadProgress(i+1,todo.length,'מעביר ל-Firebase...',snap.totalBytes?snap.bytesTransferred/snap.totalBytes*100:0),
+        reject, resolve));
+      const url=await st.getDownloadURL(task.snapshot.ref);
+      const cur=galleryItems.find(g=>g.url===oldUrl);
+      if(!cur){ st.deleteObject(st.ref(st.storage,path)).catch(()=>{}); continue; } // deleted meanwhile
+      const {blob,...rest}=cur;
+      await saveGalleryItems(galleryItems.map(g=>g.url===oldUrl?{...rest,url,path}:g));
+      moved++;
+      if(blob) fetch('/api/media-delete',{method:'POST',headers:{'content-type':'application/json'},
+        body:JSON.stringify({url:oldUrl,idToken:await idToken()})}).catch(()=>{});
+    }catch(e){
+      console.error(e);
+      errors.push(`${name}: ${e&&e.code?storageProblem(e):(e&&e.message||String(e))}`);
+    }
+  }
+  gmUp=null; gmMoving=false; gmErrors=errors;
+  renderUploadPanel();
+  renderMigrateCard();
+  if(moved) showToast(moved===1?'קובץ אחד הועבר ל-Firebase ✓':`${moved} קבצים הועברו ל-Firebase ✓`);
+}
 async function handleMediaFiles(files,group){
   if(!files.length) return;
+  if(gmMoving){ showToast('מחכים שההעברה ל-Firebase תסתיים'); return; }
   if(!storageReady){ showToast('האחסון עוד לא מחובר'); return; }
   if(!Array.isArray(galleryItems)){ showToast('הגלריה לא נטענה, נסו לפתוח שוב'); return; }
   let added=0;

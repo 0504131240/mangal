@@ -241,6 +241,14 @@ button{font-family:var(--font)}
 .gm-act{flex:1;max-width:240px;padding:13px;border-radius:12px;border:none;font-family:var(--font);font-weight:800;font-size:13.5px;cursor:pointer;background:var(--flame-bg);color:var(--flame-dark)}
 .gm-act.danger{background:var(--bad-bg);color:var(--bad)}
 .gm-act:disabled{opacity:.4;cursor:default}
+.gm-usage{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:10px 12px;margin-top:10px}
+.gm-usage-row{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;font-weight:700;color:var(--text2);margin-bottom:7px}
+.gm-usage-row b{color:var(--text)}
+.gm-usage .gm-bar i{background:var(--ok)}
+.gm-usage.high .gm-bar i{background:var(--gold)}
+.gm-usage.full .gm-bar i{background:var(--bad)}
+.gm-usage small{display:block;margin-top:6px;font-size:11.5px;color:var(--text2)}
+.gm-usage a{color:var(--flame-dark);font-weight:700}
 .gm-mig{display:flex;align-items:center;gap:12px;background:var(--surface);border:1.5px dashed var(--flame);border-radius:var(--r2);padding:11px 12px;margin-top:10px}
 .gm-mig div{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .gm-mig b{font-size:13.5px}
@@ -1452,6 +1460,7 @@ let storageReason='';
 function renderStorageNote(){
   const note=document.getElementById('storageNote');
   renderMigrateCard();
+  refreshUsage();
   if(note) note.innerHTML = storageReady||!storageReason ? '' :
     `<div class="minfo">אי אפשר להעלות קבצים כרגע: ${esc(storageReason)}. עריכה, סידור ומחיקה עובדים גם בלי זה.</div>`;
 }
@@ -1520,8 +1529,44 @@ function renderGalleryCard(){
   el.textContent = galleryItems===null
     ? (galleryLoading?'טוען...':'לא הצליח לטעון')
     : galleryItems.length
-      ? `${countOf(galleryItems.length,'פריט אחד','פריטים')} · ${countOf(mediaGroups().length,'קטגוריה אחת','קטגוריות')}`
+      ? `${countOf(galleryItems.length,'פריט אחד','פריטים')} · ${countOf(mediaGroups().length,'קטגוריה אחת','קטגוריות')}${storageUsed!==null?` · ${fmtBytes(storageUsed)} באחסון`:''}`
       : 'עוד אין תמונות באתר';
+  refreshUsage();
+}
+/* how much of Firebase Storage the gallery takes: the sizes of the files its items point to (each file's size is
+   asked once). The monthly downloads can't be read from here; the Firebase console shows them. */
+const FREE_STORAGE=5e9;
+const sizeCache=new Map();
+let storageUsed=null, usageBusy=false;
+function fmtBytes(n){ return n>=1e9 ? (n/1e9).toFixed(2)+'GB' : Math.max(n/1e6,n?0.1:0).toFixed(1)+'MB'; }
+async function refreshUsage(){
+  if(usageBusy || !Array.isArray(galleryItems) || !storageReady) return;
+  const paths=galleryItems.flatMap(g=>[g.path,g.thumbPath]).filter(Boolean);
+  const missing=paths.filter(p=>!sizeCache.has(p));
+  if(missing.length){
+    usageBusy=true;
+    try{
+      const st=await fbStorage();
+      await Promise.all(missing.map(p=>st.getMetadata(st.ref(st.storage,p)).then(m=>sizeCache.set(p,m.size)).catch(()=>sizeCache.set(p,0))));
+    }finally{ usageBusy=false; }
+  }
+  const used=paths.reduce((sum,p)=>sum+(sizeCache.get(p)||0),0);
+  const changed=used!==storageUsed;
+  storageUsed=used;
+  renderUsage();
+  if(changed) renderGalleryCard();
+}
+function renderUsage(){
+  const el=document.getElementById('gmUsage');
+  if(!el) return;
+  if(storageUsed===null || gmSel){ el.innerHTML=''; return; }
+  const pct=Math.min(100,storageUsed/FREE_STORAGE*100);
+  el.innerHTML=`
+    <div class="gm-usage ${pct>=90?'full':pct>=70?'high':''}">
+      <div class="gm-usage-row"><span>💾 אחסון ב-Firebase</span><b>${fmtBytes(storageUsed)} מתוך 5GB חינם</b></div>
+      <div class="gm-bar" role="progressbar" aria-label="אחסון ב-Firebase" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}"><i style="width:${Math.max(pct,storageUsed?1:0)}%"></i></div>
+      <small>הצפיות החודשיות (עד 100GB בחינם) מופיעות ב<a href="https://console.firebase.google.com/project/mangal-b11fe/usage/details" target="_blank" rel="noopener">קונסולת Firebase</a></small>
+    </div>`;
 }
 function openGalleryManager(){
   viewOpened(openGalleryManager);
@@ -1532,6 +1577,7 @@ function openGalleryManager(){
       <div class="gm-body" id="gmBody">
         <div class="gm-in">
           <div class="gm-info" id="gmInfo"></div>
+          <div id="gmUsage"></div>
           <div id="storageNote"></div>
           <div id="gmMigrate"></div>
           <div id="gmUpload"></div>
@@ -1582,6 +1628,7 @@ function renderGalleryManager(){
   }
   renderUploadPanel();
   renderMigrateCard();
+  renderUsage();
   const list=document.getElementById('gmList');
   if(!ready){
     list.innerHTML = galleryLoading

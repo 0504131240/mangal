@@ -283,6 +283,10 @@ button{font-family:var(--font)}
 .sheet-bg{z-index:110}
 .sheet-prev{width:100%;max-height:38vh;object-fit:contain;border-radius:12px;background:var(--surface2);display:block}
 .sheet-yt{position:relative}
+.gm-front{position:absolute;top:5px;right:5px;padding:2px 7px;border-radius:999px;background:var(--flame);color:#fff;font-size:10.5px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.front-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:10px;padding:12px;border-radius:11px;border:1.5px solid var(--flame);background:transparent;color:var(--flame-dark);font-family:var(--font);font-weight:700;font-size:13.5px;cursor:pointer}
+.front-btn.on{background:var(--flame);color:#fff}
+.front-note{margin-top:6px;font-size:12px;line-height:1.5;color:var(--text2);text-align:center}
 .sheet-del{display:block;width:100%;margin-top:8px;padding:12px;border-radius:11px;border:none;background:transparent;color:var(--bad);font-family:var(--font);font-weight:700;font-size:13px;cursor:pointer}
 .sheet-opts{display:flex;flex-direction:column;gap:8px;margin-top:18px}
 .sheet-opt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;padding:12px 14px;border-radius:var(--r2);border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-family:var(--font);font-weight:700;font-size:14px;text-align:right;cursor:pointer}
@@ -1655,7 +1659,7 @@ function renderGalleryManager(){
     info.innerHTML=`
       <div class="gm-stats">${countOf(galleryItems.length-vids,'תמונה אחת','תמונות')} · ${countOf(vids,'סרטון אחד','סרטונים')} · ${countOf(mediaGroups().length,'קטגוריה אחת','קטגוריות')}</div>
       <a class="gm-view" href="/#gallery" target="_blank" rel="noopener">👁 איך זה נראה באתר</a>
-      <p class="gm-tip"><span>✏️ לחיצה: עריכה</span><span>↕️ לחיצה ארוכה וגרירה: שינוי סדר</span><span>☑️ לחיצה ארוכה: בחירת כמה</span></p>`;
+      <p class="gm-tip"><span>✏️ לחיצה: עריכה, ו-📌 לתמונה קבועה בדף הבית</span><span>↕️ לחיצה ארוכה וגרירה: שינוי סדר</span><span>☑️ לחיצה ארוכה: בחירת כמה</span></p>`;
   }
   renderUploadPanel();
   renderMigrateCard();
@@ -1686,7 +1690,7 @@ function renderReviewsTab(){
   document.getElementById('gmInfo').innerHTML = ready && reviewItems.length ? `
     <div class="gm-stats">${countOf(reviewItems.length,'המלצה אחת','המלצות')}</div>
     <a class="gm-view" href="/#reviews" target="_blank" rel="noopener">👁 איך זה נראה באתר</a>
-    <p class="gm-tip"><span>✏️ לחיצה: עריכה ומחיקה</span><span>↕️ לחיצה ארוכה וגרירה: שינוי סדר</span></p>` : '';
+    <p class="gm-tip"><span>✏️ לחיצה: עריכה, מחיקה, ו-📌 להמלצה קבועה בדף הבית</span><span>↕️ לחיצה ארוכה וגרירה: שינוי סדר</span></p>` : '';
   document.getElementById('gmMigrate').innerHTML='';
   renderUploadPanel();
   renderUsage();
@@ -1705,7 +1709,7 @@ function renderReviewsTab(){
   }
   list.innerHTML=`<section class="gm-sec rv-sec"><div class="gm-grid rv-grid">${reviewItems.map(r=>`
     <button type="button" class="gm-tile rv-tile" data-url="rv:${esc(r.id)}" onclick="tileTap(this)"
-      aria-label="המלצה${r.name?' של '+esc(r.name):''}${r.kind==='image'?' (צילום מסך)':''}">
+      aria-label="המלצה${r.name?' של '+esc(r.name):''}${r.kind==='image'?' (צילום מסך)':''}${r.front?' (קבועה בדף הבית)':''}">${r.front?FRONT_BADGE:''}
       ${r.kind==='image'
         ? `<img src="${esc(r.thumb||r.url)}" alt="" loading="lazy" draggable="false">${r.name||r.event?`<span class="gm-cap" aria-hidden="true">${esc([r.name,r.event].filter(Boolean).join(' · '))}</span>`:''}`
         : `<span class="rv-t" aria-hidden="true"><span class="rv-q">${esc(r.text)}</span>${r.name||r.event?`<b>${esc([r.name,r.event].filter(Boolean).join(' · '))}</b>`:''}</span>`}
@@ -1754,6 +1758,7 @@ function openReviewSheet(id){
       <input id="rvEvent" type="text" maxlength="${RV_NAME}" value="${esc(r.event||'')}" placeholder="למשל: בר מצווה, ערב גיבוש">
     </div>
     <div class="modal-actions"><button type="button" class="btn-save" onclick="saveReviewSheet()">${id?'שמירה':'הוספה לאתר'}</button></div>
+    ${id?frontBtn(r,'ההמלצה','rv'):''}
     ${id?`<button type="button" class="sheet-del" onclick="deleteReview()">🗑️ מחיקת ההמלצה</button>`:''}`);
   root.dataset.rv=id||'';
 }
@@ -1840,9 +1845,10 @@ function gmTileHtml(g){
   const sel = gmSel && gmSel.has(g.url);
   return `
         <button type="button" class="gm-tile ${sel?'sel':''}" data-url="${esc(g.url)}" onclick="tileTap(this)"
-          aria-label="${g.kind==='image'?'תמונה':'סרטון'}${g.cap?': '+esc(g.cap):''}" ${gmSel?`aria-pressed="${!!sel}"`:''}>
+          aria-label="${g.kind==='image'?'תמונה':'סרטון'}${g.cap?': '+esc(g.cap):''}${g.front?' (קבוע בדף הבית)':''}" ${gmSel?`aria-pressed="${!!sel}"`:''}>
           ${mediaThumb(g)}
           ${g.cap?`<span class="gm-cap" aria-hidden="true">${esc(g.cap)}</span>`:''}
+          ${g.front?FRONT_BADGE:''}
           ${gmSel?`<span class="gm-check" aria-hidden="true">${sel?'✓':''}</span>`:''}
         </button>`;
 }
@@ -2001,8 +2007,33 @@ function openItemSheet(url){
     </div>
     ${catPicker(itemGroup(item))}
     <div class="modal-actions"><button type="button" class="btn-save" onclick="saveItemSheet()">שמירה</button></div>
+    ${frontBtn(item, what, 'g')}
     <button type="button" class="sheet-del" onclick="deleteSheetItem()">🗑️ מחיקת ${what} מהאתר</button>`);
   root.dataset.url=url;
+}
+/* "always on the home page": one photo and one review can be marked to stay in the small window on
+   the site's home page buttons; with none marked, the window shows them in turns */
+const FRONT_BADGE='<span class="gm-front" aria-hidden="true">📌 בחזית</span>';
+function frontBtn(x, what, kind){
+  const it=`את ${what} ${what==='הסרטון'?'הזה':'הזאת'}`;
+  return `<button type="button" class="front-btn ${x.front?'on':''}" onclick="toggleFront('${kind}')" aria-pressed="${!!x.front}">📌 ${x.front?'קבוע בדף הבית · לחיצה לביטול':'להציג קבוע בדף הבית'}</button>
+    <p class="front-note">${x.front?`כרגע בדף הבית רואים תמיד ${it}. בביטול, יתחלפו שם כמו קודם.`:`בדף הבית יראו תמיד ${it}, במקום שיתחלפו. אפשר לבחור רק אחד.`}</p>`;
+}
+function withFront(list, isIt, on){ return list.map(x=>{ const {front,...rest}=x; return on && isIt(x) ? {...rest, front:true} : rest; }); }
+async function toggleFront(kind){
+  const {rv:id, url}=document.getElementById('sheetRoot').dataset;
+  closeSheet();
+  try{
+    if(kind==='rv'){
+      const r=reviewItems.find(x=>x.id===id); if(!r) return;
+      await saveReviews(withFront(reviewItems, x=>x.id===id, !r.front));
+      showToast(r.front?'ההמלצות יתחלפו בדף הבית ✓':'ההמלצה קבועה בדף הבית ✓');
+    } else {
+      const g=galleryItems.find(x=>x.url===url); if(!g) return;
+      await saveGalleryItems(withFront(galleryItems, x=>x.url===url, !g.front));
+      showToast(g.front?'התמונות יתחלפו בדף הבית ✓':'קבוע בדף הבית ✓');
+    }
+  }catch(e){ console.error(e); showToast('השמירה נכשלה'); loadGalleryItems(); }
 }
 async function saveItemSheet(){
   const url=document.getElementById('sheetRoot').dataset.url;

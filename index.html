@@ -30,7 +30,8 @@ if(a.zoom)c.add('a11y-z'+a.zoom);['contrast','still','links','font','gray'].forE
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=Varela+Round&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%A5%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/png" sizes="64x64" href="images/favicon-64.png">
+<link rel="apple-touch-icon" href="images/favicon-180.png">
 <style>
 :root{
   --bg:#0E0907;--surface:#1A120E;--surface2:#261A14;--border:rgba(255,170,110,.16);
@@ -320,6 +321,9 @@ html.a11y-contrast .mh-embers{display:none!important}
 .contact-card .ci-phone,.contact-card .ci-wa{width:52px;height:52px;margin:0 auto 10px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 .ci-phone{background:linear-gradient(145deg,#FF8A3D,#C8461A);box-shadow:0 0 16px rgba(242,102,43,.55)}
 .ci-phone svg{width:26px;height:26px;fill:#fff}
+/* phones keep the emoji; computers (a mouse) get the drawn icons, which look the same on Windows */
+@media (hover:hover) and (pointer:fine){ .only-mobile{display:none!important} }
+@media not all and (hover:hover) and (pointer:fine){ .only-pc{display:none!important} }
 .ft-flame{width:15px;height:20px;vertical-align:-4px;margin:0 4px;filter:drop-shadow(0 0 4px rgba(242,102,43,.7))}
 .btn-send .ft-flame{filter:brightness(1.7) saturate(.55) drop-shadow(0 0 3px rgba(255,236,190,.9))}
 .ci-wa{background:linear-gradient(145deg,#3BE07A,#1EAA52);box-shadow:0 0 16px rgba(37,211,102,.45)}
@@ -607,15 +611,15 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
       <h2>יש שאלה לפני שמזמינים?</h2>
     </div>
     <div class="contact-grid">
-      <a class="contact-card" href="tel:0523359599"><div class="ico ci-phone" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></div><b>התקשרו אלינו</b><span>052-335-9599</span></a>
-      <a class="contact-card" rel="noopener" href="https://wa.me/972527626562?text=%D7%94%D7%99%D7%99%20%D7%93%D7%95%D7%93%D7%99!%20%D7%A8%D7%A6%D7%99%D7%AA%D7%99%20%D7%9C%D7%A9%D7%90%D7%95%D7%9C%20%D7%A2%D7%9C%20%D7%94%D7%96%D7%9E%D7%A0%D7%AA%20%D7%9E%D7%A0%D7%92%D7%9C%20%F0%9F%94%A5" target="_blank"><div class="ico ci-wa" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="b" d="M16 4.5a11.5 11.5 0 0 0-9.9 17.35L4.6 27.4l5.7-1.47A11.5 11.5 0 1 0 16 4.5z"/><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" transform="translate(9.2 9.2) scale(.57)"/></svg></div><b>וואטסאפ</b><span>דודי ישמח לעזור</span><span class="sr-only"> (נפתח בחלון חדש)</span></a>
+      <a class="contact-card" href="tel:0523359599"><div class="ico only-mobile" aria-hidden="true">📞</div><div class="ico ci-phone only-pc" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></div><b>התקשרו אלינו</b><span>052-335-9599</span></a>
+      <a class="contact-card" rel="noopener" href="https://wa.me/972527626562?text=%D7%94%D7%99%D7%99%20%D7%93%D7%95%D7%93%D7%99!%20%D7%A8%D7%A6%D7%99%D7%AA%D7%99%20%D7%9C%D7%A9%D7%90%D7%95%D7%9C%20%D7%A2%D7%9C%20%D7%94%D7%96%D7%9E%D7%A0%D7%AA%20%D7%9E%D7%A0%D7%92%D7%9C%20%F0%9F%94%A5" target="_blank"><div class="ico only-mobile" aria-hidden="true">💬</div><div class="ico ci-wa only-pc" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="b" d="M16 4.5a11.5 11.5 0 0 0-9.9 17.35L4.6 27.4l5.7-1.47A11.5 11.5 0 1 0 16 4.5z"/><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" transform="translate(9.2 9.2) scale(.57)"/></svg></div><b>וואטסאפ</b><span>דודי ישמח לעזור</span><span class="sr-only"> (נפתח בחלון חדש)</span></a>
     </div>
   </div>
 </section>
 </main>
 
 <footer>
-  <div><svg class="ft-flame" aria-hidden="true" focusable="false"><use href="#flame"/></svg>BBQ · חגיגת ברבקיו משחררת</div>
+  <div><span class="only-mobile" aria-hidden="true">🔥 </span><svg class="ft-flame only-pc" aria-hidden="true" focusable="false"><use href="#flame"/></svg>BBQ · חגיגת ברבקיו משחררת</div>
   <div style="margin-top:4px;opacity:.75">לשירותכם דודי · 052-335-9599</div>
   <div class="footer-links">
     <button type="button" class="footer-link" onclick="openPrivacy()">מדיניות פרטיות</button>
@@ -665,7 +669,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
       <section class="offer" aria-labelledby="offerSpa">
         <h4 id="offerSpa">ספא לקבוצה</h4>
         <p>יום גיבוש מפנק בספא, יחד עם המנגל, ואפשר להוסיף <b>מסאז'יסט</b> שמפנק את חברי הקבוצה.</p>
-        <a class="offer-btn" href="https://wa.me/972527626562?text=%D7%94%D7%99%D7%99%20%D7%93%D7%95%D7%93%D7%99%21%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A7%D7%91%D7%9C%20%D7%A4%D7%A8%D7%98%D7%99%D7%9D%20%D7%A2%D7%9C%20%D7%A1%D7%A4%D7%90%20%D7%9C%D7%99%D7%95%D7%9D%20%D7%92%D7%99%D7%91%D7%95%D7%A9%2C%20%D7%A2%D7%9D%20%D7%90%D7%A4%D7%A9%D7%A8%D7%95%D7%AA%20%D7%9C%D7%9E%D7%A1%D7%90%D7%96%27%D7%99%D7%A1%D7%98%20%F0%9F%A7%96" target="_blank" rel="noopener"><svg class="wa-mini" viewBox="0 0 32 32" aria-hidden="true"><path class="b" d="M16 4.5a11.5 11.5 0 0 0-9.9 17.35L4.6 27.4l5.7-1.47A11.5 11.5 0 1 0 16 4.5z"/><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" transform="translate(9.2 9.2) scale(.57)"/></svg>לקבלת פרטים בוואטסאפ<span class="sr-only"> (נפתח בחלון חדש)</span></a>
+        <a class="offer-btn" href="https://wa.me/972527626562?text=%D7%94%D7%99%D7%99%20%D7%93%D7%95%D7%93%D7%99%21%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A7%D7%91%D7%9C%20%D7%A4%D7%A8%D7%98%D7%99%D7%9D%20%D7%A2%D7%9C%20%D7%A1%D7%A4%D7%90%20%D7%9C%D7%99%D7%95%D7%9D%20%D7%92%D7%99%D7%91%D7%95%D7%A9%2C%20%D7%A2%D7%9D%20%D7%90%D7%A4%D7%A9%D7%A8%D7%95%D7%AA%20%D7%9C%D7%9E%D7%A1%D7%90%D7%96%27%D7%99%D7%A1%D7%98%20%F0%9F%A7%96" target="_blank" rel="noopener"><span class="only-mobile" aria-hidden="true">💬 </span><svg class="wa-mini only-pc" viewBox="0 0 32 32" aria-hidden="true"><path class="b" d="M16 4.5a11.5 11.5 0 0 0-9.9 17.35L4.6 27.4l5.7-1.47A11.5 11.5 0 1 0 16 4.5z"/><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" transform="translate(9.2 9.2) scale(.57)"/></svg>לקבלת פרטים בוואטסאפ<span class="sr-only"> (נפתח בחלון חדש)</span></a>
       </section>
       <div class="massage-how">
         <b>דברו איתנו</b>
@@ -743,7 +747,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
           <textarea id="fNotes" placeholder="אלרגיות, בקשות מיוחדות..."></textarea>
         </div>
         <p class="privacy-note" id="privacyNote">הפרטים משמשים רק כדי לטפל בבקשה ולחזור אליכם. השדות עם * נחוצים לטיפול בבקשה, ואין חובה חוקית למסור אותם. פרטים נוספים ב<button type="button" class="inline-link" onclick="openPrivacy()">מדיניות הפרטיות</button>.</p>
-        <button type="submit" class="btn btn-send" id="sendBtn" aria-describedby="privacyNote">שליחה לבדיקת זמינות <svg class="ft-flame" aria-hidden="true" focusable="false"><use href="#flame"/></svg></button>
+        <button type="submit" class="btn btn-send" id="sendBtn" aria-describedby="privacyNote">שליחה לבדיקת זמינות <span class="only-mobile" aria-hidden="true">🔥</span><svg class="ft-flame only-pc" aria-hidden="true" focusable="false"><use href="#flame"/></svg></button>
         <div class="form-err" id="formErr" role="alert"></div>
       </form>
       <div class="form-done" id="formDone" style="display:none" role="status">
@@ -979,7 +983,7 @@ function startPeek(kind){
   const still=document.documentElement.classList.contains('a11y-still') || matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(!still && list.length>1) p.timer=setInterval(()=>{ if(!document.hidden) show(); }, kind==='reviews'?5000:2500);
 }
-const FLAME='<svg class="ft-flame" aria-hidden="true" focusable="false"><use href="#flame"/></svg>';
+const FLAME='<span class="only-mobile" aria-hidden="true">🔥</span><svg class="ft-flame only-pc" aria-hidden="true" focusable="false"><use href="#flame"/></svg>';
 function escHtml(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 const LEVELS = [

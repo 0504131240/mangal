@@ -2040,7 +2040,7 @@ function openPeekSheet(){
   openSheet('🏠 תצוגה ראשית', `
     <p class="front-note" style="text-align:right;margin:0 0 12px">מה יופיע בחלון הקטן של "תמונות מאירועים" בדף הבית של האתר</p>
     <div class="peek-opts">
-      ${opt('video','<video src="/images/peek-video.mp4" poster="/images/peek-video.jpg" muted loop playsinline autoplay></video>','הסרטון (ברירת מחדל)','סרטון קצר של חיתוך האנטריקוט, רץ בלופ בלי קול')}
+      ${opt('video','<video poster="/images/peek-video.jpg" muted loop playsinline autoplay><source src="/images/peek-video.webm" type="video/webm"><source src="/images/peek-video.mp4" type="video/mp4"></video>','הסרטון (ברירת מחדל)','סרטון קצר של חיתוך האנטריקוט, רץ בלופ בלי קול')}
       ${opt('rotate','<span class="ico" aria-hidden="true">🔀</span>','מתחלף','תמונות מהגלריה, מתחלפות כל כמה שניות')}
       ${opt('pick', front?`<img class="peek-pic" src="${esc(front.kind==='youtube'?YT.thumb(front.url):(front.thumb||front.url))}" alt="">`:'<span class="ico" aria-hidden="true">📌</span>','תמונה שבחרתי', front?'זו התמונה שמופיעה עכשיו. אפשר לבחור אחרת למטה':'בוחרים למטה תמונה אחת שתופיע תמיד')}
     </div>

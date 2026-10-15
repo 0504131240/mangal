@@ -895,7 +895,8 @@ function setPeekMode(m){
   if(m===PEEK_MODE) return;
   PEEK_MODE=m; startPeek('gallery');
 }
-const PEEK_VIDEO='images/peek-video.mp4', PEEK_POSTER='images/peek-video.jpg';
+// WebM first (Chrome decodes it itself, on any Android phone); MP4 for iPhones
+const PEEK_SOURCES=`<source src="images/peek-video.webm" type="video/webm"><source src="images/peek-video.mp4" type="video/mp4">`, PEEK_POSTER='images/peek-video.jpg';
 function showPeekVideo(box){
   const still=document.documentElement.classList.contains('a11y-still') || matchMedia('(prefers-reduced-motion: reduce)').matches;
   box.innerHTML=`<div class="peek-layer on">${still
@@ -911,7 +912,7 @@ function showPeekVideo(box){
   });
   // downloaded only once the window is on the screen, and paused when it is not
   const io=new IntersectionObserver(es=>es.forEach(e=>{
-    if(e.isIntersecting){ if(!v.getAttribute('src')){ v.src=PEEK_VIDEO; v.load(); } play(); } else v.pause();
+    if(e.isIntersecting){ if(!v.firstChild){ v.innerHTML=PEEK_SOURCES; v.load(); } play(); } else v.pause();
   }));
   io.observe(v);
   peeks.gallery.io=io;

@@ -900,13 +900,18 @@ function showPeekVideo(box){
   const still=document.documentElement.classList.contains('a11y-still') || matchMedia('(prefers-reduced-motion: reduce)').matches;
   box.innerHTML=`<div class="peek-layer on">${still
     ? `<img src="${PEEK_POSTER}" alt="">`
-    : `<video poster="${PEEK_POSTER}" muted loop playsinline preload="none"></video>`}</div>`;
+    : `<video poster="${PEEK_POSTER}" muted autoplay loop playsinline disablepictureinpicture preload="none"></video>`}</div>`;
   const v=box.querySelector('video');
   if(!v) return;
-  v.muted=true;
+  v.muted=true; v.defaultMuted=true;
+  // some phones block a video that starts by itself (e.g. battery saver): then it starts on the first touch
+  const play=()=>v.play().catch(()=>{
+    const retry=()=>{ document.removeEventListener('touchstart',retry); document.removeEventListener('click',retry); if(v.isConnected) v.play().catch(()=>{}); };
+    document.addEventListener('touchstart',retry,{passive:true}); document.addEventListener('click',retry);
+  });
   // downloaded only once the window is on the screen, and paused when it is not
   const io=new IntersectionObserver(es=>es.forEach(e=>{
-    if(e.isIntersecting){ if(!v.src) v.src=PEEK_VIDEO; v.play().catch(()=>{}); } else v.pause();
+    if(e.isIntersecting){ if(!v.getAttribute('src')){ v.src=PEEK_VIDEO; v.load(); } play(); } else v.pause();
   }));
   io.observe(v);
   peeks.gallery.io=io;

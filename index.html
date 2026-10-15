@@ -30,7 +30,8 @@ if(a.zoom)c.add('a11y-z'+a.zoom);['contrast','still','links','font','gray'].forE
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=Varela+Round&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%A5%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/png" sizes="64x64" href="images/favicon-64.png">
+<link rel="apple-touch-icon" href="images/favicon-180.png">
 <style>
 :root{
   --bg:#0E0907;--surface:#1A120E;--surface2:#261A14;--border:rgba(255,170,110,.16);
@@ -320,6 +321,9 @@ html.a11y-contrast .mh-embers{display:none!important}
 .contact-card .ci-phone,.contact-card .ci-wa{width:52px;height:52px;margin:0 auto 10px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 .ci-phone{background:linear-gradient(145deg,#FF8A3D,#C8461A);box-shadow:0 0 16px rgba(242,102,43,.55)}
 .ci-phone svg{width:26px;height:26px;fill:#fff}
+/* the fire: phones keep the 🔥 emoji; computers (a mouse) get the drawn flame, which looks the same on Windows */
+@media (hover:hover) and (pointer:fine){ .only-mobile{display:none!important} }
+@media not all and (hover:hover) and (pointer:fine){ .only-pc{display:none!important} }
 .ft-flame{width:15px;height:20px;vertical-align:-4px;margin:0 4px;filter:drop-shadow(0 0 4px rgba(242,102,43,.7))}
 .btn-send .ft-flame{filter:brightness(1.7) saturate(.55) drop-shadow(0 0 3px rgba(255,236,190,.9))}
 .ci-wa{background:linear-gradient(145deg,#3BE07A,#1EAA52);box-shadow:0 0 16px rgba(37,211,102,.45)}
@@ -615,7 +619,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
 </main>
 
 <footer>
-  <div><svg class="ft-flame" aria-hidden="true" focusable="false"><use href="#flame"/></svg>BBQ · חגיגת ברבקיו משחררת</div>
+  <div><span class="only-mobile" aria-hidden="true">🔥 </span><svg class="ft-flame only-pc" aria-hidden="true" focusable="false"><use href="#flame"/></svg>BBQ · חגיגת ברבקיו משחררת</div>
   <div style="margin-top:4px;opacity:.75">לשירותכם דודי · 052-335-9599</div>
   <div class="footer-links">
     <button type="button" class="footer-link" onclick="openPrivacy()">מדיניות פרטיות</button>
@@ -743,7 +747,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
           <textarea id="fNotes" placeholder="אלרגיות, בקשות מיוחדות..."></textarea>
         </div>
         <p class="privacy-note" id="privacyNote">הפרטים משמשים רק כדי לטפל בבקשה ולחזור אליכם. השדות עם * נחוצים לטיפול בבקשה, ואין חובה חוקית למסור אותם. פרטים נוספים ב<button type="button" class="inline-link" onclick="openPrivacy()">מדיניות הפרטיות</button>.</p>
-        <button type="submit" class="btn btn-send" id="sendBtn" aria-describedby="privacyNote">שליחה לבדיקת זמינות <svg class="ft-flame" aria-hidden="true" focusable="false"><use href="#flame"/></svg></button>
+        <button type="submit" class="btn btn-send" id="sendBtn" aria-describedby="privacyNote">שליחה לבדיקת זמינות <span class="only-mobile" aria-hidden="true">🔥</span><svg class="ft-flame only-pc" aria-hidden="true" focusable="false"><use href="#flame"/></svg></button>
         <div class="form-err" id="formErr" role="alert"></div>
       </form>
       <div class="form-done" id="formDone" style="display:none" role="status">
@@ -979,7 +983,7 @@ function startPeek(kind){
   const still=document.documentElement.classList.contains('a11y-still') || matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(!still && list.length>1) p.timer=setInterval(()=>{ if(!document.hidden) show(); }, kind==='reviews'?5000:2500);
 }
-const FLAME='<svg class="ft-flame" aria-hidden="true" focusable="false"><use href="#flame"/></svg>';
+const FLAME='<span class="only-mobile" aria-hidden="true">🔥</span><svg class="ft-flame only-pc" aria-hidden="true" focusable="false"><use href="#flame"/></svg>';
 function escHtml(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 const LEVELS = [

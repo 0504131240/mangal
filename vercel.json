@@ -1,12 +1,42 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "crons": [
-    { "path": "/api/reminders", "schedule": "0 19 * * *" },
-    { "path": "/api/reminders", "schedule": "0 20 * * *" },
-    { "path": "/api/reminders", "schedule": "0 9 * * 5" },
-    { "path": "/api/reminders", "schedule": "0 10 * * 5" }
+    {
+      "path": "/api/reminders",
+      "schedule": "0 19 * * *"
+    },
+    {
+      "path": "/api/reminders",
+      "schedule": "0 20 * * *"
+    },
+    {
+      "path": "/api/reminders",
+      "schedule": "0 9 * * 5"
+    },
+    {
+      "path": "/api/reminders",
+      "schedule": "0 10 * * 5"
+    }
   ],
   "rewrites": [
-    { "source": "/fbs/:file", "destination": "https://firebasestorage.googleapis.com/v0/b/mangal-b11fe.firebasestorage.app/o/gallery%2F:file" }
+    {
+      "source": "/fbs/:file",
+      "destination": "https://firebasestorage.googleapis.com/v0/b/mangal-b11fe.firebasestorage.app/o/gallery%2F:file"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/dudi-bbq.vcf",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/vcard; charset=utf-8"
+        },
+        {
+          "key": "Content-Disposition",
+          "value": "inline; filename=\"dudi-bbq.vcf\""
+        }
+      ]
+    }
   ]
 }

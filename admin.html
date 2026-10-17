@@ -111,6 +111,17 @@ button{font-family:var(--font)}
 .debt-total{background:var(--bad-bg);color:var(--bad);border-radius:var(--r2);padding:14px 16px;text-align:center;margin-bottom:14px}
 .debt-total b{display:block;font-size:22px;font-family:var(--font-head)}
 .debt-total span{font-size:12px;font-weight:600}
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:14px 12px;text-align:center}
+.stat-box b{display:block;font-size:24px;font-family:var(--font-head);color:var(--text)}
+.stat-box span{display:block;font-size:12px;font-weight:700;color:var(--text2);margin-top:2px}
+.stat-box small{display:block;font-size:11.5px;color:var(--text3);margin-top:4px}
+.stats-days{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:12px 14px}
+.stats-days h3{font-size:13.5px;margin:0 0 10px;color:var(--text2)}
+.stat-row{display:grid;grid-template-columns:74px 1fr 34px;align-items:center;gap:8px;font-size:12.5px;padding:3px 0;color:var(--text2)}
+.stat-bar{height:10px;border-radius:6px;background:var(--flame);min-width:2px}
+.stat-row b{text-align:left;color:var(--text)}
+.stats-note{font-size:12px;color:var(--text3);text-align:center;margin-top:12px}
 
 /* modal */
 .modal-bg{position:fixed;inset:0;background:rgba(32,20,14,.55);z-index:100;display:flex;align-items:flex-end;justify-content:center}
@@ -363,6 +374,7 @@ button.gm-view{border:none;cursor:pointer;font-family:var(--font)}
       <div class="tab on" data-tab="board" onclick="setTab('board')">לוח אירועים</div>
       <div class="tab" data-tab="pending" onclick="setTab('pending')">בקשות חדשות<span class="badge" id="badgePending" style="display:none">0</span></div>
       <div class="tab" data-tab="debts" onclick="setTab('debts')">חובות<span class="badge" id="badgeDebts" style="display:none">0</span></div>
+      <div class="tab" data-tab="stats" onclick="setTab('stats')">כניסות</div>
     </div>
 
     <div class="panel" id="panel-pending">
@@ -389,6 +401,10 @@ button.gm-view{border:none;cursor:pointer;font-family:var(--font)}
     <div class="panel" id="panel-debts">
       <div id="debtsTotal"></div>
       <div id="debtsList"></div>
+    </div>
+
+    <div class="panel" id="panel-stats">
+      <div id="statsWrap"><div class="empty">טוען…</div></div>
     </div>
   </div>
 </div>
@@ -768,6 +784,46 @@ function setTab(t){
   currentTab=t;
   document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('on',el.dataset.tab===t));
   document.querySelectorAll('.panel').forEach(el=>el.classList.toggle('on',el.id==='panel-'+t));
+  if(t==='stats') startStats();
+}
+
+/* ===== visit counter (mangalStats/{Israel date}: views, visitors — written by index.html) ===== */
+let statsDays=null, statsStarted=false;
+async function startStats(){
+  if(statsStarted) return;
+  statsStarted=true;
+  const {db,collection,onSnapshot}=await fbInit();
+  onSnapshot(collection(db,'mangalStats'), (snap)=>{
+    statsDays={};
+    snap.docs.forEach(d=>{ const x=d.data(); statsDays[d.id]={views:Number(x.views||0),visitors:Number(x.visitors||0)}; });
+    renderStats();
+  }, (err)=>{
+    console.error('stats',err);
+    statsStarted=false;
+    document.getElementById('statsWrap').innerHTML=`<div class="empty">אין הרשאה לקרוא את נתוני הכניסות.<br>צריך לעדכן את חוקי Firestore (הקובץ firestore.rules).</div>`;
+  });
+}
+function israelDay(offset){
+  return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jerusalem'}).format(new Date(Date.now()-offset*86400000));
+}
+function renderStats(){
+  const el=document.getElementById('statsWrap');
+  const sum=(n)=>{ let v=0,p=0; for(let i=0;i<n;i++){ const d=statsDays[israelDay(i)]; if(d){ v+=d.visitors; p+=d.views; } } return {visitors:v,views:p}; };
+  const all=Object.values(statsDays).reduce((a,d)=>({visitors:a.visitors+d.visitors,views:a.views+d.views}),{visitors:0,views:0});
+  const y=statsDays[israelDay(1)]||{visitors:0,views:0};
+  const box=(label,d)=>`<div class="stat-box"><b>${d.visitors.toLocaleString()}</b><span>${label}</span><small>${d.views.toLocaleString()} צפיות</small></div>`;
+  const last=[]; for(let i=0;i<14;i++){ const k=israelDay(i); last.push({k,...(statsDays[k]||{visitors:0,views:0})}); }
+  const max=Math.max(1,...last.map(d=>d.visitors));
+  const firstDay=Object.keys(statsDays).sort()[0];
+  el.innerHTML=`<div class="stats-grid">
+      ${box('מבקרים היום',sum(1))}${box('מבקרים אתמול',y)}
+      ${box('7 ימים אחרונים',sum(7))}${box('30 ימים אחרונים',sum(30))}
+    </div>
+    <div class="stats-grid" style="grid-template-columns:1fr">${box('סה"כ מבקרים',all)}</div>
+    <div class="stats-days"><h3>מבקרים ב-14 הימים האחרונים</h3>
+      ${last.map(d=>`<div class="stat-row"><span>${new Date(d.k+'T00:00:00').toLocaleDateString('he-IL',{weekday:'short',day:'numeric',month:'numeric'})}</span><div><div class="stat-bar" style="width:${Math.round(d.visitors/max*100)}%"></div></div><b>${d.visitors}</b></div>`).join('')}
+    </div>
+    <div class="stats-note">מבקר = דפדפן שנכנס לאתר באותו יום (נספר פעם אחת ביום). צפייה = כל טעינה של האתר.${firstDay?`<br>הספירה התחילה ב-${fmtDate(firstDay)}.`:'<br>עוד לא נספרו כניסות.'}</div>`;
 }
 let boardFilter='upcoming';
 function setBoardFilter(f){

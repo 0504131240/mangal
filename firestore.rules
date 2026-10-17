@@ -70,6 +70,22 @@ service cloud.firestore {
         && request.resource.data.emails.size() <= 50;
     }
 
+    // visit counter: one document per day (Israel date), the site adds 1 view per page load and 1 visitor
+    // the first time a browser opens it that day; only admins can read the numbers
+    function validStats(d) {
+      return d.keys().hasOnly(['views', 'visitors']) && d.views is int && d.visitors is int;
+    }
+    match /mangalStats/{day} {
+      allow read: if isAdmin();
+      allow create: if day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && validStats(request.resource.data)
+        && request.resource.data.views == 1
+        && request.resource.data.visitors in [0, 1];
+      allow update: if validStats(request.resource.data)
+        && request.resource.data.views == resource.data.views + 1
+        && request.resource.data.visitors - resource.data.visitors in [0, 1];
+    }
+
     match /{path=**} {
       allow read, write: if false;
     }

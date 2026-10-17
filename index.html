@@ -554,7 +554,6 @@ html.a11y-font .sect-head p,html.a11y-font .menu-grp ul,html.a11y-font .statemen
 /* grayscale */
 html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
 </style>
-<script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 <!-- the drawn flame used instead of the 🔥 emoji (emoji look dated on Windows) -->
@@ -1350,6 +1349,29 @@ const firebaseConfig = {
   messagingSenderId: "523754634162",
   appId: "1:523754634162:web:aea58a2857650fadf082ab"
 };
+
+/* ===== visit counter ===== */
+// adds 1 to today's page views, and to today's visitors the first time this browser opens the site today
+// (mangalStats/{Israel date}, shown in the admin's "כניסות" tab)
+(function countVisit(){
+  if(/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || navigator.webdriver) return;
+  const day=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jerusalem'}).format(new Date());
+  let newVisitor=true;
+  try{ newVisitor=localStorage.getItem('mangalSeenDay')!==day; localStorage.setItem('mangalSeenDay',day); }catch(e){}
+  const base='projects/mangal-b11fe/databases/(default)/documents';
+  fetch(`https://firestore.googleapis.com/v1/${base}:commit?key=${firebaseConfig.apiKey}`,{
+    method:'POST', headers:{'Content-Type':'application/json'}, keepalive:true,
+    body:JSON.stringify({writes:[{
+      update:{name:`${base}/mangalStats/${day}`,fields:{}},
+      updateMask:{fieldPaths:[]},
+      updateTransforms:[
+        {fieldPath:'views',increment:{integerValue:'1'}},
+        {fieldPath:'visitors',increment:{integerValue:newVisitor?'1':'0'}}
+      ]
+    }]})
+  }).catch(()=>{});
+})();
+
 let _fb=null;
 async function fbInit(){
   if(_fb)return _fb;

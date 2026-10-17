@@ -338,6 +338,8 @@ html.a11y-contrast .mh-embers{display:none!important}
 .wa-mini .b,.ci-wa svg .b{fill:none;stroke:#fff;stroke-width:2.2;stroke-linejoin:round}
 .contact-card b{display:block;font-size:14px}
 .contact-card span{font-size:12px;color:var(--text2)}
+.save-contact{display:flex;align-items:center;justify-content:center;gap:8px;max-width:640px;margin:14px auto 0;padding:14px 18px;border-radius:var(--r2);border:1px solid var(--border);background:var(--glass);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 12px 30px rgba(0,0,0,.35);color:var(--text);text-decoration:none;font-weight:700;font-size:14px}
+.save-contact svg{width:22px;height:22px;fill:#F3C08A}
 footer{position:relative;isolation:isolate;overflow:hidden;color:rgba(255,236,220,.78);text-align:center;padding:54px 16px 40px;font-size:12px}
 footer::before{content:'';position:absolute;inset:0;z-index:-2;background:url(images/flames-strip.jpg) center bottom/cover no-repeat;transform-origin:50% 100%;animation:fx-flames 1.7s ease-in-out infinite alternate}
 footer::after{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(to bottom,var(--bg) 0%,rgba(14,9,7,.6) 55%,rgba(14,9,7,.15))}
@@ -376,9 +378,9 @@ footer .ys-sig{margin-top:10px;padding-bottom:0}
 .big-card .txt span{font-size:12px;color:var(--text2)}
 .big-card .arrow{font-size:18px;color:var(--text3)}
 /* home buttons and contact boxes in the CRAZY menu colors: warm brown with gold */
-.big-card,.contact-card{background:linear-gradient(160deg,#5E3B24,#4A2E1C);border-color:rgba(244,199,102,.45);box-shadow:0 12px 30px rgba(0,0,0,.4),0 0 22px rgba(232,178,82,.12)}
-.big-card:hover,.contact-card:hover{border-color:rgba(244,199,102,.85)}
-.big-card .txt b,.contact-card b{color:#FBF3EA}
+.big-card,.contact-card,.save-contact{background:linear-gradient(160deg,#5E3B24,#4A2E1C);border-color:rgba(244,199,102,.45);box-shadow:0 12px 30px rgba(0,0,0,.4),0 0 22px rgba(232,178,82,.12)}
+.big-card:hover,.contact-card:hover,.save-contact:hover{border-color:rgba(244,199,102,.85)}
+.big-card .txt b,.contact-card b,.save-contact{color:#FBF3EA}
 .big-card .txt span,.contact-card span{color:#F3E5D7}
 .big-card .ico{background:linear-gradient(135deg,rgba(244,199,102,.38),rgba(244,199,102,.1))}
 .big-card .arrow{color:#F4C766}
@@ -537,7 +539,7 @@ html.a11y-z3 body{zoom:1.5}
 html.a11y-contrast{--bg:#000;--surface:#000;--surface2:#111;--border:#fff;--text:#fff;--text2:#fff;--text3:#e6e6e6;--flame:#FFD23F;--flame-dark:#FFD23F;--flame-bg:#000;--glass:#000;--gold:#FFD23F}
 html.a11y-contrast .fire-fx,html.a11y-contrast footer::before,html.a11y-contrast .short-banner::after{display:none}
 html.a11y-contrast .short-banner img{-webkit-mask-image:none;mask-image:none}
-html.a11y-contrast .big-card,html.a11y-contrast .contact-card,html.a11y-contrast .menu-card,html.a11y-contrast .lvl-opt,html.a11y-contrast .menu-tab{border:2px solid #fff;background:#000;box-shadow:none}
+html.a11y-contrast .big-card,html.a11y-contrast .contact-card,html.a11y-contrast .save-contact,html.a11y-contrast .menu-card,html.a11y-contrast .lvl-opt,html.a11y-contrast .menu-tab{border:2px solid #fff;background:#000;box-shadow:none}
 html.a11y-contrast .menu-tab.on,html.a11y-contrast .btn-send{background:#FFD23F;color:#000;border-color:#FFD23F}
 html.a11y-contrast .lvl-opt.sel{border:3px solid #FFD23F;color:#FFD23F}
 html.a11y-contrast footer{background:#000}
@@ -619,6 +621,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
       <a class="contact-card" href="tel:0523359599"><div class="ico ci-phone" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></div><b>התקשרו אלינו</b><span>052-335-9599</span></a>
       <a class="contact-card" rel="noopener" href="https://wa.me/972527626562?text=%D7%94%D7%99%D7%99%20%D7%93%D7%95%D7%93%D7%99!%20%D7%A8%D7%A6%D7%99%D7%AA%D7%99%20%D7%9C%D7%A9%D7%90%D7%95%D7%9C%20%D7%A2%D7%9C%20%D7%94%D7%96%D7%9E%D7%A0%D7%AA%20%D7%9E%D7%A0%D7%92%D7%9C%20%F0%9F%94%A5" target="_blank"><div class="ico ci-wa" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="b" d="M16 4.5a11.5 11.5 0 0 0-9.9 17.35L4.6 27.4l5.7-1.47A11.5 11.5 0 1 0 16 4.5z"/><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" transform="translate(9.2 9.2) scale(.57)"/></svg></div><b>וואטסאפ</b><span>דודי ישמח לעזור</span><span class="sr-only"> (נפתח בחלון חדש)</span></a>
     </div>
+    <a class="save-contact" href="dudi-bbq.vcf"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 12c2.2 0 4-1.8 4-4s-1.8-4-4-4-4 1.8-4 4 1.8 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.7 0-8 1.3-8 4v2h16v-2c0-2.7-5.3-4-8-4z"/></svg>שמירה באנשי הקשר</a>
   </div>
 </section>
 </main>

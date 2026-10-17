@@ -113,12 +113,12 @@ button{font-family:var(--font)}
 .debt-total span{font-size:12px;font-weight:600}
 .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
 .stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:14px 12px;text-align:center}
-.stat-box b{display:block;font-size:24px;font-family:var(--font-head);color:var(--text)}
+.stat-box b{display:block;font-size:22px;font-family:var(--font-head);color:var(--text);margin-top:6px}
 .stat-box span{display:block;font-size:12px;font-weight:700;color:var(--text2);margin-top:2px}
-.stat-box small{display:block;font-size:11.5px;color:var(--text3);margin-top:4px}
+.stat-box small{display:block;font-size:11.5px;color:var(--text3)}
 .stats-days{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:12px 14px}
 .stats-days h3{font-size:13.5px;margin:0 0 10px;color:var(--text2)}
-.stat-row{display:grid;grid-template-columns:74px 1fr 34px;align-items:center;gap:8px;font-size:12.5px;padding:3px 0;color:var(--text2)}
+.stat-row{display:grid;grid-template-columns:74px 1fr 58px;align-items:center;gap:8px;font-size:12.5px;padding:3px 0;color:var(--text2)}
 .stat-bar{height:10px;border-radius:6px;background:var(--flame);min-width:2px}
 .stat-row b{text-align:left;color:var(--text)}
 .stats-note{font-size:12px;color:var(--text3);text-align:center;margin-top:12px}
@@ -787,7 +787,7 @@ function setTab(t){
   if(t==='stats') startStats();
 }
 
-/* ===== visit counter (mangalStats/{Israel date}: views, visitors — written by index.html) ===== */
+/* ===== visit counter (mangalStats/{Israel date}: views, visitors, devices — written by index.html) ===== */
 let statsDays=null, statsStarted=false;
 async function startStats(){
   if(statsStarted) return;
@@ -795,7 +795,7 @@ async function startStats(){
   const {db,collection,onSnapshot}=await fbInit();
   onSnapshot(collection(db,'mangalStats'), (snap)=>{
     statsDays={};
-    snap.docs.forEach(d=>{ const x=d.data(); statsDays[d.id]={views:Number(x.views||0),visitors:Number(x.visitors||0)}; });
+    snap.docs.forEach(d=>{ const x=d.data(); statsDays[d.id]={views:Number(x.views||0),visitors:Number(x.visitors||0),devices:Number(x.devices||0)}; });
     renderStats();
   }, (err)=>{
     console.error('stats',err);
@@ -808,22 +808,26 @@ function israelDay(offset){
 }
 function renderStats(){
   const el=document.getElementById('statsWrap');
-  const sum=(n)=>{ let v=0,p=0; for(let i=0;i<n;i++){ const d=statsDays[israelDay(i)]; if(d){ v+=d.visitors; p+=d.views; } } return {visitors:v,views:p}; };
-  const all=Object.values(statsDays).reduce((a,d)=>({visitors:a.visitors+d.visitors,views:a.views+d.views}),{visitors:0,views:0});
-  const y=statsDays[israelDay(1)]||{visitors:0,views:0};
-  const box=(label,d)=>`<div class="stat-box"><b>${d.visitors.toLocaleString()}</b><span>${label}</span><small>${d.views.toLocaleString()} צפיות</small></div>`;
-  const last=[]; for(let i=0;i<14;i++){ const k=israelDay(i); last.push({k,...(statsDays[k]||{visitors:0,views:0})}); }
-  const max=Math.max(1,...last.map(d=>d.visitors));
+  const ZERO={views:0,visitors:0,devices:0};
+  const add=(a,d)=>({views:a.views+d.views,visitors:a.visitors+d.visitors,devices:a.devices+d.devices});
+  const sum=(n)=>{ let t=ZERO; for(let i=0;i<n;i++) t=add(t,statsDays[israelDay(i)]||ZERO); return t; };
+  const all=Object.values(statsDays).reduce(add,ZERO);
+  // a single day shows the devices that came that day; longer ranges show the devices that came for the first time
+  const box=(label,d,day)=>`<div class="stat-box"><span>${label}</span><b>${d.views.toLocaleString()}</b><small>כניסות</small>
+    <b>${(day?d.visitors:d.devices).toLocaleString()}</b><small>${day?'מכשירים':'מכשירים חדשים'}</small></div>`;
+  const last=[]; for(let i=0;i<14;i++){ const k=israelDay(i); last.push({k,...(statsDays[k]||ZERO)}); }
+  const max=Math.max(1,...last.map(d=>d.views));
   const firstDay=Object.keys(statsDays).sort()[0];
-  el.innerHTML=`<div class="stats-grid">
-      ${box('מבקרים היום',sum(1))}${box('מבקרים אתמול',y)}
+  el.innerHTML=`<div class="stat-box" style="margin-bottom:10px"><span>סה"כ מאז שהספירה התחילה</span>
+      <b>${all.views.toLocaleString()}</b><small>כניסות</small><b>${all.devices.toLocaleString()}</b><small>מכשירים שונים</small></div>
+    <div class="stats-grid">
+      ${box('היום',sum(1),true)}${box('אתמול',statsDays[israelDay(1)]||ZERO,true)}
       ${box('7 ימים אחרונים',sum(7))}${box('30 ימים אחרונים',sum(30))}
     </div>
-    <div class="stats-grid" style="grid-template-columns:1fr">${box('סה"כ מבקרים',all)}</div>
-    <div class="stats-days"><h3>מבקרים ב-14 הימים האחרונים</h3>
-      ${last.map(d=>`<div class="stat-row"><span>${new Date(d.k+'T00:00:00').toLocaleDateString('he-IL',{weekday:'short',day:'numeric',month:'numeric'})}</span><div><div class="stat-bar" style="width:${Math.round(d.visitors/max*100)}%"></div></div><b>${d.visitors}</b></div>`).join('')}
+    <div class="stats-days"><h3>כניסות ב-14 הימים האחרונים (ובסוגריים: מכשירים)</h3>
+      ${last.map(d=>`<div class="stat-row"><span>${new Date(d.k+'T00:00:00').toLocaleDateString('he-IL',{weekday:'short',day:'numeric',month:'numeric'})}</span><div><div class="stat-bar" style="width:${Math.round(d.views/max*100)}%"></div></div><b>${d.views} (${d.visitors})</b></div>`).join('')}
     </div>
-    <div class="stats-note">מבקר = דפדפן שנכנס לאתר באותו יום (נספר פעם אחת ביום). צפייה = כל טעינה של האתר.${firstDay?`<br>הספירה התחילה ב-${fmtDate(firstDay)}.`:'<br>עוד לא נספרו כניסות.'}</div>`;
+    <div class="stats-note">כניסה = כל פתיחה של האתר. מכשיר = טלפון או מחשב שנכנס לאתר (נספר פעם אחת, גם אם נכנס הרבה פעמים).${firstDay?`<br>הספירה התחילה ב-${fmtDate(firstDay)}.`:'<br>עוד לא נספרו כניסות.'}</div>`;
 }
 let boardFilter='upcoming';
 function setBoardFilter(f){

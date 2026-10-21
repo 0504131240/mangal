@@ -568,6 +568,102 @@ html.a11y-font body,html.a11y-font body *:not(.a11y-panel *){font-family:Arial,H
 html.a11y-font .sect-head p,html.a11y-font .menu-grp ul,html.a11y-font .statement{line-height:1.9}
 /* grayscale */
 html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
+/* ===== trying out 4 home page gallery designs (א ב ג ד), shown only with ?galdemo; regular visitors see the gallery button ===== */
+.gh{display:none}
+html.gh-on .gh{display:block}
+html.gh-on #galleryCard{display:none}
+.gh{padding:4px 0}
+.gh-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:12px}
+.gh-head h2{font-family:var(--font-head);font-size:21px;line-height:1.2;color:#FBF3EA}
+.gh-head small{display:block;font-family:var(--font);font-size:12.5px;color:var(--text2);margin-top:3px;font-weight:400}
+.gh-all{flex:none;font-size:13.5px;font-weight:700;color:#F4C766;background:none;border:none;cursor:pointer;padding:4px 0;font-family:var(--font);white-space:nowrap}
+.gh-btn-all{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;padding:13px;border-radius:12px;cursor:pointer;
+  border:1.5px solid rgba(244,199,102,.45);background:linear-gradient(160deg,#5E3B24,#4A2E1C);color:#FBF3EA;font-family:var(--font);font-size:15px;font-weight:700}
+.gh-btn-all i{font-style:normal;color:#F4C766}
+.gh-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,#F2662B,#B83C14);box-shadow:0 0 14px rgba(242,102,43,.5);font-size:16px;padding-left:3px;color:#fff;pointer-events:none}
+.gh img{display:block;max-width:100%}
+.gh button{font-family:var(--font);color:inherit}
+/* א */
+.gh-chips{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;margin-bottom:12px;padding-bottom:2px}
+.gh-chips::-webkit-scrollbar{display:none}
+.gh-chip{flex:none;padding:6px 13px;border-radius:999px;border:1.5px solid var(--border);background:var(--surface);font-size:13px;font-weight:600;cursor:pointer;color:var(--text2)}
+.gh-chip[aria-pressed="true"]{border-color:var(--flame);background:var(--flame-bg);color:var(--flame-dark)}
+.gh-strip{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px;scrollbar-width:none}
+.gh-strip::-webkit-scrollbar{display:none}
+.gh-strip>button{flex:none;width:62%;max-width:280px;padding:0;scroll-snap-align:start;position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--border);aspect-ratio:3/4;background:var(--surface);cursor:pointer}
+.gh-strip img{width:100%;height:100%;object-fit:cover}
+.gh-cap{position:absolute;inset:auto 0 0;padding:26px 12px 10px;font-size:13px;font-weight:600;text-align:right;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.78))}
+.gh-dots{display:flex;justify-content:center;gap:5px;margin-top:10px}
+.gh-dots i{width:6px;height:6px;border-radius:3px;background:var(--text3);opacity:.5;transition:width .2s}
+.gh-dots i.on{background:var(--flame);opacity:1;width:16px}
+/* ב */
+.gh-mosaic{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);aspect-ratio:3/4;max-width:100%;gap:6px;border-radius:16px;overflow:hidden}
+.gh-mosaic>button{position:relative;padding:0;border:none;background:var(--surface);cursor:pointer;overflow:hidden;min-height:0}
+.gh-mosaic>button img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.gh-mosaic>button:hover img{transform:scale(1.05)}
+.gh-mosaic>.big{grid-column:span 2;grid-row:span 2}
+.gh-mosaic>.wide{grid-column:span 2}
+.gh-more{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(14,9,7,.68);font-family:var(--font-head);font-size:22px;color:#fff}
+.gh-more small{font-family:var(--font);font-size:11.5px;color:var(--text2)}
+/* ג */
+.gh-show{position:relative;border-radius:20px;overflow:hidden;aspect-ratio:4/5;max-width:100%;background:var(--surface);border:1.5px solid rgba(244,199,102,.45);box-shadow:0 14px 34px rgba(0,0,0,.45)}
+.gh-sl{position:absolute;inset:0;opacity:0;transition:opacity .9s ease;padding:0;border:none;background:none;cursor:pointer;width:100%}
+.gh-sl.on{opacity:1;z-index:1}
+.gh-sl img{width:100%;height:100%;object-fit:cover;transform:scale(1.04);transition:transform 6s linear}
+.gh-sl.on img{transform:scale(1.12)}
+.gh-show-txt{position:absolute;inset:auto 0 0;z-index:2;padding:60px 16px 16px;background:linear-gradient(transparent,rgba(10,6,4,.88));pointer-events:none;text-align:right}
+.gh-show-txt small{display:block;font-size:11.5px;font-weight:700;color:#F4C766}
+.gh-show-txt b{display:block;font-family:var(--font-head);font-size:18px;margin-top:3px;min-height:1.4em;color:#fff}
+.gh-nav{position:absolute;z-index:3;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;
+  background:rgba(14,9,7,.55);color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center}
+.gh-nav.prev{right:10px}.gh-nav.next{left:10px}
+.gh-bars{position:absolute;z-index:3;top:12px;right:12px;left:12px;display:flex;gap:4px;pointer-events:none}
+.gh-bars i{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.28);overflow:hidden}
+.gh-bars i.done::after,.gh-bars i.on::after{content:"";display:block;height:100%;background:#fff}
+.gh-bars i.on::after{animation:gh-fill 3.5s linear forwards}
+html.a11y-still .gh-bars i.on::after{animation:none}
+@keyframes gh-fill{from{width:0}to{width:100%}}
+.gh-thumbs{display:flex;gap:6px;overflow-x:auto;margin-top:10px;scrollbar-width:none}
+.gh-thumbs::-webkit-scrollbar{display:none}
+.gh-thumbs button{flex:none;width:52px;height:52px;padding:0;border-radius:10px;overflow:hidden;border:2px solid transparent;cursor:pointer;opacity:.55;background:none}
+.gh-thumbs button img{width:100%;height:100%;object-fit:cover}
+.gh-thumbs button.on{border-color:var(--flame);opacity:1}
+/* ד */
+.gh-albums{display:grid;grid-template-columns:1fr 1fr;gap:16px 12px}
+.gh-album{padding:0;border:none;background:none;cursor:pointer;text-align:right;min-width:0}
+.gh-album:last-child:nth-child(odd){grid-column:1/-1;justify-self:center;width:calc(50% - 6px)}
+.gh-stack{position:relative;aspect-ratio:1;margin:8px 6px 10px}
+.gh-stack img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:14px;border:2px solid #2E1F17;box-shadow:0 8px 18px rgba(0,0,0,.45)}
+.gh-stack img:nth-child(1){transform:rotate(-7deg) translate(-6px,2px);filter:brightness(.6)}
+.gh-stack img:nth-child(2){transform:rotate(5deg) translate(5px,0);filter:brightness(.75)}
+.gh-album b{display:block;font-family:var(--font-head);font-size:14.5px;line-height:1.3;color:#FBF3EA}
+.gh-album span{font-size:12px;color:var(--text2)}
+.gh-open-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.gh-back{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;font-size:16px;flex:none}
+.gh-open-head b{font-family:var(--font-head);font-size:17px}
+.gh-open-head span{font-size:12.5px;color:var(--text2);margin-right:auto}
+.gh-agrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.gh-agrid button{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:var(--surface);padding:0;border:none;cursor:pointer}
+.gh-agrid img{width:100%;height:100%;object-fit:cover}
+.gh-agrid .gh-play{width:30px;height:30px;font-size:12px}
+@media (prefers-reduced-motion:reduce){.gh *{transition:none!important;animation:none!important}}
+/* the switcher bar, only while trying the designs */
+.gh-bar{display:none}
+html.gh-demo .gh-bar{display:flex;position:fixed;z-index:94;bottom:calc(12px + env(safe-area-inset-bottom,0px));right:12px;left:76px;max-width:420px;margin-right:auto;
+  align-items:center;gap:5px;padding:6px;border-radius:16px;background:rgba(26,18,14,.94);border:1.5px solid rgba(244,199,102,.5);box-shadow:0 10px 28px rgba(0,0,0,.55);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+html.gh-demo body{padding-bottom:80px}
+.gh-bar button{flex:1;min-width:0;height:40px;border-radius:11px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;
+  font-family:var(--font-head);font-size:17px;line-height:1}
+.gh-bar button.cur{font-family:var(--font);font-size:11.5px;font-weight:700}
+.gh-bar button[aria-pressed="true"]{background:linear-gradient(180deg,#F2662B,#B83C14);border-color:transparent;color:#fff}
+.gh-bar .gh-x{flex:none;width:32px;border:none;background:none;color:var(--text2);font-family:var(--font);font-size:16px}
+@media(min-width:900px){
+  .gh{grid-column:1/-1;width:100%;max-width:560px;justify-self:center}
+  html.gh-on .big-cards{grid-auto-flow:row dense}
+  html.gh-on .big-cards>.big-card:last-child{grid-column:auto;justify-self:stretch;width:auto}
+}
 </style>
 </head>
 <body>
@@ -619,7 +715,8 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
 <div class="wrap">
   <div class="big-cards">
     <button type="button" class="big-card has-peek" onclick="openMenusModal()"><div class="peek-txt"><div class="txt"><b>תפריטים</b><span>CLASIC · SPECIAL · CRAZY</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><div class="peek-menus" id="menusPeek"></div></div></div></button>
-    <button type="button" class="big-card has-peek" onclick="openGalleryModal()"><div class="peek-txt"><div class="txt"><b>תמונות מאירועים</b><span>הצצה לאירועים קודמים</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><div class="peek-rot" id="galleryPeek"></div></div></div></button>
+    <button type="button" class="big-card has-peek" id="galleryCard" onclick="openGalleryModal()"><div class="peek-txt"><div class="txt"><b>תמונות מאירועים</b><span>הצצה לאירועים קודמים</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><div class="peek-rot" id="galleryPeek"></div></div></div></button>
+    <section class="gh" id="galHome" aria-label="תמונות מאירועים"></section>
     <button type="button" class="big-card has-peek" id="reviewsCard" hidden onclick="openReviewsModal()"><div class="peek-txt"><div class="txt"><b>מה אומרים עלינו</b><span>המלצות של לקוחות מאירועים</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><div class="peek-rot" id="reviewsPeek"></div></div></div></button>
     <button type="button" class="big-card has-peek" onclick="openMassageModal()"><div class="peek-txt"><div class="txt"><b>הצעה מיוחדת לימי גיבוש</b><span>ספא לקבוצה, עם אפשרות למסאז'יסט</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><img src="images/spa-peek.jpg" alt=""></div></div></button>
     <button type="button" class="big-card has-peek" onclick="openBookModal()"><div class="peek-txt"><div class="txt"><b>בדיקת זמינות</b><span>שולחים פרטים ונחזור אליכם לאשר</span></div></div><div class="peek" aria-hidden="true"><div class="peek-in"><img src="images/calendar-peek.jpg" alt=""></div></div></button>
@@ -651,6 +748,14 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
 </footer>
 
 <div id="lightboxRoot"></div>
+<div class="gh-bar" role="group" aria-label="בחירת עיצוב לגלריה">
+  <button type="button" class="cur" data-gh="" onclick="setGalDesign('')">כרגיל</button>
+  <button type="button" data-gh="a" onclick="setGalDesign('a')">א</button>
+  <button type="button" data-gh="b" onclick="setGalDesign('b')">ב</button>
+  <button type="button" data-gh="c" onclick="setGalDesign('c')">ג</button>
+  <button type="button" data-gh="d" onclick="setGalDesign('d')">ד</button>
+  <button type="button" class="gh-x" aria-label="סגירת הבחירה" onclick="endGalDemo()">✕</button>
+</div>
 
 <!-- windows: gallery / menus / booking -->
 <div class="modal-bg" id="galleryModalBg" hidden onclick="if(event.target===this)closeGalleryModal()">
@@ -918,7 +1023,7 @@ async function loadGallery(){
     try{ localStorage.setItem('mangalGalleryCache', JSON.stringify(list)); }catch(e){}
     if(JSON.stringify(list)===JSON.stringify(GALLERY)) return;
     GALLERY=list;
-    renderGallery(); startPeek('gallery');
+    renderGallery(); startPeek('gallery'); renderGalHome();
     if(lbSource==='gallery' && lightboxIndex>=GALLERY.length) closeLightbox();
     else if(lbSource==='gallery' && lightboxIndex>=0) buildLightbox();
   }catch(e){}
@@ -1563,6 +1668,111 @@ applyMediaNav();
 renderGallery();renderLevels();renderMenus();loadGallery();applyA11y();
 // admin.html links here with #gallery / #reviews to show how they look
 document.getElementById('reviewsCard').hidden=!REVIEWS.length; renderReviews();
+/* ===== trying out 4 home page gallery designs. Open the site with ?galdemo to get the switcher bar (remembered in
+   this browser; ✕ ends it). Regular visitors keep seeing the gallery button. ===== */
+let galDesign='', galDemo=false, ghTimer=null, ghSlide=0, ghChip=0, ghAlbum=null;
+try{
+  if(/[?&]galdemo\b/.test(location.search)) localStorage.setItem('mangalGalDemo','1');
+  galDemo=localStorage.getItem('mangalGalDemo')==='1';
+  if(galDemo) galDesign=localStorage.getItem('mangalGalDesign')||'a';
+}catch(e){}
+function setGalDesign(k){
+  galDesign=k; ghSlide=0; ghChip=0; ghAlbum=null;
+  try{ localStorage.setItem('mangalGalDesign',k); }catch(e){}
+  renderGalHome();
+}
+function endGalDemo(){
+  try{ localStorage.removeItem('mangalGalDemo'); localStorage.removeItem('mangalGalDesign'); }catch(e){}
+  galDemo=false; galDesign=''; renderGalHome();
+}
+function ghItems(){
+  return GALLERY.map((g,i)=>({g,i,src:g.kind==='youtube'?YT.thumb(g.url):(g.thumb||(g.kind==='image'?g.url:''))})).filter(x=>x.src);
+}
+const ghStill=()=>document.documentElement.classList.contains('a11y-still')||matchMedia('(prefers-reduced-motion: reduce)').matches;
+function ghImg(x,cls){ return `<img src="${escHtml(x.src)}" alt="" loading="lazy"${cls?` class="${cls}"`:''}>${x.g.kind!=='image'?'<span class="gh-play" aria-hidden="true">▶</span>':''}`; }
+function ghBtnAttrs(x){ return `onclick="openLightbox(${x.i})" aria-label="${escHtml(mediaLabel(x.g,x.i))}"`; }
+function ghHead(t,sub,all){ return `<div class="gh-head"><h2>${t}<small>${sub}</small></h2>${all?'<button type="button" class="gh-all" onclick="openGalleryModal()">לכל התמונות ←</button>':''}</div>`; }
+function renderGalHome(){
+  const root=document.documentElement;
+  root.classList.toggle('gh-demo',galDemo);
+  document.querySelectorAll('.gh-bar [data-gh]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.gh===galDesign)));
+  clearInterval(ghTimer);
+  const el=document.getElementById('galHome');
+  const items=ghItems();
+  const on=!!galDesign && items.length>0;
+  root.classList.toggle('gh-on',on);
+  if(!on){ el.innerHTML=''; return; }
+  const groups=[]; items.forEach(x=>{ const n=groupName(x.g); let gr=groups.find(y=>y.n===n); if(!gr){ gr={n,items:[]}; groups.push(gr); } gr.items.push(x); });
+  const pics=items.filter(x=>x.g.kind==='image');
+  if(galDesign==='a'){
+    if(ghChip>groups.length) ghChip=0;
+    const list=(ghChip?groups[ghChip-1].items:items).slice(0,12);
+    el.innerHTML=ghHead('תמונות מאירועים','החליקו הצידה לעוד תמונות',true)+
+      (groups.length>1?`<div class="gh-chips">${['הכול',...groups.map(g=>g.n)].map((n,k)=>`<button type="button" class="gh-chip" aria-pressed="${k===ghChip}" onclick="ghChip=${k};renderGalHome()">${escHtml(n)}</button>`).join('')}</div>`:'')+
+      `<div class="gh-strip" id="ghStrip">${list.map(x=>`<button type="button" ${ghBtnAttrs(x)}>${ghImg(x)}${x.g.cap?`<span class="gh-cap" aria-hidden="true">${escHtml(x.g.cap)}</span>`:''}</button>`).join('')}</div>
+      <div class="gh-dots" aria-hidden="true">${list.slice(0,Math.min(6,list.length)).map((_,k)=>`<i class="${k?'':'on'}"></i>`).join('')}</div>`;
+    const st=document.getElementById('ghStrip'), dots=[...el.querySelectorAll('.gh-dots i')];
+    st.addEventListener('scroll',()=>{ const max=(st.scrollWidth-st.clientWidth)||1; const k=Math.round(Math.abs(st.scrollLeft)/max*(dots.length-1)); dots.forEach((d,n)=>d.classList.toggle('on',n===k)); },{passive:true});
+  }
+  else if(galDesign==='b'){
+    // the first photo of each category, then the rest in order
+    const firsts=groups.map(g=>g.items.find(x=>x.g.kind==='image')).filter(Boolean);
+    const pick=[...firsts,...pics.filter(x=>!firsts.includes(x))].slice(0,7);
+    while(pick.length<7) pick.push(items[pick.length%items.length]);
+    const rest=Math.max(0,items.length-6);
+    const t=(x,cls)=>`<button type="button"${cls?` class="${cls}"`:''} ${ghBtnAttrs(x)}>${ghImg(x)}${cls&&x.g.cap?`<span class="gh-cap" aria-hidden="true">${escHtml(x.g.cap)}</span>`:''}</button>`;
+    el.innerHTML=ghHead('תמונות מאירועים',`${items.length} תמונות וסרטונים`,false)+
+      `<div class="gh-mosaic">${t(pick[0],'big')}${t(pick[1])}${t(pick[2])}${t(pick[3],'wide')}${t(pick[4])}${t(pick[5])}
+        <button type="button" class="wide" onclick="openGalleryModal()" aria-label="לכל הגלריה"><img src="${escHtml(pick[6].src)}" alt="" loading="lazy"><span class="gh-more">עוד ${rest}<small>לכל הגלריה</small></span></button></div>`;
+  }
+  else if(galDesign==='c'){
+    const sl=[...pics.filter(x=>x.g.cap),...pics.filter(x=>!x.g.cap)].slice(0,8);
+    if(!sl.length){ el.innerHTML=''; root.classList.remove('gh-on'); return; }
+    ghSlide%=sl.length;
+    el.innerHTML=ghHead('רגעים מהאירועים','מתחלף לבד · אפשר לדפדף',false)+
+      `<div class="gh-show">${sl.map((x,k)=>`<button type="button" class="gh-sl${k===ghSlide?' on':''}" ${ghBtnAttrs(x)} tabindex="${k===ghSlide?0:-1}"><img src="${escHtml(x.src)}" alt="" loading="lazy"></button>`).join('')}
+        <div class="gh-bars" aria-hidden="true">${sl.map((_,k)=>`<i class="${k<ghSlide?'done':k===ghSlide?'on':''}"></i>`).join('')}</div>
+        <div class="gh-show-txt" aria-hidden="true"><small id="ghSg"></small><b id="ghSc"></b></div>
+        <button type="button" class="gh-nav prev" aria-label="התמונה הקודמת" onclick="ghGo(-1)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+        <button type="button" class="gh-nav next" aria-label="התמונה הבאה" onclick="ghGo(1)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button></div>
+      <div class="gh-thumbs">${sl.map((x,k)=>`<button type="button" class="${k===ghSlide?'on':''}" aria-label="תמונה ${k+1}" onclick="ghGo(${k}-ghSlide)"><img src="${escHtml(x.src)}" alt="" loading="lazy"></button>`).join('')}</div>
+      <button type="button" class="gh-btn-all" onclick="openGalleryModal()">לכל התמונות והסרטונים <i>←</i></button>`;
+    el._sl=sl; ghPaint();
+    if(!ghStill()) ghTimer=setInterval(()=>{ if(!document.hidden && !document.querySelector('.modal-bg:not([hidden])')) ghGo(1,true); },3500);
+  }
+  else if(galDesign==='d'){
+    if(ghAlbum!=null && groups[ghAlbum]){
+      const g=groups[ghAlbum];
+      el.innerHTML=`<div class="gh-open-head"><button type="button" class="gh-back" aria-label="חזרה לאלבומים" onclick="ghAlbum=null;renderGalHome()">→</button><b>${escHtml(g.n)}</b><span>${g.items.length} פריטים</span></div>
+        <div class="gh-agrid">${g.items.map(x=>`<button type="button" ${ghBtnAttrs(x)}>${ghImg(x)}</button>`).join('')}</div>`;
+    } else {
+      el.innerHTML=ghHead('אלבומים מאירועים','בחרו אלבום',false)+
+        `<div class="gh-albums">${groups.map((g,k)=>{ const c=g.items.slice(0,3); while(c.length<3) c.unshift(c[0]);
+          const vids=g.items.filter(x=>x.g.kind!=='image').length, ph=g.items.length-vids;
+          const cnt=[ph?(ph===1?'תמונה אחת':`${ph} תמונות`):'', vids?(vids===1?'סרטון אחד':`${vids} סרטונים`):''].filter(Boolean).join(' · ');
+          return `<button type="button" class="gh-album" onclick="ghAlbum=${k};renderGalHome()"><div class="gh-stack" aria-hidden="true">${c.map(x=>`<img src="${escHtml(x.src)}" alt="" loading="lazy">`).join('')}</div>
+            <b>${escHtml(g.n)}</b><span>${cnt}</span></button>`; }).join('')}</div>`;
+    }
+  }
+}
+function ghPaint(){
+  const el=document.getElementById('galHome'), sl=el._sl; if(!sl) return;
+  el.querySelectorAll('.gh-sl').forEach((b,k)=>{ b.classList.toggle('on',k===ghSlide); b.tabIndex=k===ghSlide?0:-1; });
+  el.querySelectorAll('.gh-thumbs button').forEach((b,k)=>b.classList.toggle('on',k===ghSlide));
+  el.querySelectorAll('.gh-bars i').forEach((b,k)=>{ b.className=''; void b.offsetWidth; b.className=k<ghSlide?'done':k===ghSlide?'on':''; });
+  document.getElementById('ghSg').textContent=groupName(sl[ghSlide].g);
+  document.getElementById('ghSc').textContent=sl[ghSlide].g.cap||'';
+}
+function ghGo(d,auto){
+  const sl=document.getElementById('galHome')._sl; if(!sl) return;
+  ghSlide=(ghSlide+d+sl.length)%sl.length; ghPaint();
+  if(!auto){ renderGalHomeTimer(); }
+}
+function renderGalHomeTimer(){
+  clearInterval(ghTimer);
+  if(galDesign==='c' && !ghStill()) ghTimer=setInterval(()=>{ if(!document.hidden && !document.querySelector('.modal-bg:not([hidden])')) ghGo(1,true); },3500);
+}
+renderGalHome();
 startPeek('gallery'); startPeek('reviews'); renderMenusPeek();
 if(location.hash==='#gallery' || location.hash==='#reviews'){
   const h=location.hash; history.replaceState(null,'',location.pathname+location.search);

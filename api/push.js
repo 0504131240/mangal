@@ -45,6 +45,21 @@ export default async function handler(req, res) {
       return res.status(200).json(result);
     }
 
+    if (action === 'review') {
+      if (typeof id !== 'string' || !/^[A-Za-z0-9]{10,40}$/.test(id)) return res.status(400).json({ error: 'bad id' });
+      const doc = await getDoc(`mangalReviewRequests/${id}`);
+      if (!doc) return res.status(404).json({ error: 'not found' });
+      const f = doc.fields || {};
+      const fresh = Date.now() - Date.parse(doc.createTime) < BOOKING_MAX_AGE_MS;
+      if (f.notifiedAtMs || !fresh) return res.status(200).json({ skipped: true });
+      const claimed = await patchDoc(`mangalReviewRequests/${id}`, { notifiedAtMs: { integerValue: String(Date.now()) } }, ['notifiedAtMs'], true);
+      if (!claimed) return res.status(200).json({ skipped: true });
+      const name = (f.name?.stringValue || 'לקוח').slice(0, 40);
+      const text = (f.text?.stringValue || '').slice(0, 80);
+      const result = await sendToAll({ title: 'המלצה חדשה מחכה לאישור ⭐', body: `${name}: ${text}`, url: 'admin.html#reviews', tag: `review-${id}` });
+      return res.status(200).json(result);
+    }
+
     return res.status(400).json({ error: 'unknown action' });
   } catch (err) {
     return res.status(500).json({ error: err.message });

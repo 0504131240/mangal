@@ -108,6 +108,19 @@ section{padding:52px 0}
 .rv-by{display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
 .rv-by b{font-family:var(--font-head);font-size:14.5px;color:var(--flame-dark)}
 .rv-by span{font-size:12.5px;color:var(--text2)}
+/* "add a review" at the top of the reviews window: the customer's review waits for the owner's approval */
+.rv-add{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:0 0 16px;padding:12px;border-radius:var(--r2);
+  border:1.5px dashed var(--flame);background:var(--flame-bg);color:var(--flame-dark);font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer}
+.rv-add[hidden]{display:none}
+.rv-form{margin:0 0 18px;padding:16px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface)}
+.rv-form .btn-send{margin-top:16px}
+.rv-form-note{font-size:12.5px;color:var(--text2);margin-top:10px;line-height:1.6}
+.rv-count{font-size:11.5px;color:var(--text2);text-align:left;margin-top:4px}
+.rv-form-actions{display:flex;justify-content:center;margin-top:8px}
+.rv-cancel{background:none;border:none;color:var(--text2);font-family:var(--font);font-size:13.5px;text-decoration:underline;cursor:pointer;padding:6px}
+.rv-done{text-align:center;padding:18px 10px;margin:0 0 18px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface)}
+.rv-done b{display:block;font-family:var(--font-head);font-size:17px;margin-bottom:6px}
+.rv-done span{color:var(--text2);font-size:13.5px;line-height:1.7}
 .rv-shot{display:block;width:100%;padding:0;border:none;background:#000;cursor:zoom-in;font:inherit;color:inherit;text-align:right}
 .rv-shot img{display:block;width:100%;max-height:420px;object-fit:cover;object-position:top}
 .rv-shot .rv-by{margin:0;padding:10px 14px 12px;background:linear-gradient(160deg,#2A1B13,#1C130E)}
@@ -650,6 +663,27 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
 <div class="modal-bg" id="reviewsModalBg" hidden onclick="if(event.target===this)closeReviewsModal()">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="reviewsTitle">
     <div class="modal-top"><h3 id="reviewsTitle">⭐ מה אומרים עלינו</h3><button type="button" class="modal-close" aria-label="סגירה" onclick="closeReviewsModal()">✕</button></div>
+    <button type="button" class="rv-add" id="rvAddBtn" onclick="openReviewForm()" aria-expanded="false" aria-controls="rvForm">✍️ הוספת המלצה</button>
+    <form class="rv-form" id="rvForm" hidden novalidate>
+      <div class="fld">
+        <label for="rvText">ההמלצה שלכם *</label>
+        <textarea id="rvText" rows="5" maxlength="600" placeholder="איך היה האירוע?" oninput="document.getElementById('rvCount').textContent=this.value.length+'/600'"></textarea>
+        <div class="rv-count" id="rvCount" aria-hidden="true">0/600</div>
+      </div>
+      <div class="fld">
+        <label for="rvName">שם *</label>
+        <input type="text" id="rvName" maxlength="40" placeholder="למשל: משפחת כהן" autocomplete="name">
+      </div>
+      <div class="fld">
+        <label for="rvEvent">האירוע (לא חובה)</label>
+        <input type="text" id="rvEvent" maxlength="40" placeholder="למשל: בר מצווה, ערב גיבוש">
+      </div>
+      <p class="rv-form-note">ההמלצה תופיע באתר אחרי שנאשר אותה.</p>
+      <button type="submit" class="btn btn-send" id="rvSendBtn">שליחת ההמלצה</button>
+      <div class="form-err" id="rvErr" role="alert"></div>
+      <div class="rv-form-actions"><button type="button" class="rv-cancel" onclick="closeReviewForm()">ביטול</button></div>
+    </form>
+    <div class="rv-done" id="rvDone" hidden role="status" tabindex="-1"><b>תודה רבה! 🙏</b><span>ההמלצה התקבלה ותופיע באתר אחרי שנאשר אותה.</span></div>
     <div class="reviews" id="reviewsList"></div>
   </div>
 </div>
@@ -926,6 +960,18 @@ function renderReviews(){
 }
 function openReviewsModal(){ if(!reviewsOpened){ reviewsOpened=true; renderReviews(); } openDialog('reviewsModalBg'); }
 function closeReviewsModal(){ closeDialog('reviewsModalBg'); }
+function openReviewForm(){
+  document.getElementById('rvDone').hidden=true;
+  document.getElementById('rvAddBtn').hidden=true;
+  document.getElementById('rvAddBtn').setAttribute('aria-expanded','true');
+  document.getElementById('rvForm').hidden=false;
+  document.getElementById('rvText').focus();
+}
+function closeReviewForm(){
+  document.getElementById('rvForm').hidden=true;
+  document.getElementById('rvErr').style.display='none';
+  const b=document.getElementById('rvAddBtn'); b.hidden=false; b.setAttribute('aria-expanded','false'); b.focus();
+}
 /* the small windows on the home buttons: a random photo / review, changing every few seconds */
 const peeks={};
 function peekHtml(kind,x){
@@ -1477,6 +1523,35 @@ document.getElementById('bookForm').addEventListener('submit', async (e)=>{
     errEl.style.display='block';
     btn.disabled=false;btn.innerHTML='שליחה לבדיקת זמינות '+FLAME;
   }
+});
+
+/* a customer's review: saved in mangalReviewRequests, and shown on the site only after the owner approves it in the admin */
+document.getElementById('rvForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const errEl=document.getElementById('rvErr');
+  errEl.style.display='none';
+  const text=document.getElementById('rvText').value.trim().slice(0,600);
+  const name=document.getElementById('rvName').value.trim().slice(0,40);
+  const event=document.getElementById('rvEvent').value.trim().slice(0,40);
+  if(!text||!name){ errEl.textContent='נא לכתוב את ההמלצה ושם'; errEl.style.display='block'; return; }
+  const btn=document.getElementById('rvSendBtn');
+  btn.disabled=true; btn.textContent='שולח...';
+  try{
+    const {db,collection,addDoc,serverTimestamp}=await fbInit();
+    const ref=await addDoc(collection(db,'mangalReviewRequests'),{text,name,event:event||null,createdAt:serverTimestamp(),createdAtMs:Date.now()});
+    fetch('/api/push',{method:'POST',headers:{'content-type':'application/json'},keepalive:true,
+      body:JSON.stringify({action:'review',id:ref.id})}).catch(()=>{});
+    document.getElementById('rvForm').reset();
+    document.getElementById('rvCount').textContent='0/600';
+    document.getElementById('rvForm').hidden=true;
+    const b=document.getElementById('rvAddBtn'); b.hidden=false; b.setAttribute('aria-expanded','false');
+    const done=document.getElementById('rvDone'); done.hidden=false; done.focus();
+  }catch(err){
+    console.error(err);
+    errEl.textContent='אירעה שגיאה בשליחה, נסו שוב';
+    errEl.style.display='block';
+  }
+  btn.disabled=false; btn.textContent='שליחת ההמלצה';
 });
 
 function applyMediaNav(){

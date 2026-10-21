@@ -215,6 +215,22 @@ button{font-family:var(--font)}
 .gm-in{max-width:760px;margin:0 auto;padding:14px 14px 32px}
 .gm-info{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 10px}
 .gm-stats{font-size:13px;font-weight:700}
+/* reviews customers sent from the site, waiting for approval */
+.rvp-bar{display:flex;align-items:center;gap:10px;width:100%;margin:0 0 12px;padding:12px 14px;border-radius:var(--r);border:1.5px solid var(--flame);
+  background:var(--flame-bg);color:var(--text);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;text-align:right}
+.rvp-bar[hidden]{display:none}
+.rvp-bar span{flex:1}
+.rvp-sec{background:var(--warn-bg);border:1.5px solid #E4C68E;border-radius:var(--r);padding:12px;margin-bottom:12px}
+.rvp-title{font-size:14px;font-weight:800;margin-bottom:8px}
+.rvp-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:12px;margin-top:8px}
+.rvp-text{font-size:14px;line-height:1.65;white-space:pre-line;overflow-wrap:anywhere}
+.rvp-by{font-size:12.5px;color:var(--text2);margin-top:6px}
+.rvp-by b{color:var(--text)}
+.rvp-btns{display:flex;gap:8px;margin-top:10px}
+.rvp-btns button{flex:1;border:none;border-radius:10px;padding:10px;font-family:var(--font);font-size:13.5px;font-weight:700;cursor:pointer}
+.rvp-ok{background:#C63F14;color:#fff}
+.rvp-no{background:var(--bg);color:var(--text2);border:1px solid var(--border)!important}
+.rvp-btns button:disabled{opacity:.5;cursor:default}
 .gm-views{display:flex;flex-wrap:wrap;gap:8px}
 button.gm-view{border:none;cursor:pointer;font-family:var(--font)}
 .peek-opts{display:flex;flex-direction:column;gap:10px}
@@ -238,6 +254,7 @@ button.gm-view{border:none;cursor:pointer;font-family:var(--font)}
 .gm-tabs button span{font-weight:700;font-size:11.5px;background:var(--surface2);border-radius:10px;padding:1px 7px;margin-inline-start:4px}
 .gm-tabs button[aria-pressed="true"]{background:var(--char);border-color:var(--char);color:#fff}
 .gm-tabs button[aria-pressed="true"] span{background:rgba(255,255,255,.18)}
+.gm-tabs button span.rvp-n{background:var(--flame);color:#fff}
 .gm-grid.rv-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 @media(min-width:560px){.gm-grid.rv-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .rv-sec{padding-top:10px}
@@ -376,6 +393,7 @@ button.gm-view{border:none;cursor:pointer;font-family:var(--font)}
       <div class="tab" data-tab="debts" onclick="setTab('debts')">חובות<span class="badge" id="badgeDebts" style="display:none">0</span></div>
       <div class="tab" data-tab="stats" onclick="setTab('stats')">כניסות</div>
     </div>
+    <button type="button" class="rvp-bar" id="rvpBar" hidden onclick="openPendingReviews()"><span id="rvpBarTxt"></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
 
     <div class="panel" id="panel-pending">
       <div id="pendingList"></div>
@@ -604,6 +622,8 @@ function unlockApp(){
   document.getElementById('app').style.display='block';
   if(location.hash==='#pending') setTab('pending');
   startListening();
+  watchReviewRequests();
+  if(location.hash==='#reviews') openPendingReviews();
   syncPushSubscription();
 }
 
@@ -774,7 +794,8 @@ async function sendTestPush(){
 }
 if('serviceWorker' in navigator){
   navigator.serviceWorker.addEventListener('message',(e)=>{
-    if(e.data && e.data.type==='open-tab' && e.data.tab) setTab(e.data.tab);
+    if(e.data && e.data.type==='open-tab' && e.data.tab==='reviews') openPendingReviews();
+    else if(e.data && e.data.type==='open-tab' && e.data.tab) setTab(e.data.tab);
   });
 }
 
@@ -1630,11 +1651,11 @@ function gmIsOpen(){ return !!document.getElementById('gmList'); }
 function renderGalleryCard(){
   const el=document.getElementById('galleryCardInfo');
   if(!el) return;
-  el.textContent = galleryItems===null
+  el.textContent = (pendingReviews&&pendingReviews.length?`⭐ ${countOf(pendingReviews.length,'המלצה אחת מחכה','המלצות מחכות')} לאישור · `:'')+(galleryItems===null
     ? (galleryLoading?'טוען...':'לא הצליח לטעון')
     : galleryItems.length
       ? `${countOf(galleryItems.length,'פריט אחד','פריטים')} · ${countOf(mediaGroups().length,'קטגוריה אחת','קטגוריות')}${reviewItems&&reviewItems.length?` · ${countOf(reviewItems.length,'המלצה אחת','המלצות')}`:''}${storageUsed!==null?` · ${fmtBytes(storageUsed)} באחסון`:''}`
-      : 'עוד אין תמונות באתר';
+      : 'עוד אין תמונות באתר');
   refreshUsage();
 }
 /* how much of Firebase Storage the gallery takes: the sizes of the files its items point to (each file's size is
@@ -1720,7 +1741,7 @@ function renderGalleryManager(){
   tabs.hidden=!!gmSel;
   tabs.innerHTML=`<div class="gm-tabs-in">
     <button type="button" aria-pressed="${gmTab==='gallery'}" onclick="setGmTab('gallery')">🖼️ גלריה${ready?` <span>${galleryItems.length}</span>`:''}</button>
-    <button type="button" aria-pressed="${gmTab==='reviews'}" onclick="setGmTab('reviews')">⭐ המלצות${Array.isArray(reviewItems)?` <span>${reviewItems.length}</span>`:''}</button></div>`;
+    <button type="button" aria-pressed="${gmTab==='reviews'}" onclick="setGmTab('reviews')">⭐ המלצות${Array.isArray(reviewItems)?` <span>${reviewItems.length}</span>`:''}${pendingReviews&&pendingReviews.length?` <span class="rvp-n" title="מחכות לאישור">+${pendingReviews.length} ⏳</span>`:''}</button></div>`;
   if(gmTab==='reviews'){ renderReviewsTab(); return; }
   const act=document.getElementById('gmActions');
   act.hidden=!gmSel;
@@ -1764,10 +1785,10 @@ function setGmTab(t){ gmTab=t; renderGalleryManager(); document.getElementById('
 function renderReviewsTab(){
   const ready=Array.isArray(reviewItems);
   document.getElementById('gmActions').hidden=true;
-  document.getElementById('gmInfo').innerHTML = ready && reviewItems.length ? `
+  document.getElementById('gmInfo').innerHTML = pendingReviewsHtml() + (ready && reviewItems.length ? `
     <div class="gm-stats">${countOf(reviewItems.length,'המלצה אחת','המלצות')}</div>
     <a class="gm-view" href="/#reviews" target="_blank" rel="noopener">👁 איך זה נראה באתר</a>
-    <p class="gm-tip"><span>✏️ לחיצה: עריכה, מחיקה, ו-📌 להמלצה קבועה בדף הבית</span><span>↕️ לחיצה ארוכה וגרירה: שינוי סדר</span></p>` : '';
+    <p class="gm-tip"><span>✏️ לחיצה: עריכה, מחיקה, ו-📌 להמלצה קבועה בדף הבית</span><span>↕️ לחיצה ארוכה וגרירה: שינוי סדר</span></p>` : '');
   document.getElementById('gmMigrate').innerHTML='';
   renderUploadPanel();
   renderUsage();
@@ -1791,6 +1812,66 @@ function renderReviewsTab(){
         ? `<img src="${esc(r.thumb||r.url)}" alt="" loading="lazy" draggable="false">${r.name||r.event?`<span class="gm-cap" aria-hidden="true">${esc([r.name,r.event].filter(Boolean).join(' · '))}</span>`:''}`
         : `<span class="rv-t" aria-hidden="true"><span class="rv-q">${esc(r.text)}</span>${r.name||r.event?`<b>${esc([r.name,r.event].filter(Boolean).join(' · '))}</b>`:''}</span>`}
     </button>`).join('')}</div></section>`;
+}
+/* reviews customers sent from the site (mangalReviewRequests): shown on the site only after approval here */
+let pendingReviews=null, rvpBusy=new Set();
+async function watchReviewRequests(){
+  try{
+    const {db,collection,onSnapshot}=await fbInit();
+    onSnapshot(collection(db,'mangalReviewRequests'), snap=>{
+      pendingReviews=snap.docs.map(d=>({id:d.id, ...d.data()}))
+        .filter(r=>typeof r.text==='string' && r.text && typeof r.name==='string')
+        .sort((a,b)=>(b.createdAtMs||0)-(a.createdAtMs||0));
+      renderPendingReviews();
+    }, err=>{ console.error(err); pendingReviews=null; renderPendingReviews(); });
+  }catch(e){ console.error(e); }
+}
+function renderPendingReviews(){
+  const n=pendingReviews ? pendingReviews.length : 0;
+  const bar=document.getElementById('rvpBar');
+  if(bar){ bar.hidden=!n; document.getElementById('rvpBarTxt').textContent=`⭐ ${n===1?'המלצה חדשה מחכה':`${n} המלצות חדשות מחכות`} לאישור`; }
+  renderGalleryCard();
+  if(gmIsOpen()) renderGalleryManager();
+}
+function openPendingReviews(){
+  gmTab='reviews';
+  if(gmIsOpen()) renderGalleryManager(); else openGalleryManager();
+}
+function pendingReviewsHtml(){
+  if(!pendingReviews || !pendingReviews.length) return '';
+  const when=ms=>ms ? new Date(ms).toLocaleDateString('he-IL') : '';
+  return `<section class="rvp-sec" aria-labelledby="rvpTitle"><div class="rvp-title" id="rvpTitle">⏳ ${countOf(pendingReviews.length,'המלצה אחת מחכה','המלצות מחכות')} לאישור</div>
+    ${pendingReviews.map(r=>`<div class="rvp-item">
+      <div class="rvp-text">${esc(r.text)}</div>
+      <div class="rvp-by"><b>${esc(r.name)}</b>${r.event?` · ${esc(r.event)}`:''}${r.createdAtMs?` · נשלחה ב-${when(r.createdAtMs)}`:''}</div>
+      <div class="rvp-btns">
+        <button type="button" class="rvp-ok" onclick="approveReview('${esc(r.id)}')" ${rvpBusy.has(r.id)||!Array.isArray(reviewItems)?'disabled':''}>✓ אישור, להוסיף לאתר</button>
+        <button type="button" class="rvp-no" onclick="rejectReview('${esc(r.id)}')" ${rvpBusy.has(r.id)?'disabled':''}>🗑️ מחיקה</button>
+      </div></div>`).join('')}</section>`;
+}
+async function approveReview(id){
+  const p=(pendingReviews||[]).find(x=>x.id===id);
+  if(!p || rvpBusy.has(id)) return;
+  if(!Array.isArray(reviewItems)){ showToast('ההמלצות לא נטענו, נסו לפתוח שוב'); return; }
+  rvpBusy.add(id); renderGalleryManager();
+  try{
+    const r={id:newReviewId(), kind:'text', name:String(p.name).trim().slice(0,RV_NAME), event:String(p.event||'').trim().slice(0,RV_NAME), text:String(p.text).trim().slice(0,RV_TEXT)};
+    await saveReviews([r,...reviewItems]);
+    const {db,doc,deleteDoc}=await fbInit();
+    await deleteDoc(doc(db,'mangalReviewRequests',id));
+    showToast('ההמלצה נוספה לאתר ✓');
+  }catch(e){ console.error(e); showToast('האישור נכשל'); loadGalleryItems(); }
+  rvpBusy.delete(id); renderGalleryManager();
+}
+async function rejectReview(id){
+  if(rvpBusy.has(id) || !confirm('למחוק את ההמלצה? היא לא תופיע באתר.')) return;
+  rvpBusy.add(id); renderGalleryManager();
+  try{
+    const {db,doc,deleteDoc}=await fbInit();
+    await deleteDoc(doc(db,'mangalReviewRequests',id));
+    showToast('ההמלצה נמחקה ✓');
+  }catch(e){ console.error(e); showToast('המחיקה נכשלה'); }
+  rvpBusy.delete(id); renderGalleryManager();
 }
 function dropReview(list){
   const ids=[...list.querySelectorAll('.gm-tile')].map(t=>t.dataset.url.slice(3));

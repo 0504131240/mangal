@@ -56,6 +56,26 @@ service cloud.firestore {
       );
     }
 
+    // a review a customer sent from the site: waits here until an admin approves it (then it's copied into
+    // mangalSettings/gallery's reviews and deleted here) or deletes it
+    function validReview(d) {
+      return d.keys().hasOnly(['text', 'name', 'event', 'createdAt', 'createdAtMs'])
+        && d.text is string && d.text.size() > 0 && d.text.size() <= 600
+        && d.name is string && d.name.size() > 0 && d.name.size() <= 40
+        && optionalText(d.event, 40)
+        && d.createdAt == request.time
+        && d.createdAtMs is int;
+    }
+    match /mangalReviewRequests/{id} {
+      allow create: if validReview(request.resource.data);
+      allow get: if isAdmin() || justSubmitted();
+      allow list, delete: if isAdmin();
+      allow update: if justSubmitted()
+        && !('notifiedAtMs' in resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['notifiedAtMs'])
+        && request.resource.data.notifiedAtMs is int;
+    }
+
     // public: the gallery shown on the site, push subscriptions (a subscription can only receive pushes
     // signed with the server's private VAPID key), and the upcoming events' dates for the day-before
     // reminder (date, time, size and level only, no names or phones)

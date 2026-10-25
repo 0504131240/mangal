@@ -859,11 +859,13 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
       <h4>איפה המידע נשמר ומי רואה אותו</h4>
       <p>הבקשות נשמרות במסד נתונים של Google Firebase, בשרתים שעשויים להיות מחוץ לישראל. הגישה אליהן מוגבלת לחשבונות הניהול של העסק בלבד, שמוגנים בכניסה עם חשבון Google. אנחנו לא מוכרים ולא מעבירים את המידע לאחרים, חוץ מספקי השירות שנחוצים להפעלת האתר (Google, ו-Vercel שמארחת את האתר), או אם החוק מחייב.</p>
       <p>אם ביקשתם פרטים על ספא או מסאז', נעביר לספא או למסאז'יסט שעובדים איתנו רק את מה שנחוץ כדי לתאם: תאריך, שעה, מיקום וגודל הקבוצה, ואת השם והטלפון רק אם הם נחוצים לתיאום.</p>
+      <h4>סטטיסטיקה של כניסות לאתר</h4>
+      <p>כדי לדעת איך אנשים מגיעים לאתר, אנחנו סופרים כניסות באופן כללי: מאיפה הגיעו (למשל גוגל או אינסטגרם), אזור משוער בארץ לפי כתובת האינטרנט, סוג המכשיר (טלפון או מחשב), ואילו חלקים באתר נפתחו. נשמרים רק מספרים כלליים לכל יום. לא נשמרים שם, טלפון או כתובת האינטרנט, ואי אפשר לדעת מהם מי נכנס.</p>
       <h4>כמה זמן נשמר המידע</h4>
       <p>כל עוד הוא נחוץ לטיפול באירוע, לרישום החשבונות ולעמידה בדרישות החוק. אחר כך אפשר לבקש שנמחק אותו.</p>
       <h4>הזכויות שלכם</h4>
       <p>לפי חוק הגנת הפרטיות, אפשר לבקש לעיין במידע שלכם, לתקן אותו או למחוק אותו. פנו לדודי בטלפון <a href="tel:0523359599">052-335-9599</a> או ב<a href="https://wa.me/972527626562" target="_blank" rel="noopener">וואטסאפ<span class="sr-only"> (נפתח בחלון חדש)</span></a>.</p>
-      <p style="margin-top:12px;font-size:12.5px;color:var(--text3)">המדיניות עודכנה ב-9 באוקטובר 2026.</p>
+      <p style="margin-top:12px;font-size:12.5px;color:var(--text3)">המדיניות עודכנה ב-25 באוקטובר 2026.</p>
     </div>
   </div>
 </div>
@@ -943,7 +945,7 @@ function renderReviews(){
       <img src="${escHtml(r.thumb||r.url)}" alt="" loading="lazy">${reviewBy(r)}</button></figure>`).join('')
     : '<p class="gallery-empty">ההמלצות יעלו כאן בקרוב</p>';
 }
-function openReviewsModal(){ if(!reviewsOpened){ reviewsOpened=true; renderReviews(); } openDialog('reviewsModalBg'); }
+function openReviewsModal(){ trackAct('reviews'); if(!reviewsOpened){ reviewsOpened=true; renderReviews(); } openDialog('reviewsModalBg'); }
 function closeReviewsModal(){ closeDialog('reviewsModalBg'); }
 /* the small windows on the home buttons: a random photo / review, changing every few seconds */
 const peeks={};
@@ -1338,12 +1340,12 @@ addEventListener('popstate',()=>{
   else if(topId==='menusModalBg' && activeMenuTab) setMenuTab(null);
   else closeDialog(topId);
 });
-function openGalleryModal(){ galleryOpened=true; galAlbum=null; renderGallery(); openDialog('galleryModalBg'); }
+function openGalleryModal(){ trackAct('gallery'); galleryOpened=true; galAlbum=null; renderGallery(); openDialog('galleryModalBg'); }
 function closeGalleryModal(){ closeDialog('galleryModalBg'); }
-function openMenusModal(){ activeMenuTab=null; renderMenus(); openDialog('menusModalBg'); }
+function openMenusModal(){ trackAct('menus'); activeMenuTab=null; renderMenus(); openDialog('menusModalBg'); }
 function closeMenusModal(){ closeDialog('menusModalBg'); }
-function openBookModal(){ openDialog('bookModalBg'); }
-function openMassageModal(){ openDialog('massageModalBg'); }
+function openBookModal(){ trackAct('book'); openDialog('bookModalBg'); }
+function openMassageModal(){ trackAct('massage'); openDialog('massageModalBg'); }
 function closeBookModal(){ closeDialog('bookModalBg'); }
 document.addEventListener('keydown',(e)=>{
   if(lightboxIndex>=0 && !e.altKey && !e.ctrlKey && !e.metaKey){
@@ -1418,7 +1420,61 @@ function saveContact(e){
       ]
     }]})
   }).catch(()=>{});
+  // once a day per browser: where they came from and the device; the server adds the area (mangalVisitInfo/{day})
+  if(newVisitor){
+    fetch('/api/visit',{method:'POST',headers:{'content-type':'application/json'},keepalive:true,
+      body:JSON.stringify({src:visitSource(), dev:visitDevice()})}).catch(()=>{});
+  }
 })();
+// where the visitor came from: a ?src= tag on the link, the app it was opened in, or the site that linked here
+function visitSource(){
+  const tag=(new URLSearchParams(location.search).get('src')||'').toLowerCase();
+  if(['wa','ig','fb','search','tiktok','other'].includes(tag)) return tag;
+  const ua=navigator.userAgent;
+  if(/Instagram/i.test(ua)) return 'ig';
+  if(/FBAN|FBAV|FB_IAB|FBIOS/i.test(ua)) return 'fb';
+  if(/WhatsApp/i.test(ua)) return 'wa';
+  if(/musical_ly|BytedanceWebview|TikTok/i.test(ua)) return 'tiktok';
+  let host=''; try{ host=new URL(document.referrer).hostname.replace(/^www\./,''); }catch(e){}
+  if(!host || host===location.hostname) return 'direct';
+  if(/whatsapp/.test(host)) return 'wa';
+  if(/instagram/.test(host)) return 'ig';
+  if(/facebook|(^|\.)fb\.(com|me)$/.test(host)) return 'fb';
+  if(/tiktok/.test(host)) return 'tiktok';
+  if(/(^|\.)(google|bing|yahoo|duckduckgo|yandex)\./.test(host)) return 'search';
+  return 'other';
+}
+function visitDevice(){
+  const ua=navigator.userAgent;
+  if(/iPad|Tablet/i.test(ua) || (/Android/i.test(ua) && !/Mobile/i.test(ua)) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints>1)) return 'tablet';
+  return /Mobi|iPhone|Android/i.test(ua) ? 'mobile' : 'desktop';
+}
+// what visitors did: each action counts once per browser per day (mangalVisitInfo/{day}, act_*)
+const VISIT_ACTS=['menus','gallery','reviews','massage','book','bookStart','bookSent','wa','call','contact'];
+function trackAct(a){
+  if(!VISIT_ACTS.includes(a) || /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || navigator.webdriver) return;
+  const day=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jerusalem'}).format(new Date());
+  try{
+    const seen=JSON.parse(localStorage.getItem('mangalActs')||'{}');
+    const list=seen.day===day && Array.isArray(seen.acts) ? seen.acts : [];
+    if(list.includes(a)) return;
+    localStorage.setItem('mangalActs',JSON.stringify({day,acts:[...list,a]}));
+  }catch(e){}
+  const base='projects/mangal-b11fe/databases/(default)/documents';
+  fetch(`https://firestore.googleapis.com/v1/${base}:commit?key=${firebaseConfig.apiKey}`,{
+    method:'POST', headers:{'Content-Type':'application/json'}, keepalive:true,
+    body:JSON.stringify({writes:[{update:{name:`${base}/mangalVisitInfo/${day}`,fields:{}},updateMask:{fieldPaths:[]},
+      updateTransforms:[{fieldPath:'act_'+a,increment:{integerValue:'1'}}]}]})
+  }).catch(()=>{});
+}
+// WhatsApp / phone / save-contact taps anywhere on the page
+document.addEventListener('click',e=>{
+  const a=e.target.closest && e.target.closest('a[href]'); if(!a) return;
+  const h=a.getAttribute('href')||'';
+  if(/^https:\/\/wa\.me\/972527626562/.test(h)) trackAct('wa');
+  else if(/^tel:/.test(h)) trackAct('call');
+  else if(/dudi-bbq\.vcf/.test(h)) trackAct('contact');
+},true);
 
 let _fb=null;
 async function fbInit(){
@@ -1449,6 +1505,8 @@ function updatePrepNote(){
   document.getElementById('prepTime').textContent=txt;
 }
 
+// started filling the booking form
+document.getElementById('bookForm').addEventListener('input',()=>trackAct('bookStart'),{once:true});
 document.getElementById('bookForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
   const errEl=document.getElementById('formErr');
@@ -1498,6 +1556,7 @@ document.getElementById('bookForm').addEventListener('submit', async (e)=>{
     document.getElementById('doneDate').textContent=new Date(date).toLocaleDateString('he-IL');
     document.getElementById('doneWa').href=`https://wa.me/${BUSINESS.whatsapp}?text=${encodeURIComponent(`היי דודי! שלחתי עכשיו בקשה לבדיקת זמינות לתאריך ${new Date(date).toLocaleDateString('he-IL')} (${name}) 🔥`)}`;
     document.getElementById('formDone').style.display='block';
+    trackAct('bookSent');
     document.getElementById('doneTitle').focus();
   }catch(err){
     console.error(err);

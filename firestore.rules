@@ -110,6 +110,38 @@ service cloud.firestore {
         && request.resource.data.devices - resource.data.devices in [0, 1];
     }
 
+    // what visitors did and where they came from, as counts per day (mangalVisitInfo/{Israel date}): written by
+    // index.html (act_*) and api/visit.js (src_*, dev_*, area_*); each write adds 1 to at most 3 known counters
+    function visitKeys() {
+      return [
+        'src_direct', 'src_wa', 'src_ig', 'src_fb', 'src_search', 'src_tiktok', 'src_other',
+        'dev_mobile', 'dev_tablet', 'dev_desktop', 'area_jm', 'area_ta', 'area_ha', 'area_m',
+        'area_z', 'area_d', 'area_ys', 'area_abroad', 'area_unknown', 'act_menus', 'act_gallery',
+        'act_reviews', 'act_massage', 'act_book', 'act_bookStart', 'act_bookSent', 'act_wa',
+        'act_call', 'act_contact'
+      ];
+    }
+    function prevCount(k) {
+      return resource == null ? 0 : resource.data.get(k, 0);
+    }
+    function bumped(k) {
+      return !(k in request.resource.data) || (request.resource.data[k] is int
+        && (request.resource.data[k] == prevCount(k) || request.resource.data[k] == prevCount(k) + 1));
+    }
+    match /mangalVisitInfo/{day} {
+      allow read: if isAdmin();
+      allow create, update: if day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && request.resource.data.keys().hasOnly(visitKeys())
+        && request.resource.data.diff(resource == null ? {} : resource.data).affectedKeys().size() <= 3
+        && bumped('src_direct') && bumped('src_wa') && bumped('src_ig') && bumped('src_fb') &&
+        bumped('src_search') && bumped('src_tiktok') && bumped('src_other') && bumped('dev_mobile') &&
+        bumped('dev_tablet') && bumped('dev_desktop') && bumped('area_jm') && bumped('area_ta') &&
+        bumped('area_ha') && bumped('area_m') && bumped('area_z') && bumped('area_d') && bumped('area_ys') &&
+        bumped('area_abroad') && bumped('area_unknown') && bumped('act_menus') && bumped('act_gallery') &&
+        bumped('act_reviews') && bumped('act_massage') && bumped('act_book') && bumped('act_bookStart') &&
+        bumped('act_bookSent') && bumped('act_wa') && bumped('act_call') && bumped('act_contact');
+    }
+
     match /{path=**} {
       allow read, write: if false;
     }

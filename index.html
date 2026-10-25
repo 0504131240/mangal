@@ -1425,11 +1425,9 @@ function saveContact(e){
   });
   // security rules from before weekNew / monthNew existed refuse them; then count the visit without them
   send(true).then(r=>{ if(r.status===403) return send(false); }).catch(()=>{});
-  // once a month per browser: where they came from and the device; the server adds the area (mangalVisitInfo/{month})
-  if(newMonth){
-    fetch('/api/visit',{method:'POST',headers:{'content-type':'application/json'},keepalive:true,
-      body:JSON.stringify({src:visitSource(), dev:visitDevice()})}).catch(()=>{});
-  }
+  // every visit: where it came from and the device; the server adds the area (mangalVisitInfo/{month})
+  fetch('/api/visit',{method:'POST',headers:{'content-type':'application/json'},keepalive:true,
+    body:JSON.stringify({src:visitSource(), dev:visitDevice()})}).catch(()=>{});
 })();
 // where the visitor came from: a ?src= tag on the link, the app it was opened in, or the site that linked here
 function visitSource(){
@@ -1454,17 +1452,14 @@ function visitDevice(){
   if(/iPad|Tablet/i.test(ua) || (/Android/i.test(ua) && !/Mobile/i.test(ua)) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints>1)) return 'tablet';
   return /Mobi|iPhone|Android/i.test(ua) ? 'mobile' : 'desktop';
 }
-// what visitors did: each action counts once per browser per month (mangalVisitInfo/{month}, act_*)
+// what visitors did: each action counts once per visit (page load), so a second visit counts again (mangalVisitInfo/{month}, act_*)
+const actsDone=new Set();
 const VISIT_ACTS=['menus','gallery','reviews','massage','book','bookStart','bookSent','wa','call','contact'];
 function trackAct(a){
   if(!VISIT_ACTS.includes(a) || /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || navigator.webdriver) return;
+  if(actsDone.has(a)) return;
+  actsDone.add(a);
   const month=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jerusalem'}).format(new Date()).slice(0,7);
-  try{
-    const seen=JSON.parse(localStorage.getItem('mangalActs')||'{}');
-    const list=seen.month===month && Array.isArray(seen.acts) ? seen.acts : [];
-    if(list.includes(a)) return;
-    localStorage.setItem('mangalActs',JSON.stringify({month,acts:[...list,a]}));
-  }catch(e){}
   const base='projects/mangal-b11fe/databases/(default)/documents';
   fetch(`https://firestore.googleapis.com/v1/${base}:commit?key=${firebaseConfig.apiKey}`,{
     method:'POST', headers:{'Content-Type':'application/json'}, keepalive:true,

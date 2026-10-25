@@ -880,14 +880,14 @@ function renderStats(){
     <div class="stats-note">כניסה = כל פתיחה של האתר. מכשירים שונים = כמה טלפונים ומחשבים נכנסו בתקופה, כל אחד נספר פעם אחת גם אם נכנס כל יום (לפי הדפדפן, כך שמי שגולש משני דפדפנים או מנקה את הדפדפן נספר שוב).${firstDay?`<br>הספירה התחילה ב-${fmtDate(firstDay)}.`:'<br>עוד לא נספרו כניסות.'}</div>
     ${visitInfoHtml()}`;
 }
-/* where visitors came from, their area and device, and what they did on the site: each device counted once a month */
+/* where visits came from, their area and device, and what was done on the site: every visit counts (repeat visits too) */
 const VI_GROUPS=[
-  {p:'src_', t:'מאיפה הגיעו', s:'מכשירים שונים', rows:{direct:'ישירה / וואטסאפ',search:'גוגל וחיפוש',ig:'אינסטגרם',fb:'פייסבוק',wa:'וואטסאפ (קישור מסומן)',tiktok:'טיקטוק',other:'אתרים אחרים'},
+  {p:'src_', t:'מאיפה הגיעו', s:'כניסות', rows:{direct:'ישירה / וואטסאפ',search:'גוגל וחיפוש',ig:'אינסטגרם',fb:'פייסבוק',wa:'וואטסאפ (קישור מסומן)',tiktok:'טיקטוק',other:'אתרים אחרים'},
     tip:'וואטסאפ בדרך כלל לא מגלה שהקישור נפתח ממנו, ולכן רוב הכניסות מוואטסאפ נספרות כ"ישירה". קישור עם ‎?src=wa‎ בסוף נספר כוואטסאפ.'},
-  {p:'area_', t:'אזור', s:'מכשירים שונים', rows:{jm:'ירושלים',ta:'תל אביב',m:'מרכז',ha:'חיפה',z:'צפון',d:'דרום',ys:'יהודה ושומרון',abroad:'חו"ל',unknown:'לא ידוע'},
+  {p:'area_', t:'אזור', s:'כניסות', rows:{jm:'ירושלים',ta:'תל אביב',m:'מרכז',ha:'חיפה',z:'צפון',d:'דרום',ys:'יהודה ושומרון',abroad:'חו"ל',unknown:'לא ידוע'},
     tip:'האזור משוער לפי כתובת האינטרנט ולא תמיד מדויק (למשל בגלישה מהסלולר).'},
-  {p:'dev_', t:'מכשיר', s:'מכשירים שונים', rows:{mobile:'טלפון',desktop:'מחשב',tablet:'טאבלט'}},
-  {p:'act_', t:'מה עשו באתר', s:'כמה מכשירים', rows:{menus:'פתחו את התפריטים',gallery:'פתחו את הגלריה',reviews:'פתחו את ההמלצות',massage:"פתחו את הספא / מסאז'",book:'פתחו את בדיקת הזמינות',bookStart:'התחילו למלא את הטופס',bookSent:'שלחו בקשה',wa:'לחצו על וואטסאפ',call:'לחצו על התקשרות',contact:'שמרו באנשי הקשר'}, keep:true},
+  {p:'dev_', t:'מכשיר', s:'כניסות', rows:{mobile:'טלפון',desktop:'מחשב',tablet:'טאבלט'}},
+  {p:'act_', t:'מה עשו באתר', s:'בכמה כניסות', rows:{menus:'פתחו את התפריטים',gallery:'פתחו את הגלריה',reviews:'פתחו את ההמלצות',massage:"פתחו את הספא / מסאז'",book:'פתחו את בדיקת הזמינות',bookStart:'התחילו למלא את הטופס',bookSent:'שלחו בקשה',wa:'לחצו על וואטסאפ',call:'לחצו על התקשרות',contact:'שמרו באנשי הקשר'}, keep:true},
 ];
 function setViRange(r){ viRange=r; renderStats(); }
 function visitInfoHtml(){
@@ -908,11 +908,11 @@ function visitInfoHtml(){
       if(!g.keep) rows=rows.filter(r=>r.n).sort((a,b)=>b.n-a.n);
       const sum=Object.keys(g.rows).reduce((a,k)=>a+(tot[g.p+k]||0),0);
       const max=Math.max(1,...rows.map(r=>r.n));
-      // actions are shown as a share of all the visitors in the period (counted by where they came from)
+      // actions are shown as a share of all the visits in the period (counted by where they came from)
       const base=g.p==='act_' ? Object.keys(VI_GROUPS[0].rows).reduce((a,k)=>a+(tot['src_'+k]||0),0) : sum;
       return `<div class="vi-card"><h4>${g.t}<small>${g.s}</small></h4>${!sum?'<div class="vi-empty">עוד אין נתונים לתקופה הזו</div>':rows.map(r=>`<div class="vi-row"><span>${r.l}</span><div><div class="vi-bar" style="width:${Math.round(r.n/max*100)}%"></div></div><b dir="ltr">${r.n.toLocaleString()}${base?`<small>${Math.round(r.n/base*100)}%</small>`:''}</b></div>`).join('')}${g.tip&&sum?`<div class="vi-tip">${g.tip}</div>`:''}</div>`;
     }).join('')}
-    <div class="stats-note">כל מכשיר נספר פעם אחת בחודש, גם אם נכנס הרבה פעמים. האחוזים הם מתוך המכשירים שנכנסו באותו חודש.${viRange==='all'?'<br>ב"כל החודשים" מכשיר שנכנס בכמה חודשים נספר בכל אחד מהם.':''}${first?`<br>הנתונים האלה נאספים מ${monthName(first)}.`:'<br>הנתונים יתחילו להצטבר מהכניסה הבאה לאתר.'}</div></div>`;
+    <div class="stats-note">כל כניסה נספרת, גם כניסה שנייה ושלישית של אותו אדם. ב"מה עשו באתר": בכמה כניסות עשו את זה (פעם אחת לכל כניסה). האחוזים הם מתוך הכניסות בתקופה.${first?`<br>הנתונים האלה נאספים מ${monthName(first)}.`:'<br>הנתונים יתחילו להצטבר מהכניסה הבאה לאתר.'}</div></div>`;
 }
 let boardFilter='upcoming';
 function setBoardFilter(f){

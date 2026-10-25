@@ -1,4 +1,5 @@
-// Counts a visitor's source, device and area for the admin's "כניסות" tab (mangalVisitInfo/{Israel date}).
+// Counts a visitor's source, device and area for the admin's "כניסות" tab (mangalVisitInfo/{Israel month}),
+// sent once a month per browser.
 // The area comes from Vercel's location headers (by the visitor's internet address); only the counts are saved.
 const KEY = 'AIzaSyA5Qp3W1dcpd4ncnTyB68nMueXtHbAoLAk';
 const DB = 'projects/mangal-b11fe/databases/(default)/documents';
@@ -21,7 +22,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'method not allowed' });
   const { src, dev } = req.body || {};
   if (!SOURCES.includes(src) || !DEVICES.includes(dev)) return res.status(400).json({ error: 'bad input' });
-  const day = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date());
+  const month = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date()).slice(0, 7);
   const inc = (f) => ({ fieldPath: f, increment: { integerValue: '1' } });
   try {
     const r = await fetch(`https://firestore.googleapis.com/v1/${DB}:commit?key=${KEY}`, {
@@ -29,7 +30,7 @@ export default async function handler(req, res) {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         writes: [{
-          update: { name: `${DB}/mangalVisitInfo/${day}`, fields: {} },
+          update: { name: `${DB}/mangalVisitInfo/${month}`, fields: {} },
           updateMask: { fieldPaths: [] },
           updateTransforms: [inc(`src_${src}`), inc(`dev_${dev}`), inc(`area_${area(req.headers)}`)],
         }],

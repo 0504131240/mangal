@@ -860,7 +860,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
       <p>הבקשות נשמרות במסד נתונים של Google Firebase, בשרתים שעשויים להיות מחוץ לישראל. הגישה אליהן מוגבלת לחשבונות הניהול של העסק בלבד, שמוגנים בכניסה עם חשבון Google. אנחנו לא מוכרים ולא מעבירים את המידע לאחרים, חוץ מספקי השירות שנחוצים להפעלת האתר (Google, ו-Vercel שמארחת את האתר), או אם החוק מחייב.</p>
       <p>אם ביקשתם פרטים על ספא או מסאז', נעביר לספא או למסאז'יסט שעובדים איתנו רק את מה שנחוץ כדי לתאם: תאריך, שעה, מיקום וגודל הקבוצה, ואת השם והטלפון רק אם הם נחוצים לתיאום.</p>
       <h4>סטטיסטיקה של כניסות לאתר</h4>
-      <p>כדי לדעת איך אנשים מגיעים לאתר, אנחנו סופרים כניסות באופן כללי: מאיפה הגיעו (למשל גוגל או אינסטגרם), אזור משוער בארץ לפי כתובת האינטרנט, סוג המכשיר (טלפון או מחשב), ואילו חלקים באתר נפתחו. נשמרים רק מספרים כלליים לכל יום. לא נשמרים שם, טלפון או כתובת האינטרנט, ואי אפשר לדעת מהם מי נכנס.</p>
+      <p>כדי לדעת איך אנשים מגיעים לאתר, אנחנו סופרים כניסות באופן כללי: מאיפה הגיעו (למשל גוגל או אינסטגרם), אזור משוער בארץ לפי כתובת האינטרנט, סוג המכשיר (טלפון או מחשב), ואילו חלקים באתר נפתחו. נשמרים רק מספרים כלליים לכל יום ולכל חודש. לא נשמרים שם, טלפון או כתובת האינטרנט, ואי אפשר לדעת מהם מי נכנס.</p>
       <h4>כמה זמן נשמר המידע</h4>
       <p>כל עוד הוא נחוץ לטיפול באירוע, לרישום החשבונות ולעמידה בדרישות החוק. אחר כך אפשר לבקש שנמחק אותו.</p>
       <h4>הזכויות שלכם</h4>
@@ -1401,27 +1401,32 @@ function saveContact(e){
 (function countVisit(){
   if(/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || navigator.webdriver) return;
   const day=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jerusalem'}).format(new Date());
-  let newVisitor=true, newDevice=true;
+  // first visit of this browser today / this week (from Sunday) / this month / ever, so the admin can count each device once per period
+  const weekStart=(d=>{ const t=new Date(d+'T00:00:00Z'); t.setUTCDate(t.getUTCDate()-t.getUTCDay()); return t.toISOString().slice(0,10); })(day);
+  let newVisitor=true, newDevice=true, newWeek=true, newMonth=true;
   try{
-    newVisitor=localStorage.getItem('mangalSeenDay')!==day;
-    newDevice=!localStorage.getItem('mangalSeenDay');
+    const last=localStorage.getItem('mangalSeenDay')||'';
+    newVisitor=last!==day;
+    newDevice=!last;
+    newWeek=!last || last<weekStart;
+    newMonth=!last || last.slice(0,7)!==day.slice(0,7);
     localStorage.setItem('mangalSeenDay',day);
   }catch(e){}
   const base='projects/mangal-b11fe/databases/(default)/documents';
-  fetch(`https://firestore.googleapis.com/v1/${base}:commit?key=${firebaseConfig.apiKey}`,{
+  const inc=(f,on)=>({fieldPath:f,increment:{integerValue:on?'1':'0'}});
+  const send=withPeriods=>fetch(`https://firestore.googleapis.com/v1/${base}:commit?key=${firebaseConfig.apiKey}`,{
     method:'POST', headers:{'Content-Type':'application/json'}, keepalive:true,
     body:JSON.stringify({writes:[{
       update:{name:`${base}/mangalStats/${day}`,fields:{}},
       updateMask:{fieldPaths:[]},
-      updateTransforms:[
-        {fieldPath:'views',increment:{integerValue:'1'}},
-        {fieldPath:'visitors',increment:{integerValue:newVisitor?'1':'0'}},
-        {fieldPath:'devices',increment:{integerValue:newDevice?'1':'0'}}
-      ]
+      updateTransforms:[inc('views',true),inc('visitors',newVisitor),inc('devices',newDevice),
+        ...(withPeriods?[inc('weekNew',newWeek),inc('monthNew',newMonth)]:[])]
     }]})
-  }).catch(()=>{});
-  // once a day per browser: where they came from and the device; the server adds the area (mangalVisitInfo/{day})
-  if(newVisitor){
+  });
+  // security rules from before weekNew / monthNew existed refuse them; then count the visit without them
+  send(true).then(r=>{ if(r.status===403) return send(false); }).catch(()=>{});
+  // once a month per browser: where they came from and the device; the server adds the area (mangalVisitInfo/{month})
+  if(newMonth){
     fetch('/api/visit',{method:'POST',headers:{'content-type':'application/json'},keepalive:true,
       body:JSON.stringify({src:visitSource(), dev:visitDevice()})}).catch(()=>{});
   }
@@ -1449,21 +1454,21 @@ function visitDevice(){
   if(/iPad|Tablet/i.test(ua) || (/Android/i.test(ua) && !/Mobile/i.test(ua)) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints>1)) return 'tablet';
   return /Mobi|iPhone|Android/i.test(ua) ? 'mobile' : 'desktop';
 }
-// what visitors did: each action counts once per browser per day (mangalVisitInfo/{day}, act_*)
+// what visitors did: each action counts once per browser per month (mangalVisitInfo/{month}, act_*)
 const VISIT_ACTS=['menus','gallery','reviews','massage','book','bookStart','bookSent','wa','call','contact'];
 function trackAct(a){
   if(!VISIT_ACTS.includes(a) || /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || navigator.webdriver) return;
-  const day=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jerusalem'}).format(new Date());
+  const month=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jerusalem'}).format(new Date()).slice(0,7);
   try{
     const seen=JSON.parse(localStorage.getItem('mangalActs')||'{}');
-    const list=seen.day===day && Array.isArray(seen.acts) ? seen.acts : [];
+    const list=seen.month===month && Array.isArray(seen.acts) ? seen.acts : [];
     if(list.includes(a)) return;
-    localStorage.setItem('mangalActs',JSON.stringify({day,acts:[...list,a]}));
+    localStorage.setItem('mangalActs',JSON.stringify({month,acts:[...list,a]}));
   }catch(e){}
   const base='projects/mangal-b11fe/databases/(default)/documents';
   fetch(`https://firestore.googleapis.com/v1/${base}:commit?key=${firebaseConfig.apiKey}`,{
     method:'POST', headers:{'Content-Type':'application/json'}, keepalive:true,
-    body:JSON.stringify({writes:[{update:{name:`${base}/mangalVisitInfo/${day}`,fields:{}},updateMask:{fieldPaths:[]},
+    body:JSON.stringify({writes:[{update:{name:`${base}/mangalVisitInfo/${month}`,fields:{}},updateMask:{fieldPaths:[]},
       updateTransforms:[{fieldPath:'act_'+a,increment:{integerValue:'1'}}]}]})
   }).catch(()=>{});
 }

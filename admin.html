@@ -824,19 +824,21 @@ function setTab(t){
 }
 
 /* ===== visit counter (mangalStats/{Israel date}: views, visitors, devices — written by index.html) ===== */
-let statsDays=null, statsStarted=false, visitInfo=null, viRange=7;
+let statsDays=null, statsStarted=false, visitInfo=null, viRange='this';
 async function startStats(){
   if(statsStarted) return;
   statsStarted=true;
   const {db,collection,onSnapshot}=await fbInit();
   onSnapshot(collection(db,'mangalVisitInfo'), (snap)=>{
     visitInfo={};
-    snap.docs.forEach(d=>{ const x=d.data(), o={}; for(const k in x){ const n=Number(x[k]); if(Number.isFinite(n) && n>0) o[k]=n; } visitInfo[d.id]=o; });
+    // one document per month (ids like 2026-10); daily ones from the first version are skipped
+    snap.docs.filter(d=>/^\d{4}-\d{2}$/.test(d.id)).forEach(d=>{ const x=d.data(), o={}; for(const k in x){ const n=Number(x[k]); if(Number.isFinite(n) && n>0) o[k]=n; } visitInfo[d.id]=o; });
     renderStats();
   }, (err)=>{ console.error('visit info',err); visitInfo='denied'; renderStats(); });
   onSnapshot(collection(db,'mangalStats'), (snap)=>{
     statsDays={};
-    snap.docs.forEach(d=>{ const x=d.data(); statsDays[d.id]={views:Number(x.views||0),visitors:Number(x.visitors||0),devices:Number(x.devices||0)}; });
+    snap.docs.forEach(d=>{ const x=d.data(); statsDays[d.id]={views:Number(x.views||0),visitors:Number(x.visitors||0),devices:Number(x.devices||0),
+      weekNew:Number(x.weekNew||0),monthNew:Number(x.monthNew||0),periods:'monthNew' in x}; });
     renderStats();
   }, (err)=>{
     console.error('stats',err);
@@ -849,47 +851,58 @@ function israelDay(offset){
 }
 function renderStats(){
   const el=document.getElementById('statsWrap');
-  const ZERO={views:0,visitors:0,devices:0};
-  const add=(a,d)=>({views:a.views+d.views,visitors:a.visitors+d.visitors,devices:a.devices+d.devices});
-  const sum=(n)=>{ let t=ZERO; for(let i=0;i<n;i++) t=add(t,statsDays[israelDay(i)]||ZERO); return t; };
-  const all=Object.values(statsDays).reduce(add,ZERO);
-  // a single day shows the devices that came that day; longer ranges show the devices that came for the first time
-  const box=(label,d,day)=>`<div class="stat-box"><span>${label}</span><b>${d.views.toLocaleString()}</b><small>כניסות</small>
-    <b>${(day?d.visitors:d.devices).toLocaleString()}</b><small>${day?'מכשירים':'מכשירים חדשים'}</small></div>`;
-  const last=[]; for(let i=0;i<14;i++){ const k=israelDay(i); last.push({k,...(statsDays[k]||ZERO)}); }
+  const today=israelDay(0);
+  const weekStart=(d=>{ const t=new Date(d+'T00:00:00Z'); t.setUTCDate(t.getUTCDate()-t.getUTCDay()); return t.toISOString().slice(0,10); })(today);
+  const monthStart=today.slice(0,8)+'01';
+  const days=Object.keys(statsDays).sort();
+  const sumFrom=(from,f)=>days.filter(k=>k>=from && k<=today).reduce((a,k)=>a+statsDays[k][f],0);
+  const all=days.reduce((a,k)=>({views:a.views+statsDays[k].views,devices:a.devices+statsDays[k].devices}),{views:0,devices:0});
+  // the week / month device counts exist since the site started sending them; before that they'd be too low
+  const countedFrom=days.find(k=>statsDays[k].periods);
+  const partial=from=>!countedFrom || countedFrom>from;
+  const day=k=>statsDays[k]||{views:0,visitors:0};
+  const box=(label,views,devs,note)=>`<div class="stat-box"><span>${label}</span><b>${views.toLocaleString()}</b><small>כניסות</small>
+    <b>${devs.toLocaleString()}</b><small>מכשירים שונים${note?' *':''}</small></div>`;
+  const wPart=partial(weekStart), mPart=partial(monthStart);
+  const last=[]; for(let i=0;i<14;i++){ const k=israelDay(i); last.push({k,...day(k)}); }
   const max=Math.max(1,...last.map(d=>d.views));
-  const firstDay=Object.keys(statsDays).sort()[0];
+  const firstDay=days[0];
   el.innerHTML=`<div class="stat-box" style="margin-bottom:10px"><span>סה"כ מאז שהספירה התחילה</span>
       <b>${all.views.toLocaleString()}</b><small>כניסות</small><b>${all.devices.toLocaleString()}</b><small>מכשירים שונים</small></div>
     <div class="stats-grid">
-      ${box('היום',sum(1),true)}${box('אתמול',statsDays[israelDay(1)]||ZERO,true)}
-      ${box('7 ימים אחרונים',sum(7))}${box('30 ימים אחרונים',sum(30))}
+      ${box('היום',day(today).views,day(today).visitors)}${box('אתמול',day(israelDay(1)).views,day(israelDay(1)).visitors)}
+      ${box('השבוע (מיום א\')',sumFrom(weekStart,'views'),sumFrom(weekStart,'weekNew'),wPart)}${box('החודש',sumFrom(monthStart,'views'),sumFrom(monthStart,'monthNew'),mPart)}
     </div>
-    <div class="stats-days"><h3>כניסות ב-14 הימים האחרונים (ובסוגריים: מכשירים)</h3>
+    ${wPart||mPart?`<div class="stats-note" style="margin:-6px 0 14px">* הספירה של מכשירים שונים בשבוע ובחודש התחילה ${countedFrom?`ב-${fmtDate(countedFrom)}`:'עכשיו'}, ולכן המספר מסומן בכוכבית נמוך מהאמת עד ${wPart&&mPart?'סוף החודש':'סוף השבוע'}.</div>`:''}
+    <div class="stats-days"><h3>כניסות ב-14 הימים האחרונים (ובסוגריים: מכשירים שונים באותו יום)</h3>
       ${last.map(d=>`<div class="stat-row"><span>${new Date(d.k+'T00:00:00').toLocaleDateString('he-IL',{weekday:'short',day:'numeric',month:'numeric'})}</span><div><div class="stat-bar" style="width:${Math.round(d.views/max*100)}%"></div></div><b>${d.views} (${d.visitors})</b></div>`).join('')}
     </div>
-    <div class="stats-note">כניסה = כל פתיחה של האתר. מכשיר = טלפון או מחשב שנכנס לאתר (נספר פעם אחת, גם אם נכנס הרבה פעמים).${firstDay?`<br>הספירה התחילה ב-${fmtDate(firstDay)}.`:'<br>עוד לא נספרו כניסות.'}</div>
+    <div class="stats-note">כניסה = כל פתיחה של האתר. מכשירים שונים = כמה טלפונים ומחשבים נכנסו בתקופה, כל אחד נספר פעם אחת גם אם נכנס כל יום (לפי הדפדפן, כך שמי שגולש משני דפדפנים או מנקה את הדפדפן נספר שוב).${firstDay?`<br>הספירה התחילה ב-${fmtDate(firstDay)}.`:'<br>עוד לא נספרו כניסות.'}</div>
     ${visitInfoHtml()}`;
 }
-/* where visitors came from, their area and device (each visitor counted once a day), and what they did on the site */
+/* where visitors came from, their area and device, and what they did on the site: each device counted once a month */
 const VI_GROUPS=[
-  {p:'src_', t:'מאיפה הגיעו', s:'מבקרים', rows:{direct:'ישירה / וואטסאפ',search:'גוגל וחיפוש',ig:'אינסטגרם',fb:'פייסבוק',wa:'וואטסאפ (קישור מסומן)',tiktok:'טיקטוק',other:'אתרים אחרים'},
+  {p:'src_', t:'מאיפה הגיעו', s:'מכשירים שונים', rows:{direct:'ישירה / וואטסאפ',search:'גוגל וחיפוש',ig:'אינסטגרם',fb:'פייסבוק',wa:'וואטסאפ (קישור מסומן)',tiktok:'טיקטוק',other:'אתרים אחרים'},
     tip:'וואטסאפ בדרך כלל לא מגלה שהקישור נפתח ממנו, ולכן רוב הכניסות מוואטסאפ נספרות כ"ישירה". קישור עם ‎?src=wa‎ בסוף נספר כוואטסאפ.'},
-  {p:'area_', t:'אזור', s:'מבקרים', rows:{jm:'ירושלים',ta:'תל אביב',m:'מרכז',ha:'חיפה',z:'צפון',d:'דרום',ys:'יהודה ושומרון',abroad:'חו"ל',unknown:'לא ידוע'},
+  {p:'area_', t:'אזור', s:'מכשירים שונים', rows:{jm:'ירושלים',ta:'תל אביב',m:'מרכז',ha:'חיפה',z:'צפון',d:'דרום',ys:'יהודה ושומרון',abroad:'חו"ל',unknown:'לא ידוע'},
     tip:'האזור משוער לפי כתובת האינטרנט ולא תמיד מדויק (למשל בגלישה מהסלולר).'},
-  {p:'dev_', t:'מכשיר', s:'מבקרים', rows:{mobile:'טלפון',desktop:'מחשב',tablet:'טאבלט'}},
-  {p:'act_', t:'מה עשו באתר', s:'כמה מבקרים', rows:{menus:'פתחו את התפריטים',gallery:'פתחו את הגלריה',reviews:'פתחו את ההמלצות',massage:"פתחו את הספא / מסאז'",book:'פתחו את בדיקת הזמינות',bookStart:'התחילו למלא את הטופס',bookSent:'שלחו בקשה',wa:'לחצו על וואטסאפ',call:'לחצו על התקשרות',contact:'שמרו באנשי הקשר'}, keep:true},
+  {p:'dev_', t:'מכשיר', s:'מכשירים שונים', rows:{mobile:'טלפון',desktop:'מחשב',tablet:'טאבלט'}},
+  {p:'act_', t:'מה עשו באתר', s:'כמה מכשירים', rows:{menus:'פתחו את התפריטים',gallery:'פתחו את הגלריה',reviews:'פתחו את ההמלצות',massage:"פתחו את הספא / מסאז'",book:'פתחו את בדיקת הזמינות',bookStart:'התחילו למלא את הטופס',bookSent:'שלחו בקשה',wa:'לחצו על וואטסאפ',call:'לחצו על התקשרות',contact:'שמרו באנשי הקשר'}, keep:true},
 ];
-function setViRange(n){ viRange=n; renderStats(); }
+function setViRange(r){ viRange=r; renderStats(); }
 function visitInfoHtml(){
   const head=`<div class="vi-wrap"><h3>מאיפה הגיעו ומה עשו</h3>`;
   if(visitInfo==='denied') return head+`<div class="empty">אין הרשאה לקרוא את הנתונים. צריך לעדכן את חוקי Firestore (הקובץ firestore.rules).</div></div>`;
   if(!visitInfo) return head+`<div class="empty">טוען…</div></div>`;
-  const days=viRange ? Array.from({length:viRange},(_,i)=>israelDay(i)) : Object.keys(visitInfo);
-  const tot={}; days.forEach(d=>{ const x=visitInfo[d]; if(x) for(const k in x) tot[k]=(tot[k]||0)+x[k]; });
+  const thisMonth=israelDay(0).slice(0,7);
+  const prev=new Date(thisMonth+'-01T00:00:00Z'); prev.setUTCMonth(prev.getUTCMonth()-1);
+  const lastMonth=prev.toISOString().slice(0,7);
+  const months=viRange==='this'?[thisMonth]:viRange==='last'?[lastMonth]:Object.keys(visitInfo);
+  const tot={}; months.forEach(m=>{ const x=visitInfo[m]; if(x) for(const k in x) tot[k]=(tot[k]||0)+x[k]; });
   const first=Object.keys(visitInfo).sort()[0];
-  const ranges=[[1,'היום'],[7,'7 ימים'],[30,'30 ימים'],[0,'הכול']];
-  return head+`<div class="vi-range">${ranges.map(([n,l])=>`<button type="button" aria-pressed="${viRange===n}" onclick="setViRange(${n})">${l}</button>`).join('')}</div>
+  const monthName=m=>new Date(m+'-01T00:00:00').toLocaleDateString('he-IL',{month:'long'});
+  const ranges=[['this',`החודש (${monthName(thisMonth)})`],['last',monthName(lastMonth)],['all','כל החודשים']];
+  return head+`<div class="vi-range">${ranges.map(([n,l])=>`<button type="button" aria-pressed="${viRange===n}" onclick="setViRange('${n}')">${l}</button>`).join('')}</div>
     ${VI_GROUPS.map(g=>{
       let rows=Object.entries(g.rows).map(([k,l])=>({l,n:tot[g.p+k]||0}));
       if(!g.keep) rows=rows.filter(r=>r.n).sort((a,b)=>b.n-a.n);
@@ -899,7 +912,7 @@ function visitInfoHtml(){
       const base=g.p==='act_' ? Object.keys(VI_GROUPS[0].rows).reduce((a,k)=>a+(tot['src_'+k]||0),0) : sum;
       return `<div class="vi-card"><h4>${g.t}<small>${g.s}</small></h4>${!sum?'<div class="vi-empty">עוד אין נתונים לתקופה הזו</div>':rows.map(r=>`<div class="vi-row"><span>${r.l}</span><div><div class="vi-bar" style="width:${Math.round(r.n/max*100)}%"></div></div><b dir="ltr">${r.n.toLocaleString()}${base?`<small>${Math.round(r.n/base*100)}%</small>`:''}</b></div>`).join('')}${g.tip&&sum?`<div class="vi-tip">${g.tip}</div>`:''}</div>`;
     }).join('')}
-    <div class="stats-note">כל מבקר נספר פעם אחת ביום. האחוזים הם מתוך המבקרים בתקופה.${first?`<br>הנתונים האלה נאספים מ-${fmtDate(first)}.`:'<br>הנתונים יתחילו להצטבר מהכניסה הבאה לאתר.'}</div></div>`;
+    <div class="stats-note">כל מכשיר נספר פעם אחת בחודש, גם אם נכנס הרבה פעמים. האחוזים הם מתוך המכשירים שנכנסו באותו חודש.${viRange==='all'?'<br>ב"כל החודשים" מכשיר שנכנס בכמה חודשים נספר בכל אחד מהם.':''}${first?`<br>הנתונים האלה נאספים מ${monthName(first)}.`:'<br>הנתונים יתחילו להצטבר מהכניסה הבאה לאתר.'}</div></div>`;
 }
 let boardFilter='upcoming';
 function setBoardFilter(f){

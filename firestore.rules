@@ -93,9 +93,11 @@ service cloud.firestore {
     // visit counter: one document per day (Israel date), the site adds 1 view per page load, 1 visitor
     // the first time a browser opens it that day and 1 device the first time a browser ever opens it;
     // only admins can read the numbers
+    // weekNew / monthNew: the browser's first visit this week / this month, so each device counts once per period
     function validStats(d) {
-      return d.keys().hasOnly(['views', 'visitors', 'devices'])
-        && d.views is int && d.visitors is int && d.devices is int;
+      return d.keys().hasOnly(['views', 'visitors', 'devices', 'weekNew', 'monthNew'])
+        && d.views is int && d.visitors is int && d.devices is int
+        && d.get('weekNew', 0) is int && d.get('monthNew', 0) is int;
     }
     match /mangalStats/{day} {
       allow read: if isAdmin();
@@ -103,14 +105,18 @@ service cloud.firestore {
         && validStats(request.resource.data)
         && request.resource.data.views == 1
         && request.resource.data.visitors in [0, 1]
-        && request.resource.data.devices in [0, 1];
+        && request.resource.data.devices in [0, 1]
+        && request.resource.data.get('weekNew', 0) in [0, 1]
+        && request.resource.data.get('monthNew', 0) in [0, 1];
       allow update: if validStats(request.resource.data)
         && request.resource.data.views == resource.data.views + 1
         && request.resource.data.visitors - resource.data.visitors in [0, 1]
-        && request.resource.data.devices - resource.data.devices in [0, 1];
+        && request.resource.data.devices - resource.data.devices in [0, 1]
+        && request.resource.data.get('weekNew', 0) - resource.data.get('weekNew', 0) in [0, 1]
+        && request.resource.data.get('monthNew', 0) - resource.data.get('monthNew', 0) in [0, 1];
     }
 
-    // what visitors did and where they came from, as counts per day (mangalVisitInfo/{Israel date}): written by
+    // what visitors did and where they came from, as counts per month (mangalVisitInfo/{Israel month, e.g. 2026-10}): written by
     // index.html (act_*) and api/visit.js (src_*, dev_*, area_*); each write adds 1 to at most 3 known counters
     function visitKeys() {
       return [
@@ -128,9 +134,9 @@ service cloud.firestore {
       return !(k in request.resource.data) || (request.resource.data[k] is int
         && (request.resource.data[k] == prevCount(k) || request.resource.data[k] == prevCount(k) + 1));
     }
-    match /mangalVisitInfo/{day} {
+    match /mangalVisitInfo/{month} {
       allow read: if isAdmin();
-      allow create, update: if day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+      allow create, update: if month.matches('^[0-9]{4}-[0-9]{2}$')
         && request.resource.data.keys().hasOnly(visitKeys())
         && request.resource.data.diff(resource == null ? {} : resource.data).affectedKeys().size() <= 3
         && bumped('src_direct') && bumped('src_wa') && bumped('src_ig') && bumped('src_fb') &&

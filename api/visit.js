@@ -1,5 +1,5 @@
 // Counts a visitor's source, device and area for the admin's "כניסות" tab (mangalVisitInfo/{Israel month}),
-// sent once a month per browser.
+// sent on every visit.
 // The area comes from Vercel's location headers (by the visitor's internet address); only the counts are saved.
 const KEY = 'AIzaSyA5Qp3W1dcpd4ncnTyB68nMueXtHbAoLAk';
 const DB = 'projects/mangal-b11fe/databases/(default)/documents';

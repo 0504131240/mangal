@@ -10,15 +10,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0E0907">
-<title>BBQ · חגיגת ברבקיו משחררת</title>
-<meta name="description" content="חוויית מנגל יוקרתית שמגיעה עד אליכם. תפריטים, גלריה ובדיקת זמינות לאירוע באתר.">
+<title>דודי שוורץ · מנגל לאירועים | BBQ חגיגת ברבקיו משחררת</title>
+<meta name="description" content="דודי שוורץ, גרילמן ומנגל לאירועים: ימי הולדת, שבע ברכות, ימי גיבוש ואירועים משפחתיים. בשרים בכשרות קהילות, ציוד מקצועי ועריכה מוקפדת שמגיעים עד אליכם.">
 <!-- link preview (WhatsApp, Facebook...): without these, apps pick the transparent logo and show it cropped on black -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://mangal-belahavot.vercel.app/">
 <link rel="canonical" href="https://mangal-belahavot.vercel.app/">
 <meta property="og:site_name" content="BBQ · חגיגת ברבקיו משחררת">
-<meta property="og:title" content="BBQ · חגיגת ברבקיו משחררת">
-<meta property="og:description" content="חוויית מנגל יוקרתית שמגיעה עד אליכם. תפריטים, גלריה ובדיקת זמינות לאירוע באתר.">
+<meta property="og:title" content="דודי שוורץ · מנגל לאירועים | BBQ חגיגת ברבקיו משחררת">
+<meta property="og:description" content="דודי שוורץ, גרילמן ומנגל לאירועים: ימי הולדת, שבע ברכות, ימי גיבוש ואירועים משפחתיים. בשרים בכשרות קהילות, ציוד מקצועי ועריכה מוקפדת שמגיעים עד אליכם.">
 <meta property="og:image" content="https://mangal-belahavot.vercel.app/images/share-card.jpg">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
@@ -26,6 +26,8 @@
 <meta property="og:image:alt" content="הלוגו של BBQ חגיגת ברבקיו משחררת על רקע אש, מנגל לאירועים">
 <meta property="og:locale" content="he_IL">
 <meta name="twitter:card" content="summary_large_image">
+<!-- for search engines: who the business is -->
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LocalBusiness", "name": "BBQ · חגיגת ברבקיו משחררת", "alternateName": ["דודי שוורץ מנגל לאירועים", "דודי שוורץ גרילמן BBQ", "BBQ חגיגת ברבקיו משחררת"], "description": "דודי שוורץ, גרילמן ומנגל לאירועים: ימי הולדת, שבע ברכות, ימי גיבוש ואירועים משפחתיים. בשרים בכשרות קהילות, ציוד מקצועי ועריכה מוקפדת שמגיעים עד אליכם.", "url": "https://mangal-belahavot.vercel.app/", "telephone": "+972-52-335-9599", "image": "https://mangal-belahavot.vercel.app/images/share-card.jpg", "logo": "https://mangal-belahavot.vercel.app/images/logo-v2.png", "founder": {"@type": "Person", "name": "דודי שוורץ"}, "areaServed": {"@type": "Country", "name": "Israel"}, "knowsAbout": ["מנגל לאירועים", "גרילמן", "בשרים על האש", "קייטרינג בשרי"]}</script>
 <script>try{const a=JSON.parse(localStorage.getItem('mangalA11y')||'{}');const c=document.documentElement.classList;
 if(a.zoom)c.add('a11y-z'+a.zoom);['contrast','still','links','font','gray'].forEach(k=>a[k]&&c.add('a11y-'+k));}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -60,7 +62,7 @@ a{color:inherit}
 /* no line or panel under the header: it sits on the page background and the ad fades in below it */
 .nav{position:sticky;top:0;z-index:40}
 .nav-in{max-width:920px;margin:0 auto;padding:8px 16px;display:flex;flex-direction:column;align-items:center;gap:4px}
-.brand{display:flex;align-items:center;justify-content:center}
+.brand{display:flex;align-items:center;justify-content:center;margin:0;font-size:inherit}
 .logo-wrap{--logo:96px;position:relative;display:block;width:var(--logo);height:var(--logo)}
 /* the background fills the logo file's thin transparent margin */
 .brand img{position:relative;display:block;height:100%;width:100%;object-fit:cover;border-radius:50%;background:#F9F4E8;
@@ -594,12 +596,12 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
       <a href="#menus" onclick="openMenusModal();return false">תפריטים</a>
       <a href="#contact">יצירת קשר</a>
     </div>
-    <div class="brand">
+    <h1 class="brand">
       <span class="logo-wrap" id="logoWrap">
         <span class="logo-sparks" aria-hidden="true"></span>
-        <img src="images/logo-v2.png" alt="BBQ · חגיגת ברבקיו משחררת">
+        <img src="images/logo-v2.png" alt="BBQ חגיגת ברבקיו משחררת · דודי שוורץ, מנגל לאירועים">
       </span>
-    </div>
+    </h1>
   </div>
 </nav>
 <script>
@@ -637,6 +639,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
   <div class="wrap">
     <div class="sect-head">
       <h2>יש שאלה לפני שמזמינים?</h2>
+      <p>מנגל לאירועים עם דודי שוורץ: ימי הולדת, שבע ברכות, ימי גיבוש ואירועים משפחתיים. אפשר להתקשר או לשלוח הודעה בוואטסאפ.</p>
     </div>
     <div class="contact-grid">
       <a class="contact-card" href="tel:0523359599"><div class="ico ci-phone" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></div><b>התקשרו אלינו</b><span>052-335-9599</span></a>
@@ -649,7 +652,7 @@ html.a11y-gray body>*:not(.a11y-btn):not(.a11y-panel){filter:grayscale(1)}
 
 <footer>
   <div><span class="only-mobile" aria-hidden="true">🔥 </span><svg class="ft-flame only-pc" aria-hidden="true" focusable="false"><use href="#flame"/></svg>BBQ · חגיגת ברבקיו משחררת</div>
-  <div style="margin-top:4px;opacity:.75">לשירותכם דודי · 052-335-9599</div>
+  <div style="margin-top:4px;opacity:.75">לשירותכם דודי שוורץ · 052-335-9599</div>
   <div class="footer-links">
     <button type="button" class="footer-link" onclick="openPrivacy()">מדיניות פרטיות</button>
     <button type="button" class="footer-link" onclick="openStatement()">הצהרת נגישות</button>

@@ -104,4 +104,4 @@ npx serve .
 
 ## דשבורד כניסות
 
-לשונית "כניסות" מוצגת גם בדשבורד של כל האתרים (הריפו `dashboard`). כדי שאפשר יהיה להתחבר משם, צריך להוסיף את הכתובת של הדשבורד ב-Firebase Console של `mangal-b11fe`: Authentication ← Settings ← Authorized domains.
+לשונית "כניסות" מוצגת גם בדשבורד של כל האתרים (https://dashboard-delta-opal-80.vercel.app, הריפו `dashboard`). כדי שאפשר יהיה להתחבר משם, צריך להוסיף את `dashboard-delta-opal-80.vercel.app` ב-Firebase Console של `mangal-b11fe`: Authentication ← Settings ← Authorized domains.

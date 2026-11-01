@@ -38,17 +38,5 @@
         }
       ]
     }
-  ],
-  "redirects": [
-    {
-      "source": "/dashboard.html",
-      "destination": "https://my-sites-dashboard.vercel.app/",
-      "permanent": false
-    },
-    {
-      "source": "/dashboard/:path*",
-      "destination": "https://my-sites-dashboard.vercel.app/",
-      "permanent": false
-    }
   ]
 }

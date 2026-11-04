@@ -4,7 +4,9 @@
 const KEY = 'AIzaSyA5Qp3W1dcpd4ncnTyB68nMueXtHbAoLAk';
 const DB = 'projects/mangal-b11fe/databases/(default)/documents';
 
-const SOURCES = ['direct', 'wa', 'ig', 'fb', 'search', 'tiktok', 'other'];
+const SOURCES = ['direct', 'wa', 'ig', 'fb', 'search', 'maps', 'mail', 'tiktok', 'other'];
+// until the new firestore.rules are published, Firestore refuses the newer sources; then count them as before
+const OLD_SOURCE = { maps: 'search', mail: 'other' };
 const DEVICES = ['mobile', 'tablet', 'desktop'];
 // Israel's districts by their ISO codes
 const DISTRICTS = { JM: 'jm', TA: 'ta', HA: 'ha', M: 'm', Z: 'z', D: 'd' };
@@ -24,18 +26,20 @@ export default async function handler(req, res) {
   if (!SOURCES.includes(src) || !DEVICES.includes(dev)) return res.status(400).json({ error: 'bad input' });
   const month = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date()).slice(0, 7);
   const inc = (f) => ({ fieldPath: f, increment: { integerValue: '1' } });
+  const save = (src) => fetch(`https://firestore.googleapis.com/v1/${DB}:commit?key=${KEY}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      writes: [{
+        update: { name: `${DB}/mangalVisitInfo/${month}`, fields: {} },
+        updateMask: { fieldPaths: [] },
+        updateTransforms: [inc(`src_${src}`), inc(`dev_${dev}`), inc(`area_${area(req.headers)}`)],
+      }],
+    }),
+  });
   try {
-    const r = await fetch(`https://firestore.googleapis.com/v1/${DB}:commit?key=${KEY}`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        writes: [{
-          update: { name: `${DB}/mangalVisitInfo/${month}`, fields: {} },
-          updateMask: { fieldPaths: [] },
-          updateTransforms: [inc(`src_${src}`), inc(`dev_${dev}`), inc(`area_${area(req.headers)}`)],
-        }],
-      }),
-    });
+    let r = await save(src);
+    if (r.status === 403 && OLD_SOURCE[src]) r = await save(OLD_SOURCE[src]);
     return res.status(r.ok ? 200 : 502).json({ ok: r.ok });
   } catch (err) {
     return res.status(500).json({ error: err.message });

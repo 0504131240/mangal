@@ -1398,11 +1398,16 @@ function saveContact(e){
 }
 
 /* ===== visit counter ===== */
+// a refresh or going back to the page continues the same visit, so it is not counted again
+const NEW_VISIT=(()=>{
+  let t=''; try{ t=(performance.getEntriesByType('navigation')[0]||{}).type||''; }catch(e){}
+  return t!=='reload' && t!=='back_forward';
+})();
 // adds 1 to today's page views, to today's visitors the first time this browser opens the site today,
 // and to today's new devices the first time this browser ever opens it
 // (mangalStats/{Israel date}, shown in the admin's "כניסות" tab)
 (function countVisit(){
-  if(/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || navigator.webdriver) return;
+  if(/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || navigator.webdriver || !NEW_VISIT) return;
   const day=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jerusalem'}).format(new Date());
   // first visit of this browser today / this week (from Sunday) / this month / ever, so the admin can count each device once per period
   const weekStart=(d=>{ const t=new Date(d+'T00:00:00Z'); t.setUTCDate(t.getUTCDate()-t.getUTCDay()); return t.toISOString().slice(0,10); })(day);
@@ -1435,7 +1440,7 @@ function saveContact(e){
 // where the visitor came from: a ?src= tag on the link, the app it was opened in, or the site that linked here
 function visitSource(){
   const tag=(new URLSearchParams(location.search).get('src')||'').toLowerCase();
-  if(['wa','ig','fb','search','tiktok','other'].includes(tag)) return tag;
+  if(['wa','ig','fb','search','maps','mail','tiktok','other'].includes(tag)) return tag;
   const ua=navigator.userAgent;
   if(/Instagram/i.test(ua)) return 'ig';
   if(/FBAN|FBAV|FB_IAB|FBIOS/i.test(ua)) return 'fb';
@@ -1447,7 +1452,11 @@ function visitSource(){
   if(/instagram/.test(host)) return 'ig';
   if(/facebook|(^|\.)fb\.(com|me)$/.test(host)) return 'fb';
   if(/tiktok/.test(host)) return 'tiktok';
-  if(/(^|\.)(google|bing|yahoo|duckduckgo|yandex)\./.test(host)) return 'search';
+  // Gmail and other mail (also the Gmail app) and Google Maps (also the Maps app) are not a search;
+  // a link from the Google Business Profile usually looks like a search, so give it ?src=maps
+  if(/^(mail|outlook)\.|^com\.google\.android\.gm$/.test(host)) return 'mail';
+  if(/^maps\.google\.|^com\.google\.android\.apps\.maps$/.test(host)) return 'maps';
+  if(/^(google\.[a-z.]+|com\.google\.android\.googlequicksearchbox|bing\.com|(search\.)?yahoo\.com|duckduckgo\.com|yandex\.[a-z.]+)$/.test(host)) return 'search';
   return 'other';
 }
 function visitDevice(){
@@ -1455,13 +1464,18 @@ function visitDevice(){
   if(/iPad|Tablet/i.test(ua) || (/Android/i.test(ua) && !/Mobile/i.test(ua)) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints>1)) return 'tablet';
   return /Mobi|iPhone|Android/i.test(ua) ? 'mobile' : 'desktop';
 }
-// what visitors did: each action counts once per visit (page load), so a second visit counts again (mangalVisitInfo/{month}, act_*)
+// what visitors did: each action counts once per visit (a refresh is the same visit), so a second visit counts again (mangalVisitInfo/{month}, act_*)
 const actsDone=new Set();
+try{
+  if(NEW_VISIT) sessionStorage.removeItem('mangalActs');
+  else JSON.parse(sessionStorage.getItem('mangalActs')||'[]').forEach(a=>actsDone.add(a));
+}catch(e){}
 const VISIT_ACTS=['menus','gallery','reviews','massage','book','bookStart','bookSent','wa','call','contact'];
 function trackAct(a){
   if(!VISIT_ACTS.includes(a) || /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || navigator.webdriver) return;
   if(actsDone.has(a)) return;
   actsDone.add(a);
+  try{ sessionStorage.setItem('mangalActs',JSON.stringify([...actsDone])); }catch(e){}
   const month=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jerusalem'}).format(new Date()).slice(0,7);
   const base='projects/mangal-b11fe/databases/(default)/documents';
   fetch(`https://firestore.googleapis.com/v1/${base}:commit?key=${firebaseConfig.apiKey}`,{

@@ -120,7 +120,7 @@ service cloud.firestore {
     // index.html (act_*) and api/visit.js (src_*, dev_*, area_*); each write adds 1 to at most 3 known counters
     function visitKeys() {
       return [
-        'src_direct', 'src_wa', 'src_ig', 'src_fb', 'src_search', 'src_tiktok', 'src_other',
+        'src_direct', 'src_wa', 'src_ig', 'src_fb', 'src_search', 'src_maps', 'src_mail', 'src_tiktok', 'src_other',
         'dev_mobile', 'dev_tablet', 'dev_desktop', 'area_jm', 'area_ta', 'area_ha', 'area_m',
         'area_z', 'area_d', 'area_ys', 'area_abroad', 'area_unknown', 'act_menus', 'act_gallery',
         'act_reviews', 'act_massage', 'act_book', 'act_bookStart', 'act_bookSent', 'act_wa',
@@ -140,7 +140,7 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(visitKeys())
         && request.resource.data.diff(resource == null ? {} : resource.data).affectedKeys().size() <= 3
         && bumped('src_direct') && bumped('src_wa') && bumped('src_ig') && bumped('src_fb') &&
-        bumped('src_search') && bumped('src_tiktok') && bumped('src_other') && bumped('dev_mobile') &&
+        bumped('src_search') && bumped('src_maps') && bumped('src_mail') && bumped('src_tiktok') && bumped('src_other') && bumped('dev_mobile') &&
         bumped('dev_tablet') && bumped('dev_desktop') && bumped('area_jm') && bumped('area_ta') &&
         bumped('area_ha') && bumped('area_m') && bumped('area_z') && bumped('area_d') && bumped('area_ys') &&
         bumped('area_abroad') && bumped('area_unknown') && bumped('act_menus') && bumped('act_gallery') &&
